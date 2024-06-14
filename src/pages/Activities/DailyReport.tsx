@@ -105,7 +105,7 @@ const DailyReport: React.FC = () => {
                     <div className="flex justify-between flex-wrap px-4">
                         <div className="mb-6 lg:w-1/2 w-full">
                             <div className="flex items-center text-black dark:text-white shrink-0">
-                                <img src="../../../public/logo1.png" alt="img" className="w-14" />
+                                <img src="/logo1.png" alt="img" className="w-14" />
                             </div>
                             <div className="space-y-1 mt-6 text-gray-500 dark:text-gray-400">
                                 <div>Mining Project and Systems</div>
