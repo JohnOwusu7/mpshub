@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
 import { addReport, ApiResponse } from '../../Api/api';
 import IconSend from '../../components/Icon/IconSend';
 import showMessage from '../../components/Alerts/showMessage';
+import { IRootState } from '../../store';
 
 interface ReportFormData {
     tasksAccomplished: string;
@@ -15,6 +16,9 @@ interface ReportFormData {
 }
 
 const DailyReport: React.FC = () => {
+    const authenticatedUser = useSelector((state: IRootState) => state.user.user);
+    const user = authenticatedUser || { firstName: 'Guest', email: '' };
+
     const dispatch = useDispatch();
     const [formData, setFormData] = useState<ReportFormData>({
         tasksAccomplished: '',
@@ -112,14 +116,14 @@ const DailyReport: React.FC = () => {
                         <div className="lg:w-1/2 w-full lg:max-w-fit">
                             <div className="flex items-center">
                                 <label htmlFor="name" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
-                                    Name
+                                    {user.firstName} {user.lastName}
                                 </label>
                                 </div>
                             <div className="flex items-center mt-4">
                                 <label htmlFor="section" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
-                                    Section
+                                {user.position}
                                 </label>
-                                </div>
+                            </div>
                         </div>
                     </div>
                     <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
@@ -224,7 +228,6 @@ const DailyReport: React.FC = () => {
                     </div>
                     <div className="panel">
                         <div className="grid xl:grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
-
                             <button type="submit" className="btn btn-info w-full gap-2">
                             {loading ? (
                                 <>
