@@ -20,6 +20,7 @@ interface Report {
   updatedAt: string;
   reportedBy: User;
   heavyEquipmentId: string;
+  tag: string;
 }
 
 const IssueReportsList: React.FC = () => {
@@ -167,7 +168,7 @@ const IssueReportsList: React.FC = () => {
                                 <td className="py-2 px-4 border-b print:border-none">{`${report?.reportedBy?.firstName} ${report?.reportedBy?.lastName}`}</td>
                                 <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId}</td>
                                 <td className="py-2 px-4 border-b print:border-none">{report.title}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : 'No one'}</td>
+                                <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : report.tag || 'No one'}</td>
                                 <td className="py-2 px-4 border-b print:border-none">{report?.completedBy ? `${report?.completedBy?.firstName} ${report?.completedBy?.lastName}` : 'No one'}</td>
                                 <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
                                 <td className="py-2 px-4 print:bg-red border-b print:border-none">{report.priority}</td>
