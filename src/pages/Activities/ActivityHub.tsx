@@ -99,7 +99,7 @@ const ActivityHub = () => {
             res = allTasks.filter((d: any) => d.status !== 'trash');
         }
 
-        if (selectedTab === 'dispatch' || selectedTab === 'network' || selectedTab === 'smart-cap' || selectedTab === 'improvement' || selectedTab === 'systems-admin') {
+        if (selectedTab === 'dispatch' || selectedTab === 'network' || selectedTab === 'power' || selectedTab === 'smart-cap' || selectedTab === 'improvement' || selectedTab === 'systems-admin') {
             res = res.filter((d: any) => d.purpose === selectedTab);
         } else if (selectedTab === 'high' || selectedTab === 'medium' || selectedTab === 'low') {
             res = res.filter((d: any) => d.priority === selectedTab);
@@ -375,6 +375,19 @@ const ActivityHub = () => {
                                 </button>
                                 <button
                                     type="button"
+                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-success ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
+                                        selectedTab === 'power' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
+                                    }`}
+                                    onClick={() => {
+                                        tabChanged();
+                                        setSelectedTab('power');
+                                    }}
+                                >
+                                    <IconSquareRotated className="fill-success shrink-0" />
+                                    <div className="ltr:ml-3 rtl:mr-3">Power</div>
+                                </button>
+                                <button
+                                    type="button"
                                     className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-danger ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
                                         selectedTab === 'systems-admin' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
                                     }`}
@@ -574,6 +587,8 @@ const ActivityHub = () => {
                                                                                         ? 'badge-outline-primary hover:bg-primary'
                                                                                         : task.purpose === 'network'
                                                                                         ? 'badge-outline-success hover:bg-success'
+                                                                                        : task.purpose === 'power'
+                                                                                        ? 'badge-outline-success hover:bg-success'
                                                                                         : task.purpose === 'smart-cap'
                                                                                         ? 'badge-outline-info hover:bg-info'
                                                                                         : task.purpose === 'improvement'
@@ -717,7 +732,7 @@ const ActivityHub = () => {
                                             {selectedTask.tag && (
                                                 <div
                                                     className={`badge rounded-3xl capitalize ${
-                                                        selectedTask.purpose === 'dispatch' ? 'badge-outline-primary' : selectedTask.purpose === 'network' ? 'badge-outline-success ' : selectedTask.purpose === 'smart-cap' ? 'badge-outline-info ' : selectedTask.purpose === 'improvement' ? 'badge-outline-warning ' : selectedTask.purpose === 'systems-admin' ? 'badge-outline-danger ': ''
+                                                        selectedTask.purpose === 'dispatch' ? 'badge-outline-primary' : selectedTask.purpose === 'network' ?  'badge-outline-success ' : selectedTask.purpose === 'power' ?  'badge-outline-success ' : selectedTask.purpose === 'smart-cap' ? 'badge-outline-info ' : selectedTask.purpose === 'improvement' ? 'badge-outline-warning ' : selectedTask.purpose === 'systems-admin' ? 'badge-outline-danger ': ''
                                                     }`}
                                                 >
                                                     {selectedTask.purpose}
