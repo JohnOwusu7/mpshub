@@ -133,7 +133,7 @@ const CreateTicket = () => {
                                     <div className="p-5">
                                         <form>
                                             <div className="mb-5">
-                                                <label htmlFor="heavyEquipmentId">Equipment ID</label>
+                                                <label htmlFor="heavyEquipmentId">Equipment ID (Trucks Issues Only)</label>
                                                 <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Equipment ID</option>
                                                     {heavyEquipments.map((heavyEquipment) => (
@@ -154,6 +154,7 @@ const CreateTicket = () => {
                                                     <option value="network">Network</option>
                                                     <option value="dispatch">Dispatch</option>
                                                     <option value="smart-cap">Smart Cap</option>
+                                                    <option value="power">Solar/Power</option>
                                                     <option value="systems-admin">Systems Admin</option>
                                                     <option value="improvement">Improvement</option>
                                                 </select>

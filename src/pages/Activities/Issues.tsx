@@ -476,7 +476,7 @@ const getUserRole = () => {
                                                         <option value="">Select Type</option>
                                                         <option value="network">Network</option>
                                                         <option value="dispatch">Dispatch</option>
-                                                        <option value="network">Solar/Power</option>
+                                                        <option value="power">Solar/Power</option>
                                                         <option value="smart-cap">Smart Cap</option>
                                                         <option value="systems-admin">Systems Admin</option>
                                                         <option value="improvement">Inprovement</option>

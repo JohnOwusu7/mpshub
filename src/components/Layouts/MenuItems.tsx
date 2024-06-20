@@ -95,36 +95,48 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuTodo />,
         },
         {
-            label: 'Inventory',
+            label: 'Inventory Hub',
             link: '/inventory',
             icon: <IconMenuScrumboard />,
         },
         {
-            label: 'Users',
+            label: 'User Accounts',
             link: '/users/list',
             icon: <IconMenuUsers />,
         },
         {
-            label: 'Report',
+            label: 'Report Forum',
             link: '/daily/report',
             icon: <IconDribbble />,
         }
     ],
     DISPATCH: [
         {
-            label: 'Activity Hub',
+            label: 'Dispatch Hub',
             link: '/activity',
             icon: <IconMenuNotes />,
         },
         {
-            label: 'Report Activity',
+            label: 'Dispatch ticket forum',
+            link: '/ticket',
+            icon: <IconMenuNotes />,
+        }
+    ],
+    GEOTECH: [
+        {
+            label: 'Geotech Hub',
+            link: '/activity',
+            icon: <IconMenuNotes />,
+        },
+        {
+            label: 'GEO Report forum',
             link: '/ticket',
             icon: <IconMenuNotes />,
         }
     ],
     'RAM-JACK': [
         {
-            label: 'Dashboard',
+            label: 'Ram Jack Dashboard',
             link: '/dashboard',
             icon: <IconDesktop />,
         },
@@ -139,7 +151,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuTodo />,
         },
         {
-            label: 'Issuing Board',
+            label: 'Ram Jack HUB',
             link: '/activity',
             icon: <IconMenuNotes />,
         },
@@ -151,24 +163,24 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
     ],
     BENEWISE: [
         {
-            label: 'Dashboard',
+            label: 'Beniwise Dashbub',
             link: '/dashboard',
             icon: <IconDesktop />,
         },
         {
-            label: 'Report Activity',
+            label: 'Beniwise Ticket Forum',
             link: '/ticket',
             icon: <IconMenuNotes />,
         }
     ],
     'AFRIYIE': [
         {
-            label: 'Dash Hub',
+            label: 'Afriyie Dash Hub',
             link: '/dashboard',
             icon: <IconDesktop />,
         },
         {
-            label: 'Issuing Board',
+            label: 'Issuing Forum',
             link: '/activity',
             icon: <IconMenuNotes />,
         },
@@ -183,7 +195,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuScrumboard />,
         },
         {
-            label: 'IP Address',
+            label: 'IP Address Lists',
             link: '/address',
             icon: <IconMenuContacts />,
             children: [
@@ -215,7 +227,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ],
         },
         {
-            label: 'Daily Reports',
+            label: 'Afriyie Daily Reports',
             link: '/daily/report',
             icon: <IconMenuNotes />,
         }
@@ -227,7 +239,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconDesktop />,
         },
         {
-            label: 'IP ADDRESSES',
+            label: 'IP ADDRESS LIST',
             link: '/address',
             icon: <IconMenuContacts />,
             children: [
@@ -259,17 +271,17 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ],
         },
         {
-            label: 'INVENTORY',
+            label: 'INVENTORY MANAGEMENT',
             link: '/inventory',
             icon: <IconMenuScrumboard />,
         },
         {
-            label: 'ACTIVITY HUB',
+            label: 'SYSTEMS ACTIVITY HUB',
             link: '/activity',
             icon: <IconMenuNotes />,
         },
         {
-            label: 'DAILY REPORTS',
+            label: 'SYSTEMS DAILY REPORTS',
             link: '/daily/report',
             icon: <IconDribbble />,
         },
@@ -283,7 +295,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
     MANAGER: [
         
         {
-            label: 'Dashboard',
+            label: 'Manager\'s Dashboard',
             link: '/',
             icon: <IconDesktop />,
         },

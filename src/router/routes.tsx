@@ -81,7 +81,7 @@ const routes: Route[] = [
     // Contractors Dashboard
     {
         path: '/dashboard',
-        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAM-JACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE']}/>,
+        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAM-JACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
         layout: 'default',
     },
 
@@ -146,7 +146,7 @@ const routes: Route[] = [
     // Activity Hub
     {
         path: '/activity/',
-        element: <PrivateRoute path='/activity' element={<Issues />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM-JACK', 'DISPATCH', 'BENEWISE']}/>,
+        element: <PrivateRoute path='/activity' element={<Issues />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM-JACK', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
         layout: 'blank',
     },
     {
@@ -156,7 +156,7 @@ const routes: Route[] = [
     },
     {
         path: '/ticket',
-        element: <PrivateRoute path='/ticket' element={<CreateTicket /> } allowedRoles={['BENEWISE', 'DISPATCH']}/>,
+        element: <PrivateRoute path='/ticket' element={<CreateTicket /> } allowedRoles={['BENEWISE', 'DISPATCH', 'ADMIN', 'MANAGER', 'GEOTECH']}/>,
         layout: 'default',
     },
 
@@ -200,11 +200,6 @@ const routes: Route[] = [
     },
 
     // Reports
-    {
-        path: '/reports',
-        element: <PrivateRoute path='/reports' element={<TransactionFilterForm />} allowedRoles={['AFRIYIE']}/>,
-        layout: 'default',
-    },
     {
         path: '/daily/report',
         element: <PrivateRoute path='/daily/report' element={<DailyReport />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'RAM-JACK', 'AFRIYIE']} />,

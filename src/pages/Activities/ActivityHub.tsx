@@ -743,6 +743,8 @@ const ActivityHub = () => {
                                                         <option value="AFRIYIE">Afriyie Contractors</option>
                                                         <option value="RAM-JACK">RamJack Contractors</option>
                                                         <option value="DISPATCH">Amax Contractors</option>
+                                                        <option value="GEOTECH">Geotech Engineer</option>
+                                                        <option value="BENEWISE">Beniwise Contractors</option>
                                                     </select>
                                                     </div>
                                                     <div className="flex-1">
