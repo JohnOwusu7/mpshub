@@ -30,7 +30,7 @@ const Users: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<User[]>([]);
-  const [role, setRole] = useState<string>('ADMIN');
+  const [role, setRole] = useState<string>('');
 
 
   useEffect(() => {
@@ -177,7 +177,7 @@ const deleteUser = async (user: User | null = null) => {
     });
   };
 
-  const roleList = ['ADMIN', 'SYSTEMS-ENGINEER', 'DISPATCH', 'RAM-JACK', 'AFRIYIE', 'BENEWISE', 'MANAGER'];
+  const roleList = ['ADMIN', 'SYSTEMS-ENGINEER', 'DISPATCH', 'RAM-JACK', 'AFRIYIE', 'BENEWISE', 'GEOTECH', 'MANAGER'];
 
   return (
     <div>
