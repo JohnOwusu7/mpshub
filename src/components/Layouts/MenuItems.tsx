@@ -234,12 +234,12 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
     ],
     'SYSTEMS-ENGINEER': [
         {
-            label: 'DASH HUB',
+            label: 'Dash HUB',
             link: '/dashboard',
             icon: <IconDesktop />,
         },
         {
-            label: 'IP ADDRESS LIST',
+            label: 'IP Address List',
             link: '/address',
             icon: <IconMenuContacts />,
             children: [
@@ -271,22 +271,22 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ],
         },
         {
-            label: 'INVENTORY MANAGEMENT',
+            label: 'Inventory Management',
             link: '/inventory',
             icon: <IconMenuScrumboard />,
         },
         {
-            label: 'SYSTEMS ACTIVITY HUB',
+            label: 'Systems Activity HUB',
             link: '/activity',
             icon: <IconMenuNotes />,
         },
         {
-            label: 'SYSTEMS DAILY REPORTS',
+            label: 'Systems Daily Report',
             link: '/daily/report',
             icon: <IconDribbble />,
         },
         {
-            label: 'EQUIPMENT USAGE',
+            label: 'Equipmnts Usage',
             link: '/get-item',
             icon: <IconMenuTodo />,
         },
