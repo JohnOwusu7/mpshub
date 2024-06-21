@@ -376,7 +376,7 @@ const getUserRole = () => {
                                                             )}
                                                         </div>
                                                         <div className="ltr:ml-2 rtl:mr-2">
-                                                            <div className="font-semibold">By: {note.user}</div>
+                                                            <div className="font-semibold">Reported By: {note.user}</div>
                                                             <div className="text-sx text-white-dark">{new Date(note.date).toLocaleString()}</div>
                                                         </div>
                                                     </div>
