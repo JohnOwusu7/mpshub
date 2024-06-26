@@ -134,9 +134,9 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuNotes />,
         }
     ],
-    'RAM JACK': [
+    'RAMJACK': [
         {
-            label: 'Ram Jack Dashboard',
+            label: 'RamJack Dashboard',
             link: '/dashboard',
             icon: <IconDesktop />,
         },
@@ -151,7 +151,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuTodo />,
         },
         {
-            label: 'Ram Jack HUB',
+            label: 'RamJack HUB',
             link: '/activity',
             icon: <IconMenuNotes />,
         },

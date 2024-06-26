@@ -81,7 +81,7 @@ const routes: Route[] = [
     // Contractors Dashboard
     {
         path: '/dashboard',
-        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAM JACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
+        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAMJACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
         layout: 'default',
     },
 
@@ -146,7 +146,7 @@ const routes: Route[] = [
     // Activity Hub
     {
         path: '/activity/',
-        element: <PrivateRoute path='/activity' element={<Issues />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM JACK', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
+        element: <PrivateRoute path='/activity' element={<Issues />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAMJACK', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
         layout: 'blank',
     },
     {
@@ -163,29 +163,29 @@ const routes: Route[] = [
     // getting Inventory Item
     {
         path: '/get-item/input',
-        element: <PrivateRoute path='/task/scrumboard' element={<GetItem />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM JACK']}/>,
+        element: <PrivateRoute path='/task/scrumboard' element={<GetItem />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAMJACK']}/>,
         layout: 'default',
     },
     {
         path: '/replace-item/input',
-        element: <PrivateRoute path='/task/scrumboard' element={<ReplaceItem />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM JACK']}/>,
+        element: <PrivateRoute path='/task/scrumboard' element={<ReplaceItem />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAMJACK']}/>,
         layout: 'default',
     },
     {
         path: '/get-item',
-        element: <PrivateRoute path='/task/scrumboard' element={<GetItemPage />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM JACK']}/>,
+        element: <PrivateRoute path='/task/scrumboard' element={<GetItemPage />} allowedRoles={['SYSTEMS-ENGINEER', 'AFRIYIE', 'RAMJACK']}/>,
         layout: 'default',
     },
 
     // Inventory Management
     {
         path: '/inventory',
-        element: <PrivateRoute path='inventory' element={<EquipmentList />} allowedRoles={['RAM JACK', 'ADMIN', 'SYSTEMS-ENGINEER', 'AFRIYIE']}/>,
+        element: <PrivateRoute path='inventory' element={<EquipmentList />} allowedRoles={['RAMJACK', 'ADMIN', 'SYSTEMS-ENGINEER', 'AFRIYIE']}/>,
         layout: 'default',
     },
     {
         path: '/inventory/add',
-        element: <PrivateRoute path='inventory/add' element={<AddEquipmentForm />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'AFRIYIE', 'RAM JACK']}/>,
+        element: <PrivateRoute path='inventory/add' element={<AddEquipmentForm />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'AFRIYIE', 'RAMJACK']}/>,
         layout: 'default',
     },
     {
@@ -202,7 +202,7 @@ const routes: Route[] = [
     // Reports
     {
         path: '/daily/report',
-        element: <PrivateRoute path='/daily/report' element={<DailyReport />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'RAM JACK', 'AFRIYIE']} />,
+        element: <PrivateRoute path='/daily/report' element={<DailyReport />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'RAMJACK', 'AFRIYIE']} />,
         layout: 'default',
     },
 

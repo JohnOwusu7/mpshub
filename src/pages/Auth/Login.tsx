@@ -46,7 +46,7 @@ const Login = () => {
                     case 'DISPATCH':
                     case 'SYSTEMS-ENGINEER':
                     case 'AFRIYIE':
-                    case 'RAM JACK':
+                    case 'RAMJACK':
                     case 'BENEWISE':
                         navigate('/dashboard');
                         break;

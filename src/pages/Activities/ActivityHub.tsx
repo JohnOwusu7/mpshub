@@ -756,7 +756,7 @@ const ActivityHub = () => {
                                                         <option value="">Select Section</option>
                                                         <option value="SYSTEMS-ENGINEER">Systems Engineer</option>
                                                         <option value="AFRIYIE">Afriyie Contractors</option>
-                                                        <option value="RAM JACK">RamJack Contractors</option>
+                                                        <option value="RAMJACK">RamJack Contractors</option>
                                                         <option value="DISPATCH">Amax Contractors</option>
                                                         <option value="GEOTECH">Geotech Engineer</option>
                                                         <option value="BENEWISE">Beniwise Contractors</option>
