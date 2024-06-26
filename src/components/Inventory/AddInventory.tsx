@@ -10,6 +10,7 @@ interface SingleFormData {
   description: string;
   itemName: string;
   totalStock: number;
+  categories: string;
 }
 
 const AddSingleEquipmentForm: React.FC = () => {
@@ -20,6 +21,7 @@ const AddSingleEquipmentForm: React.FC = () => {
     description: '',
     itemName: '',
     totalStock: 0,
+    categories: '',
   });
 
   useEffect(() => {
@@ -127,6 +129,23 @@ const AddSingleEquipmentForm: React.FC = () => {
                     min="1"
                     required
                   />
+                </div>
+                <div className="flex items-center mt-4">
+                  <label htmlFor="categories" className="ltr:mr-2 w-1/3 mb-0">
+                    Category
+                  </label>
+                  <select 
+                    id="categories"
+                    name='categories'
+                    className='form-input flex-1'
+                    placeholder='Select Category'
+                    value={singleFormData.categories}
+                    onChange={(e: any) => handleSingleChange(e)}>
+                      <option value={''}>Select</option>
+                      <option value={'DISPATCH'}>DISPATCH</option>
+                      <option value={"NETWORK"}>NETWORK</option>
+                      <option value={"SMARTCAP"}>SMARTCAPS</option>
+                    </select>
                 </div>
               </div>
             </div>
