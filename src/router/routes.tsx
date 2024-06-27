@@ -33,7 +33,7 @@ const UnauthorizedAccess = lazy(() => import('../components/Error'));
 const NotFound = lazy(() => import('../components/NotFound'));
 const DailyReport = lazy(() => import('../pages/Activities/DailyReport'));
 
-const HeavyEquipment = lazy(() => import('../pages/installations/heavyEquipment'));
+const HeavyEquipment = lazy(() => import('../pages/installations/HeavyEquipment'));
 
 type Route = {
     path: string;
