@@ -33,6 +33,8 @@ const UnauthorizedAccess = lazy(() => import('../components/Error'));
 const NotFound = lazy(() => import('../components/NotFound'));
 const DailyReport = lazy(() => import('../pages/Activities/DailyReport'));
 
+const HeavyEquipment = lazy(() => import('../pages/installations/heavyEquipment'));
+
 type Route = {
     path: string;
     element: React.ReactNode;
@@ -204,6 +206,12 @@ const routes: Route[] = [
         path: '/daily/report',
         element: <PrivateRoute path='/daily/report' element={<DailyReport />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER', 'RAMJACK', 'AFRIYIE']} />,
         layout: 'default',
+    },
+
+    // Installations
+    {
+        path: '/installations/heavy-equipment',
+        element: <PrivateRoute path='/installations/heavy-equipment' element={<HeavyEquipment />} allowedRoles={['ADMIN']} />,
     },
 
 ];
