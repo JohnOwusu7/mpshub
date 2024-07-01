@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 import ReactApexChart from 'react-apexcharts';
-import { useDispatch, useSelector } from 'react-redux';
-import { IRootState } from '../../store';
-import Dropdown from '../../components/Dropdown';
-import { useEffect, useState } from 'react';
+import { useDispatch, } from 'react-redux';
+import { useEffect, useState, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
 import IconTrendingUp from '../../components/Icon/IconTrendingUp';
 import IconSquareCheck from '../../components/Icon/IconSquareCheck';
 import { API_CONFIG } from '../../Api/apiConfig';
@@ -35,6 +33,8 @@ const fetchIssues = async () => {
   const [newUnassignedTask, setNewUnassignedTask] = useState(0);
   const [percentComplete, setPercentComplete] = useState(0);
   const [percentNotComplete, setPercentNotComplete] = useState(0);
+  const [notCompleted, setNotCompleted] = useState<any[]>([]);
+  const [viewPending, setViewPending] = useState<any>(false);
 
   useEffect(() => {
     const getIssuesAndCount = async () => {
@@ -45,12 +45,14 @@ const fetchIssues = async () => {
       const newNotAssigned = issues.filter((issue: { isAssigned: boolean }) => !issue.isAssigned).length;
       const percentageComplete = (completedTask / count) * 100;
       const percentageNotComplete = 100 - percentageComplete;
+      const pending = issues.filter((issue: {isComplete: any;}) => !issue.isComplete);
       setTotalCount(count);
       setCompletedIssueCount(completedTask);
       setNotCompletedIssueCount(notCompletedTask);
       setNewUnassignedTask(newNotAssigned);
       setPercentComplete(percentageComplete);
       setPercentNotComplete(percentageNotComplete);
+      setNotCompleted(pending);
     };
     getIssuesAndCount();
   }, []);
@@ -164,28 +166,6 @@ const fetchIssues = async () => {
                         {/* statistics */}
                         <div className="flex justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg ">Activity Statistics</h5>
-                            <div className="dropdown">
-                                <Dropdown
-                                    offset={[0, 5]}
-                                    btnClassName="hover:text-primary"
-                                    button={<IconHorizontalDots className="text-black/70 dark:text-white/70 hover:!text-primary" />}
-                                >
-                                    <ul>
-                                        <li>
-                                            <button type="button">This Week</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">Last Week</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">This Month</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">Last Month</button>
-                                        </li>
-                                    </ul>
-                                </Dropdown>
-                            </div>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-8 text-sm text-[#515365] font-bold">
                             <div>
@@ -211,43 +191,25 @@ const fetchIssues = async () => {
                     <div className="panel h-full">
                         <div className="flex justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg ">Pending Jobs </h5>
-
-                            <div className="dropdown">
-                                <Dropdown
-                                    offset={[0, 5]}
-                                    btnClassName="hover:text-primary"
-                                    button={<IconHorizontalDots className="text-black/70 dark:text-white/70 hover:!text-primary" />}
-                                >
-                                    <ul>
-                                        <li>
-                                            <button type="button">This Week</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">Last Week</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">This Month</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">Last Month</button>
-                                        </li>
-                                    </ul>
-                                </Dropdown>
-                            </div>
                         </div>
                         <div className=" text-[#e95f2b] text-3xl font-bold my-10">
                             <span>{notCompletedIssueCount}</span>
-                            <span className="text-black text-sm dark:text-white-light ltr:mr-2 rtl:ml-2"> Not Completed</span>
+                            <span className="text-black text-sm dark:text-white-light ltr:mr-2"> Not Completed</span>
                             <IconTrendingUp className="text-success inline" />
                         </div>
-                        <div className="flex items-center justify-between mb-2 font-semibold">
+                        <div className="flex items-center justify-between font-semibold">
                                 <div className="flex items-center">
                                     <IconSquareCheck className="w-4 h-4 text-success" />
                                 </div>
                                 <p className="text-primary">{percentNotComplete.toFixed(0)}% Pending Activities</p>
                             </div>
-                            <div className="rounded-full h-2.5 p-0.5 bg-dark-light dark:bg-dark-light/10 mb-5">
+                            <div className="rounded-full h-2.5 p-0.5 bg-dark-light">
                                 <div className="bg-gradient-to-r from-[#1e9afe] to-[#60dfcd] h-full rounded-full" style={{ width: `${percentComplete}%` }}></div>
+                            </div>
+                            <div className="w-full absolute bottom-0 flex items-center justify-between p-5 -mx-5">
+                                <button  onClick={() => setViewPending(true)} className="btn btn-secondary btn-lg w-full border-0 bg-gradient-to-r from-[#3d38e1] to-[#1e9afe]" >
+                                    View Pending jobs
+                                </button>
                             </div>
                     </div>
 
@@ -305,6 +267,61 @@ const fetchIssues = async () => {
                         </div>
                     </div>
                 </div>
+                <Transition appear show={viewPending} as={Fragment}>
+                    <Dialog as='div' open={viewPending} onClose={() => {setViewPending(false)}}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-[black]/60" />
+                    </Transition.Child>
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center px-4 py-8">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                                    <div className="p-5">
+                                    {/* <div className='pt-5'> */}
+                                    <h2 className='text-[#cd1a1a] text-3xl font-bold pb-5 text-center'>{notCompletedIssueCount} Pending Jobs</h2>
+                                        <table className='min-w-full bg-white border-gray-400'>
+                                            <thead>
+                                                <tr>
+                                                    <th className='py-2 px-4 border-b'>Assignee</th>
+                                                    <th className='py-2 px-4 border-b'>concern</th>
+                                                    <th className='py-2 px-4 border-b'>Issued Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {notCompleted.map((notC, index) => (
+                                                     <tr key={index}>
+                                                        <td className='py-2 px-2 border-b'>{notC?.assignedTo ? `${notC?.assignedTo?.firstName} ${notC?.assignedTo?.lastName}` : notC.tag || 'No one'}</td>
+                                                        <td className='py-2 px-4 border-b'>{notC.title}</td>
+                                                        <td className='py-2 px-2 border-b'>{notC.progress}</td>
+                                                     </tr> 
+                                                ))} 
+                                            </tbody>
+                                        </table>
+                                    {/* </div> */}
+                                    <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4 mt-5" onClick={() => setViewPending(false)}>Close</button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                    </Dialog>
+                </Transition>
 
                 {/* Analytics 3 */}
                 <DailyReportDashboard />
