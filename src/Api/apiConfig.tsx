@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  baseURL: 'https://mpsserver.onrender.com/api',
-  // baseURL: 'http://localhost:7854/api',
+  // baseURL: 'https://mpsserver.onrender.com/api',
+  baseURL: 'http://localhost:7854/api',
   socketUrl: 'https://mpsserver.onrender.com',
   equipment: {
     endpoints: {
@@ -40,6 +40,15 @@ export const API_CONFIG = {
       add: '/heavy-equipments',
       edit: '/heavy-equipments',
       delete: '/heavy-equipments',
+    },
+  },
+  operators: {
+    endpoints: {
+      list: '/operators/list',
+      listOne: '/operators/:id',
+      add: '/operators',
+      edit: '/operators',
+      delete: '/operators',
     },
   },
   installations: {

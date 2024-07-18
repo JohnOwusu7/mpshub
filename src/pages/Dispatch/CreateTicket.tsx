@@ -7,10 +7,11 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const CreateTicket = () => {
-    const [createTicket, setCreateTicket] = useState(false)
-    const defaultParams = { id: null, heavyEquipmentId: '', title: '', description: '', priority: '', user: '' };
-    const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)))
+    const [createTicket, setCreateTicket] = useState(false);
+    const defaultParams = { id: null, heavyEquipmentId: '', title: '', description: '', priority: '', user: '', issue: '', issueDesc: '', operator: '',};
+    const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
+    const [operators, setOperators] = useState<any[]>([]);
     const token = localStorage.getItem('token');
 
     // Fetch heavyEquipments data
@@ -32,21 +33,41 @@ const CreateTicket = () => {
         fetchHeavyEquipments();
     }, [token]);
 
+    // Fetch operators data
+    useEffect(() => {
+        const fetchOperators = async () => {
+            try {
+                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.operators.endpoints.list}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setOperators(response.data);
+            } catch (error) {
+                console.error('Error fetching operators:', error);
+                showMessage('Error fetching operators. Please try again later.', 'error');
+            }
+        };
+
+        fetchOperators();
+    }, [token]);
+
     const logCall = async () => {
-        if (!params.title) {
-            showMessage('Title is required.', 'error');
-            return false;
-        }
+        // if (!params.title) {
+        //     showMessage('Title is required.', 'error');
+        //     return false;
+        // }
 
         // Rename the 'description' field to 'descriptionText'
         params.descriptionText = params.description;
         try {
             // Send the request to add/update the note
-            await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.add}`, params, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            // await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.add}`, params, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`
+            //     }
+            // });
+            console.log('Issue Logss:', params)
 
             showMessage('Ticket Sent successfully.');
             setCreateTicket(false);
@@ -135,16 +156,16 @@ const CreateTicket = () => {
                                             {/* Initial State */}
                                             <div className='mb-5'>
                                                 <label htmlFor='start'>Critical Summary (Reporting Operation)</label>
-                                                <select id='start' className='form-select' value={params.start} onChange={(e) => changeValue(e)}>
+                                                <select id='start' className='form-select' onChange={(e) => changeValue(e)}>
                                                     <option value=''>Select Related</option>
-                                                    <option value="truck">Truck Operation</option>
-                                                    <option value="pit">Pit Operation</option>
-                                                    <option value="other">Other operations</option>
+                                                    <option value="Truck">Truck Operation</option>
+                                                    <option value="Pit">Pit Operation</option>
+                                                    <option value="Other">Other operations</option>
                                                 </select>
                                             </div>
                                             {/* Heavy Equipment ID */}
                                             <div className='flex justify-between mt-2'>
-                                            <div className="mb-5" style={{display: params.start === 'truck' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.start === 'Truck' ? 'block' : 'none'}}>
                                                 <label htmlFor="heavyEquipmentId">Heavy Equipment ID</label>
                                                 <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select HE ID</option>
@@ -156,13 +177,13 @@ const CreateTicket = () => {
                                                 </select>
                                             </div>
                                             {/* Operator Name */}
-                                            <div className="mb-5" style={{display: params.start === 'truck' ? 'block' : 'none'}}>
-                                                <label htmlFor="heavyEquipmentId">Operator's Name (optional)</label>
-                                                <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
-                                                    <option value="">Select Equipment ID</option>
-                                                    {heavyEquipments.map((heavyEquipment) => (
-                                                        <option key={heavyEquipment.id} value={heavyEquipment.id}>
-                                                            {heavyEquipment.heavyEquipmentName}
+                                            <div className="mb-5" style={{display: params.start === 'Truck' ? 'block' : 'none'}}>
+                                                <label htmlFor="operator">Operator's Name (optional)</label>
+                                                <select id="operator" className="form-select" value={params.operator} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select Operator's Name</option>
+                                                    {operators.map((operator) => (
+                                                        <option key={operator.id} value={operator.id}>
+                                                            {operator.operator}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -170,13 +191,13 @@ const CreateTicket = () => {
                                             </div>
 
                                             {/* Pit Location */}
-                                            <div className="mb-5" style={{display: params.start === 'pit' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.start === 'Pit' ? 'block' : 'none'}}>
                                                 <label htmlFor="title">Location</label>
                                                 <input id="title" type="text" placeholder="Enter Location" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
 
                                             {/* Other Operations */}
-                                            <div className="mb-5" style={{display: params.start === 'other' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
                                                 <label htmlFor="title">Other</label>
                                                 <input id="title" type="text" placeholder="Other Related" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
@@ -212,23 +233,23 @@ const CreateTicket = () => {
                                                         <option value="">Select Type</option>
                                                         <option value="Life Screen">LIFE SCREEN</option>
                                                         <option value="Life band">LIFE BAND</option>
-                                                        <option value="power">POWER</option>
+                                                        <option value="Power">POWER</option>
                                                     </select>
                                                 </div>
                                                 <div className="mb-5" style={{ display: params.issue === 'Life Screen' ? 'block' : 'none' }}>
-                                                <label htmlFor="screenIssue">Select Issue type</label>
-                                                <select id="screenIssue" className="form-select" value={params.screen} onChange={(e) => changeValue(e)}>
+                                                <label htmlFor="issueDesc">Select Issue type</label>
+                                                <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
                                                     <option value="is on and off">ON/OFF</option>
                                                     <option value="is not responsive">SCREEN NOT RESPONSIVE</option>
                                                 </select>
                                                 </div>
                                                 <div className="mb-5" style={{ display: params.issue === 'Life band' ? 'block' : 'none' }}>
-                                                <label htmlFor="screen-issue">Select Issue type</label>
-                                                <select id="screen-issue" className="form-select" value={params.screen} onChange={(e) => changeValue(e)}>
+                                                <label htmlFor="issueDesc">Select Issue type</label>
+                                                <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
                                                     <option value="is poorly fitted">POORLY FITTED</option>
-                                                    <option value="needs readjust">RE ADJUST</option>
+                                                    <option value="needs re-adjust">RE ADJUST</option>
                                                     <option value='is removed'>REMOVE</option>
                                                 </select>
                                                 </div>
@@ -236,7 +257,7 @@ const CreateTicket = () => {
 
                                             <div className='flex justify-between mt-2'>
                                             {/* priority */}
-                                            <div className="mb-5" style={{display: params.screenIssue ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.issueDesc || params.issue ==='Power' ? 'block' : 'none'}}>
                                                 <label htmlFor="priority">Priority State</label>
                                                 <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select</option>
@@ -249,10 +270,13 @@ const CreateTicket = () => {
                                             <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
                                                 <label htmlFor="location">Location Happening</label>
                                                 <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
-                                                    <option value="">Select</option>
-                                                    <option value="low">CUT2C</option>
-                                                    <option value="medium">AJOPA</option>
-                                                    <option value="high">BLOCK5</option>
+                                                    <option value="">Select location</option>
+                                                    <option value="CUT2C">CUT2C</option>
+                                                    <option value="CUT2B">CUT2B</option>
+                                                    <option value="WASTE DUMP 4">WASTE DUMP 4</option>
+                                                    <option value="VIEW POINT">VIEW POINT</option>
+                                                    <option value="NEW TOWER">NEW TOWER</option>
+                                                    <option value="BLOCK 5">BLOCK 5</option>
                                                 </select>
                                             </div>    
                                             </div>

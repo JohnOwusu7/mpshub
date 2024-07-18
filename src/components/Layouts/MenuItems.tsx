@@ -36,7 +36,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ]
         },
         {
-            label: 'Installations',
+            label: 'Operators and Equipments',
             link: '/installations',
             icon: <IconMenuFontIcons />,
             children: [
@@ -46,8 +46,8 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
                     icon: <IconMenuFontIcons />,
                 },
                 {
-                    label: 'Equipment List',
-                    link: '/installations/equipment',
+                    label: 'Operators List',
+                    link: '/operators/all',
                     icon: <IconMenuFontIcons />,
                 },
                 {

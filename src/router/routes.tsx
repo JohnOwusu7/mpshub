@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import ContractorsDashboard from '../pages/Contractors/Dashboard';
 import SignOutPage from '../pages/Auth/SignOut';
+const Operators = lazy(() => import('../pages/Operators/Operators'))
 
 const AddEquipmentBulkForm = lazy(() => import('../components/Inventory/BulkUpload'));
 const InventoryAnalytics = lazy(() => import('../pages/Dashboard/InventoryAnalytics'));
@@ -208,10 +209,14 @@ const routes: Route[] = [
         layout: 'default',
     },
 
-    // Installations
+    // Installations & Operators
     {
         path: '/installations/heavy-equipment',
         element: <PrivateRoute path='/installations/heavy-equipment' element={<HeavyEquipment />} allowedRoles={['ADMIN']} />,
+    },
+    {
+        path: '/operators/all',
+        element: <PrivateRoute path='/installations/heavy-equipment' element={<Operators />} allowedRoles={['ADMIN']} />,
     },
 
 ];
