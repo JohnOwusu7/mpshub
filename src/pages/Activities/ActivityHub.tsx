@@ -32,6 +32,7 @@ const ActivityHub = () => {
     const defaultParams: any = {
         _id: null,
         title: '',
+        heavyEquipmentId: '',
         description: '',
         descriptionText: '',
         assignee: '',
@@ -533,7 +534,8 @@ const ActivityHub = () => {
                                                     <td>
                                                         <div onClick={() => viewTask(task)}>
                                                             <div className={`group-hover:text-primary font-semibold text-base whitespace-nowrap ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.title}
+                                                                {/* {task.title} */}
+                                                                {task.heavyEquipmentId}
                                                             </div>
                                                             <div className={`text-white-dark overflow-hidden min-w-[300px] line-clamp-1 ${task.status === 'complete' ? 'line-through' : ''}`}>
                                                                 {task.descriptionText}
@@ -711,7 +713,10 @@ const ActivityHub = () => {
                                             <IconX />
                                         </button>
                                         <div className="flex items-center flex-wrap gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                            <div>{selectedTask.title}</div>
+                                            <div>
+                                                {/* {selectedTask.title} */}
+                                                {selectedTask.heavyEquipmentId}
+                                            </div>
                                             {selectedTask.priority && (
                                                 <div
                                                     className={`badge rounded-3xl capitalize ${

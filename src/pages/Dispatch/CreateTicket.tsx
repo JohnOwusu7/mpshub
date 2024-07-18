@@ -132,8 +132,32 @@ const CreateTicket = () => {
                                     </div>
                                     <div className="p-5">
                                         <form>
-                                            <div className="mb-5">
-                                                <label htmlFor="heavyEquipmentId">Equipment ID (Trucks Issues Only)</label>
+                                            {/* Initial State */}
+                                            <div className='mb-5'>
+                                                <label htmlFor='start'>Critical Summary (Reporting Operation)</label>
+                                                <select id='start' className='form-select' value={params.start} onChange={(e) => changeValue(e)}>
+                                                    <option value=''>Select Related</option>
+                                                    <option value="truck">Truck Operation</option>
+                                                    <option value="pit">Pit Operation</option>
+                                                    <option value="other">Other operations</option>
+                                                </select>
+                                            </div>
+                                            {/* Heavy Equipment ID */}
+                                            <div className='flex justify-between mt-2'>
+                                            <div className="mb-5" style={{display: params.start === 'truck' ? 'block' : 'none'}}>
+                                                <label htmlFor="heavyEquipmentId">Heavy Equipment ID</label>
+                                                <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select HE ID</option>
+                                                    {heavyEquipments.map((heavyEquipment) => (
+                                                        <option key={heavyEquipment.id} value={heavyEquipment.id}>
+                                                            {heavyEquipment.heavyEquipmentName}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {/* Operator Name */}
+                                            <div className="mb-5" style={{display: params.start === 'truck' ? 'block' : 'none'}}>
+                                                <label htmlFor="heavyEquipmentId">Operator's Name (optional)</label>
                                                 <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Equipment ID</option>
                                                     {heavyEquipments.map((heavyEquipment) => (
@@ -143,25 +167,77 @@ const CreateTicket = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="title">Title</label>
-                                                <input id="title" type="text" placeholder="Enter Title" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
-                                            <div className="mb-5">
+
+                                            {/* Pit Location */}
+                                            <div className="mb-5" style={{display: params.start === 'pit' ? 'block' : 'none'}}>
+                                                <label htmlFor="title">Location</label>
+                                                <input id="title" type="text" placeholder="Enter Location" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
+                                            </div>
+
+                                            {/* Other Operations */}
+                                            <div className="mb-5" style={{display: params.start === 'other' ? 'block' : 'none'}}>
+                                                <label htmlFor="title">Other</label>
+                                                <input id="title" type="text" placeholder="Other Related" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
+                                            </div>
+
+                                            {/* Activity Type Flow */}
+                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'pit' || params.start === 'other' ? 'block' : 'none'}}>
                                                 <label htmlFor="purpose">Activity Type</label>
                                                 <select id="purpose" className="form-select" value={params.purpose} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
                                                     <option value="network">Network</option>
                                                     <option value="dispatch">Dispatch</option>
-                                                    <option value="smart-cap">Smart Cap</option>
+                                                    <option value="smart-cap">SMARTCAP</option>
                                                     <option value="power">Solar/Power</option>
                                                     <option value="systems-admin">Systems Admin</option>
                                                     <option value="improvement">Improvement</option>
                                                 </select>
                                             </div>
+                                            {/* smartcap Type */}
+                                            <div className="mb-5" style={{ display: params.purpose === 'smart-cap' ? 'block' : 'none' }}>
+                                                <label htmlFor="issueType">What type of SmartCap</label>
+                                                <select id="issueType" className="form-select" value={params.issueType} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select Type</option>
+                                                    <option value="issue">ISSUE</option>
+                                                    <option value="request">REQUEST</option>
+                                                </select>
+                                            </div>
+                                            
+                                            {/* Issue Type flow */}
+                                            <div className='flex justify-between mt-2'>
+                                                <div className="mb-5" style={{ display: params.issueType === 'issue' ? 'block' : 'none' }}>
+                                                    <label htmlFor="issue">Select Issue type</label>
+                                                    <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                        <option value="">Select Type</option>
+                                                        <option value="Life Screen">LIFE SCREEN</option>
+                                                        <option value="Life band">LIFE BAND</option>
+                                                        <option value="power">POWER</option>
+                                                    </select>
+                                                </div>
+                                                <div className="mb-5" style={{ display: params.issue === 'Life Screen' ? 'block' : 'none' }}>
+                                                <label htmlFor="screenIssue">Select Issue type</label>
+                                                <select id="screenIssue" className="form-select" value={params.screen} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select Type</option>
+                                                    <option value="is on and off">ON/OFF</option>
+                                                    <option value="is not responsive">SCREEN NOT RESPONSIVE</option>
+                                                </select>
+                                                </div>
+                                                <div className="mb-5" style={{ display: params.issue === 'Life band' ? 'block' : 'none' }}>
+                                                <label htmlFor="screen-issue">Select Issue type</label>
+                                                <select id="screen-issue" className="form-select" value={params.screen} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select Type</option>
+                                                    <option value="is poorly fitted">POORLY FITTED</option>
+                                                    <option value="needs readjust">RE ADJUST</option>
+                                                    <option value='is removed'>REMOVE</option>
+                                                </select>
+                                                </div>
+                                            </div>
+
+                                            <div className='flex justify-between mt-2'>
                                             {/* priority */}
-                                            <div className="mb-5">
-                                                <label htmlFor="priority">Priority</label>
+                                            <div className="mb-5" style={{display: params.screenIssue ? 'block' : 'none'}}>
+                                                <label htmlFor="priority">Priority State</label>
                                                 <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select</option>
                                                     <option value="low">Low</option>
@@ -169,13 +245,26 @@ const CreateTicket = () => {
                                                     <option value="high">High</option>
                                                 </select>
                                             </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="description">Description</label>
+                                            {/* Concerns Location */}
+                                            <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
+                                                <label htmlFor="location">Location Happening</label>
+                                                <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select</option>
+                                                    <option value="low">CUT2C</option>
+                                                    <option value="medium">AJOPA</option>
+                                                    <option value="high">BLOCK5</option>
+                                                </select>
+                                            </div>    
+                                            </div>
+
+                                            {/* comments */}
+                                            <div className="mb-5" style={{display: params.location ? 'block' : 'none'}}>
+                                                <label htmlFor="description">Comment (optional)</label>
                                                 <textarea
                                                     id="description"
                                                     rows={3}
                                                     className="form-textarea resize-none min-h-[130px]"
-                                                    placeholder="Enter Description"
+                                                    placeholder="Enter any coments"
                                                     value={params.description}
                                                     onChange={(e) => changeValue(e)}
                                                 ></textarea>

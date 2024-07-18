@@ -49,7 +49,7 @@ const getUserRole = () => {
     });
     const [notesList, setNoteList] = useState([]);
 
-    const defaultParams: any = { id: null, title: '', description: '', priority: '', user: '' };
+    const defaultParams: any = { id: null, title: '', heavyEquipmentId: '', description: '', priority: '', user: '' };
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [createTicket, setCreateTicket] = useState<any>(false);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
@@ -71,10 +71,11 @@ const getUserRole = () => {
             });
 
             // Normalize the filtered data
-            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; descriptionText: any; createdAt: any; tag: any; priority: any; progress: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
+            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; heavyEquipmentId: any; descriptionText: any; createdAt: any; tag: any; priority: any; progress: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
                 id: item._id,
                 user: item.reportedBy.firstName,
                 title: item.title,
+                heavyEquipmentId: item.heavyEquipmentId,
                 description: item.descriptionText,
                 date: item.createdAt,
                 tag: item.tag,
@@ -405,7 +406,9 @@ const getUserRole = () => {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold mt-4">{note.title}</h4>
+                                                    <h4 className="font-semibold mt-4">
+                                                        {note.title}
+                                                        </h4>
                                                     <p className="text-white-dark mt-2">{note.description}</p>
                                                 </div>
                                             </div>
