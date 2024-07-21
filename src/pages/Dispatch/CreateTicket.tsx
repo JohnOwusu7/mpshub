@@ -67,7 +67,7 @@ const CreateTicket = () => {
             //         Authorization: `Bearer ${token}`
             //     }
             // });
-            console.log('Issue Logss:', params)
+            console.log('Issue Logs:', params)
 
             showMessage('Ticket Sent successfully.');
             setCreateTicket(false);
@@ -109,11 +109,13 @@ const CreateTicket = () => {
 
     return (
         <div>
-            <div>
-                <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}>
-                    <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0" />
-                    Create A ticket
-                </button>
+            <div className='text-3xl'>
+                {/* <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}> */}
+                    <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0 " />
+                    {/* Create A ticket */}
+                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON - BY EDWIN ODURO
+                {/* </button> */}
+                <img src="/maintanance.png" alt="image" className="w-80% h-20% object-cover" />
             </div>
             <Transition appear show={createTicket} as={Fragment}>
                 <Dialog as="div" open={createTicket} onClose={() => setCreateTicket(false)} className="relative z-[51]">
@@ -224,7 +226,7 @@ const CreateTicket = () => {
                                                     <option value="request">REQUEST</option>
                                                 </select>
                                             </div>
-                                            
+
                                             {/* Issue Type flow */}
                                             <div className='flex justify-between mt-2'>
                                                 <div className="mb-5" style={{ display: params.issueType === 'issue' ? 'block' : 'none' }}>
@@ -278,7 +280,7 @@ const CreateTicket = () => {
                                                     <option value="NEW TOWER">NEW TOWER</option>
                                                     <option value="BLOCK 5">BLOCK 5</option>
                                                 </select>
-                                            </div>    
+                                            </div>
                                             </div>
 
                                             {/* comments */}

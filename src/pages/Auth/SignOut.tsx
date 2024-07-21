@@ -28,7 +28,14 @@ function SignOutPage() {
                     <div className="mt-5 text-center text-4xl font-extra leading-tight tracking-tight">
                          Welcome!
                      </div>
-                     <a href='/auth' className='text-center mt-10 text-2xl tracking-tight leading-tight'>Sign In...</a>
+                     {/* <a href='/auth' className='text-center mt-10 text-2xl tracking-tight leading-tight'>Sign In...</a> */}
+                     <div className='text-3xl'>
+                {/* <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}> */}
+                    {/* Create A ticket */}
+                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON - BY EDWIN ODURO
+                {/* </button> */}
+                <img src="/maintanance.png" alt="image" className="w-30 h-30 object-cover" />
+            </div>
                     </div>
                 </div>
             </div>
