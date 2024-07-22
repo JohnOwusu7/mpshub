@@ -32,10 +32,10 @@ function SignOutPage() {
                      <div className='text-3xl'>
                 {/* <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}> */}
                     {/* Create A ticket */}
-                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON - BY EDWIN ODURO (SENIOR MINING SYSTEMS ENGINEER)
+                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON
                 {/* </button> */}
-                <img src="/maintanance.png" alt="image" className="w-30 h-30 object-cover" />
-            </div>
+                    <img src="/maintanance.png" alt="image" className="w-30 h-30 object-cover" />
+                    </div>
                     </div>
                 </div>
             </div>

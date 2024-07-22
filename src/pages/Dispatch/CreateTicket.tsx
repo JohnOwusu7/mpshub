@@ -113,7 +113,7 @@ const CreateTicket = () => {
                 {/* <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}> */}
                     <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0 " />
                     {/* Create A ticket */}
-                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON - BY EDWIN ODURO (SENIOR MINING SYSTEMS ENGINEER)
+                    SYSTEM UNDER MAINTENANCE, YOU WILL GET NOTICED SOON
                 {/* </button> */}
                 <img src="/maintanance.png" alt="image" className="w-80% h-20% object-cover" />
             </div>
