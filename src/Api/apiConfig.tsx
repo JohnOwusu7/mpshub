@@ -1,7 +1,8 @@
 export const API_CONFIG = {
-  baseURL: 'https://mpsserver.onrender.com/api',
-//   baseURL: 'http://localhost:7854/api',
-  socketUrl: 'https://mpsserver.onrender.com',
+  // baseURL: 'https://mpsserver.onrender.com/api',
+  baseURL: 'http://localhost:7854/api',
+  // socketUrl: 'https://mpsserver.onrender.com',
+  socketUrl: 'http://localhost:7854',
   equipment: {
     endpoints: {
       list: '/equipments/list',
@@ -31,6 +32,7 @@ export const API_CONFIG = {
       active: 'users/:userId/block',
       inActive: 'users/:userId/unblock',
       changePassword: 'users/change-password',
+      send: '/users/send',
     },
   },
   heavyEquipments: {
@@ -82,7 +84,8 @@ export const API_CONFIG = {
       deleteToTrash: '/issues/deleteToTrash',
       complete: '/issues/complete',
       reported: '/issues/reported',
-      assigned: '/issues/assign'
+      assigned: '/issues/assign',
+      send: '/issues/send',
     },
   },
   transaction: {
@@ -105,6 +108,11 @@ export const API_CONFIG = {
         delete: '/reports/:id',
         download: '/reports/download',
       },
+  },
+  settings: {
+    endpoints: {
+      send: '/users/send',
+    }
   }
 };
 

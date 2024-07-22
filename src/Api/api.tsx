@@ -52,24 +52,6 @@ interface Report {
     date: string;
 }
 
-// Login API call
-// export const loginApi = async (identityNo: string, password: string): Promise<LoginResponse> => {
-//   try {
-//     const response = await axiosInstance.post(API_CONFIG.users.endpoints.login, {
-//       identityNo,
-//       password,
-//     });
-
-//     console.log('API Response:', response);
-
-//     const { success, message, user, token } = response.data;
-
-//     return { success, message, user, token };
-//   } catch (error: any) {
-//     console.error('API call error:', error);
-//     handleApiError(error);
-//   }
-// };
 export const loginApi = async (identityNo: string, password: string): Promise<LoginResponse> => {
   try {
     const response = await axiosInstance.post(API_CONFIG.users.endpoints.login, {

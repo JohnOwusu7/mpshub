@@ -1,4 +1,3 @@
-import React from 'react';
 import IconMenuDashboard from '../Icon/Menu/IconMenuDashboard';
 import IconMenuTodo from '../Icon/Menu/IconMenuTodo';
 import IconMenuNotes from '../Icon/Menu/IconMenuNotes';
@@ -8,6 +7,7 @@ import IconMenuFontIcons from '../Icon/Menu/IconMenuFontIcons';
 import IconMenuUsers from '../Icon/Menu/IconMenuUsers';
 import IconDribbble from '../Icon/IconDribbble';
 import IconDesktop from '../Icon/IconDesktop';
+import IconSettings from '../Icon/IconSettings';
 
 interface MenuItem {
     label: string;
@@ -108,6 +108,11 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             label: 'Report Forum',
             link: '/daily/report',
             icon: <IconDribbble />,
+        },
+        {
+            label: 'Settings',
+            link: '/settings',
+            icon: <IconSettings />,
         }
     ],
     DISPATCH: [
