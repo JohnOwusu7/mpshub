@@ -1,8 +1,8 @@
 export const API_CONFIG = {
-  baseURL: 'https://mpsserver.onrender.com/api',
-  // baseURL: 'http://localhost:7854/api',
-  socketUrl: 'https://mpsserver.onrender.com',
-  // socketUrl: 'http://localhost:7854',
+  // baseURL: 'https://mpsserver.onrender.com/api',
+  baseURL: 'http://localhost:7854/api',
+  // socketUrl: 'https://mpsserver.onrender.com',
+  socketUrl: 'http://localhost:7854',
   equipment: {
     endpoints: {
       list: '/equipments/list',

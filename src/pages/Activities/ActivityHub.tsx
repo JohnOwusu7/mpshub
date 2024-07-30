@@ -21,7 +21,6 @@ import IconX from '../../components/Icon/IconX';
 import IconRestore from '../../components/Icon/IconRestore';
 import axios from 'axios';
 import { API_CONFIG } from '../../Api/apiConfig';
-import { connectWebSocket } from '../../websocket';;
 
 const ActivityHub = () => {
     const dispatch = useDispatch();
@@ -38,6 +37,11 @@ const ActivityHub = () => {
         reportedBy: '',
         tag: '',
         priority: 'low',
+        heavyEquipmentId: '',
+        issue: '',
+        issueDesc: '',
+        operator: '',
+
     };
 
     const [selectedTab, setSelectedTab] = useState('');
@@ -533,10 +537,10 @@ const ActivityHub = () => {
                                                     <td>
                                                         <div onClick={() => viewTask(task)}>
                                                             <div className={`group-hover:text-primary font-semibold text-base whitespace-nowrap ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.title}
+                                                                {task.heavyEquipmentId ? `${task.heavyEquipmentId} Reporting on ${task.issue} Issues` : task.title}
                                                             </div>
                                                             <div className={`text-white-dark overflow-hidden min-w-[300px] line-clamp-1 ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.descriptionText}
+                                                                {task.issue } {task.issueDesc} {task.description}.
                                                             </div>
                                                         </div>
                                                     </td>
@@ -738,10 +742,11 @@ const ActivityHub = () => {
                                                     {selectedTask.purpose}
                                                 </div>
                                             )}
-                                            {`${selectedTask.reportedBy.firstName} ${'-'} ${selectedTask.reportedBy.role}`}
+                                            {`Reported By ${selectedTask.reportedBy.firstName} ${' '} ${selectedTask.reportedBy.lastName}(${selectedTask.reportedBy.role})`}
                                         </div>
                                         <div className="item-center p-5">
-                                            <div className="text-base prose" dangerouslySetInnerHTML={{ __html: selectedTask.description }}></div>
+                                            {/* <div className="text-base prose" dangerouslySetInnerHTML={{ __html: selectedTask.description }}></div> */}
+                                            {selectedTask.heavyEquipmentId ? `${selectedTask.operator}'s ${selectedTask.issue} ${selectedTask.issueDesc} ${!selectedTask.issue ? selectedTask.description : ''}. Reporting on ${selectedTask.heavyEquipmentId}. Location: ${selectedTask.location}`  : selectedTask.description }
                                             {!selectedTask.assignedTo && !selectedTask.tag ? (
                                             <div className='flex justify-between mt-8'>
                                                 <div className="mb-5 flex justify-between gap-4">
