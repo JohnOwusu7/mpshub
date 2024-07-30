@@ -398,30 +398,34 @@ const CreateTicket = () => {
                                                         <label htmlFor="issue">Select Request Operation</label>
                                                         <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
-                                                            <option value="Report on application Issue">APPLICATION ISSUE</option>
-                                                            <option value="Report on dispatch server issue">DISPATCH NOT WORKING</option>
+                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
+                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
+                                                            <option value="Requests for new screen">NEW SCREEN</option>
+                                                            <option value="Requests for dispatch mount">MOUNT</option>
                                                             <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
-                                                            <option value="Requests for new GPS"></option>
+                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
+                                                            <option value="Requests for new GPS">GPS</option>
                                                         </select>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Administration flow */}
+                                            {/* Request flow */}
                                             <div className='flex justify-between mt-2'>
                                                     <div className="mb-5" style={{ display: params.issueTypeDisp === 'administration' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Administration Operation</label>
+                                                        <label htmlFor="issue">Select Request Operation</label>
                                                         <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
                                                             <option value="Requests for new antenna">NEW ANTENNA</option>
                                                             <option value="Requests for new screen">NEW SCREEN</option>
                                                             <option value="Requests for dispatch mount">MOUNT</option>
-                                                            <option value="Requests for new dispatch application installation on new PC">DISPATCH APPLICATION INSTALLATION</option>
+                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
+                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
+                                                            <option value="Requests for new GPS">GPS</option>
                                                         </select>
                                                     </div>
                                                 </div>
-                                            </div>
 
                                             {/* priority */}
                                             <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' ? 'block' : 'none'}}>
