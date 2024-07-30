@@ -537,7 +537,7 @@ const ActivityHub = () => {
                                                     <td>
                                                         <div onClick={() => viewTask(task)}>
                                                             <div className={`group-hover:text-primary font-semibold text-base whitespace-nowrap ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.heavyEquipmentId ? `${task.heavyEquipmentId} Reporting on ${task.issue} Issues` : task.title}
+                                                                {task.heavyEquipmentId ? `${task.heavyEquipmentId} Reporting on ${task.issue} Issues` : task.title || `${task.issue} critical issue at ${task.location}`}
                                                             </div>
                                                             <div className={`text-white-dark overflow-hidden min-w-[300px] line-clamp-1 ${task.status === 'complete' ? 'line-through' : ''}`}>
                                                                 {task.issue } {task.issueDesc} {task.description}.

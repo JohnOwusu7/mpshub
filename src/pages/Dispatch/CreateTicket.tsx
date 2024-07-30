@@ -162,6 +162,7 @@ const CreateTicket = () => {
                                                     <option value=''>Select Related</option>
                                                     <option value="Truck">Truck Operation</option>
                                                     <option value="Pit">Pit Operation</option>
+                                                    <option value="Admin">Administrative Operation</option>
                                                     <option value="Other">Other operations</option>
                                                 </select>
                                             </div>
@@ -192,6 +193,25 @@ const CreateTicket = () => {
                                                 </div>
                                             </div>
 
+                                            
+                                            
+                                            {/* Concerns Location */}
+                                            <div className="mb-5" style={{display: params.start ==='Pit' || params.heavyEquipmentId || params. start === 'Admin' ? 'block' : 'none'}}>
+                                                    <label htmlFor="location">Location Happening</label>
+                                                    <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
+                                                        <option value="">Select location</option>
+                                                        <option value="CUT2C">CUT2C</option>
+                                                        <option value="CUT2B">CUT2B</option>
+                                                        <option value="WASTE DUMP 4">WASTE DUMP 4</option>
+                                                        <option value="VIEW POINT">VIEW POINT</option>
+                                                        <option value="NEW TOWER">NEW TOWER</option>
+                                                        <option value="BLOCK 5">BLOCK 5</option>
+                                                        <option value="MINING OFFICE">MINING OFFICE</option>
+                                                        <option value="HME">HME (AMAX OFFICE)</option>
+                                                    </select>
+                                                </div>
+
+
                                             {/* Pit Location */}
                                             <div className="mb-5" style={{display: params.start === 'Pit' ? 'block' : 'none'}}>
                                                 <label htmlFor="title">Location</label>
@@ -205,7 +225,7 @@ const CreateTicket = () => {
                                             </div>
 
                                             {/* Activity Type Flow */}
-                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'pit' || params.start === 'other' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Other' || params.start === 'Admin' ? 'block' : 'none'}}>
                                                 <label htmlFor="purpose">Activity Type</label>
                                                 <select id="purpose" className="form-select" value={params.purpose} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
@@ -296,11 +316,12 @@ const CreateTicket = () => {
                                             <div>
                                                  {/* DISPATCH Type */}
                                                 <div className="mb-5" style={{ display: params.purpose === 'dispatch' ? 'block' : 'none' }}>
-                                                    <label htmlFor="issueTypeDisp">What type of Dispatch</label>
+                                                    <label htmlFor="issueTypeDisp">What type of incident operations</label>
                                                     <select id="issueTypeDisp" className="form-select" value={params.issueTypeDisp} onChange={(e) => changeValue(e)}>
                                                         <option value="">Select Type</option>
                                                         <option value="issue">ISSUE</option>
                                                         <option value="request">REQUEST</option>
+                                                        <option value="administration">ADMINISTRATION</option>
                                                         <option value="describe">OTHER</option>
                                                     </select>
                                                 </div>
@@ -308,19 +329,19 @@ const CreateTicket = () => {
                                                 {/* Issue Type flow */}
                                                 <div className='flex justify-between mt-2'>
                                                     <div className="mb-5" style={{ display: params.issueTypeDisp === 'issue' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Issue type</label>
+                                                        <label htmlFor="issue">Select Issue operation</label>
                                                         <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="PTX Screen">PTX SCREEN</option>
                                                             <option value="GPS">GPS</option>
                                                             <option value="Antenna">ANTENNA</option>
-                                                            <option value="Power">POWER</option>
-                                                            <option value="Communication">COMMUNICATION</option>
+                                                            <option value="Mount">MOUNT</option>
+                                                            <option value="Communication">NETWORK</option>
                                                         </select>
                                                     </div>
                                                     {/* GPS */}
                                                     <div className="mb-5" style={{ display: params.issue === 'GPS' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Issue type</label>
+                                                        <label htmlFor="issueDesc">Select GPS Issue type</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="is off">OFF</option>
@@ -330,7 +351,7 @@ const CreateTicket = () => {
                                                     </div>
                                                     {/* PTX Screen */}
                                                     <div className="mb-5" style={{ display: params.issue === 'PTX Screen' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Issue type</label>
+                                                        <label htmlFor="issueDesc">Select Screen Issue type</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="is removed">NO SCREEN</option>
@@ -343,27 +364,28 @@ const CreateTicket = () => {
                                                         </select>
                                                     </div>
                                                     {/* Power */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Power' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Power type</label>
+                                                    <div className="mb-5" style={{ display: params.issue === 'Mount' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issueDesc">Select Mount type</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
-                                                            <option value="is Off">OFF</option>
+                                                            <option value="needs re-adjustment">RE ADJUST(eg: loose bolts, loose mount)</option>
+                                                            <option value="is broken">BROKEN</option>
                                                         </select>
                                                     </div>
                                                     {/* Comms */}
                                                     <div className="mb-5" style={{ display: params.issue === 'Communication' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Communication type</label>
+                                                        <label htmlFor="issueDesc">Select Network issue type</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
-                                                            <option value="is Off">NO COMMS</option>
+                                                            <option value="is Off">OFF</option>
                                                             <option value="is unstable">UNSTABLE COMMS</option>
                                                         </select>
                                                     </div>
                                                     {/* Antenna */}
                                                     <div className="mb-5" style={{ display: params.issue === 'Antenna' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Communication type</label>
+                                                        <label htmlFor="issueDesc">Select Antenna status</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
+                                                            <option value="">Select Status</option>
                                                             <option value="is broken">ATENNA BROKEN</option>
                                                             <option value="needs re adjustment">RE ADJUST</option>
                                                         </select>
@@ -373,15 +395,29 @@ const CreateTicket = () => {
                                                 {/* Request flow */}
                                                 <div className='flex justify-between mt-2'>
                                                     <div className="mb-5" style={{ display: params.issueTypeDisp === 'request' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Request type</label>
+                                                        <label htmlFor="issue">Select Request Operation</label>
+                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="Report on application Issue">APPLICATION ISSUE</option>
+                                                            <option value="Report on dispatch server issue">DISPATCH NOT WORKING</option>
+                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
+                                                            <option value="Requests for new GPS"></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Administration flow */}
+                                            <div className='flex justify-between mt-2'>
+                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'administration' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issue">Select Administration Operation</label>
                                                         <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
                                                             <option value="Requests for new antenna">NEW ANTENNA</option>
                                                             <option value="Requests for new screen">NEW SCREEN</option>
                                                             <option value="Requests for dispatch mount">MOUNT</option>
-                                                            <option value="Requests for new installation">INSTALLATION</option>
-                                                            <option value="Requests for new GPS">GPS</option>
+                                                            <option value="Requests for new dispatch application installation on new PC">DISPATCH APPLICATION INSTALLATION</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -397,22 +433,9 @@ const CreateTicket = () => {
                                                         <option value="high">High</option>
                                                     </select>
                                                 </div>
-                                                {/* Concerns Location */}
-                                                <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
-                                                    <label htmlFor="location">Location Happening</label>
-                                                    <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select location</option>
-                                                        <option value="CUT2C">CUT2C</option>
-                                                        <option value="CUT2B">CUT2B</option>
-                                                        <option value="WASTE DUMP 4">WASTE DUMP 4</option>
-                                                        <option value="VIEW POINT">VIEW POINT</option>
-                                                        <option value="NEW TOWER">NEW TOWER</option>
-                                                        <option value="BLOCK 5">BLOCK 5</option>
-                                                    </select>
-                                                </div>
-
+                                                
                                             {/* comments */}
-                                            <div className="mb-5" style={{display: params.location ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
                                                 <label htmlFor="description">Comment (optional)</label>
                                                 <textarea
                                                     id="description"
