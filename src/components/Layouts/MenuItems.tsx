@@ -36,6 +36,23 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ]
         },
         {
+            label: 'Safety Dashboard',
+            link: '/',
+            icon: <IconMenuTodo />,
+            children: [
+                {
+                    label: 'Planned Job Obervation',
+                    link: '/safety/pjo',
+                    icon: <IconMenuDashboard />,
+                },
+                {
+                    label: 'Safety Interation Record',
+                    link: '/safety/sir',
+                    icon: <IconMenuDashboard />,
+                },
+            ]
+        },
+        {
             label: 'Operators and Equipments',
             link: '/installations',
             icon: <IconMenuFontIcons />,
