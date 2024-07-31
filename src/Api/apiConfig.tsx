@@ -33,6 +33,7 @@ export const API_CONFIG = {
       inActive: 'users/:userId/unblock',
       changePassword: 'users/change-password',
       send: '/users/send',
+      ready: '/users/ready',
     },
   },
   heavyEquipments: {

@@ -200,9 +200,25 @@ const Settings = () => {
     };
 
     const token = localStorage.getItem('token');
-    const sendEmail = async () => {
+    const sendHoldEmail = async () => {
         try {
              const baseurl = await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.send}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            console.log('Sent email ', baseurl );
+            showMessage('Email Sent successfully');
+            
+        } catch (error) {
+            console.error('Error sending email to all:', error);
+            showMessage('Failed to send email. Please try again.', 'error');
+        }
+    };
+
+    const sendReadyEmail = async () => {
+        try {
+             const baseurl = await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.ready}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -230,7 +246,8 @@ const Settings = () => {
                     Add Project
                 </button>
             </div>
-            <div><button type='button' className='btn btn-danger flex mt-5' onClick={() => {sendEmail();}}>Send Email</button></div>
+            <div><button type='button' className='btn btn-danger flex mt-5' onClick={() => {sendHoldEmail();}}>Send Email for Maintenance</button></div>
+            <div><button type='button' className='btn btn-success flex mt-5' onClick={() => {sendReadyEmail();}}>Send Email for Ready App</button></div>
             {/* project list  */}
             <div className="relative pt-5">
                 <div className="perfect-scrollbar h-full -mx-2">
