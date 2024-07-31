@@ -468,7 +468,7 @@ const getUserRole = () => {
                         <div className="flex justify-center items-center sm:min-h-[300px] min-h-[400px] font-semibold text-lg h-full">No data available</div>
                     )}
 
-<Transition appear show={createTicket} as={Fragment}>
+                <Transition appear show={createTicket} as={Fragment}>
                 <Dialog as="div" open={createTicket} onClose={() => setCreateTicket(false)} className="relative z-[51]">
                     <Transition.Child
                         as={Fragment}
