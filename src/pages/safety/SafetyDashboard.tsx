@@ -10,7 +10,7 @@ import IconPlus from '../../components/Icon/IconPlus';
 import IconEdit from '../../components/Icon/IconEdit';
 import IconEye from '../../components/Icon/IconEye';
 
-const List = () => {
+const SafetyDashboard = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(setPageTitle('Invoice List'));
@@ -312,4 +312,4 @@ const List = () => {
     );
 };
 
-export default List;
+export default SafetyDashboard;
