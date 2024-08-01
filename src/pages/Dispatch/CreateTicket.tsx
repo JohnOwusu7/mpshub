@@ -215,7 +215,7 @@ const CreateTicket = () => {
 
 
                                             {/* Pit Location */}
-                                            <div className="mb-5" style={{display: params.start === 'Pit' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
                                                 <label htmlFor="title">Location</label>
                                                 <input id="title" type="text" placeholder="Enter Location" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
