@@ -49,7 +49,7 @@ const getUserRole = () => {
     });
     const [notesList, setNoteList] = useState([]);
 
-    const defaultParams: any = { id: null, heavyEquipmentId: '', title: '', description: '', priority: '', user: '', issue: '', issueDesc: '', operator: '', };
+    const defaultParams: any = { id: null, heavyEquipmentId: '', title: '', description: '', priority: '', user: '', issue: '', issueDesc: '', operator: '', location: '', };
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [createTicket, setCreateTicket] = useState<any>(false);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
@@ -114,7 +114,7 @@ const getUserRole = () => {
             });
 
             // Normalize the filtered data
-            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; heavyEquipmentId: any; descriptionText: any; createdAt: any; tag: any; priority: any; progress: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
+            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; heavyEquipmentId: any; descriptionText: any; operator: any; createdAt: any; location: any; tag: any; priority: any; progress: any; issue: any; issueDesc: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
                 id: item._id,
                 user: item.reportedBy.firstName,
                 title: item.title,
@@ -124,6 +124,10 @@ const getUserRole = () => {
                 tag: item.tag,
                 priority: item.priority,
                 progress: item.progress,
+                issue: item.issue,
+                issueDesc: item.issueDesc,
+                location: item.location,
+                operator: item.operator,
                 // role: item.role,
                 updatedAt: item.updatedAt,
                 isComplete: item.isComplete,
@@ -414,7 +418,7 @@ const getUserRole = () => {
                                                             )}
                                                         </div>
                                                         <div className="ltr:ml-2 rtl:mr-2">
-                                                            <div className="font-semibold">By: {note.user}</div>
+                                                            <div className="font-semibold">Reported By: {note.user}</div>
                                                             <div className="text-sx text-white-dark">{new Date(note.date).toLocaleString()}</div>
                                                         </div>
                                                     </div>
@@ -444,9 +448,11 @@ const getUserRole = () => {
                                                 </div>
                                                 <div>
                                                     <h4 className="font-semibold mt-4">
-                                                        {note.title}
+                                                        {note.heavyEquipmentId ? `${note.heavyEquipmentId} Reporting on ${note.issue} Issues` : note.title || `${note.issue} critical issue at ${note.location}`}
                                                         </h4>
-                                                    <p className="text-white-dark mt-2">{note.description}</p>
+                                                    <p className="text-white-dark mt-2">
+                                                    
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="absolute bottom-5 left-0 w-full px-5">
@@ -551,32 +557,27 @@ const getUserRole = () => {
                                                     <label htmlFor="location">Location Happening</label>
                                                     <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
                                                         <option value="">Select location</option>
-                                                        <option value="CUT2C">CUT2C</option>
+                                                        <option value="CUT2A">CUT2A</option>
                                                         <option value="CUT2B">CUT2B</option>
+                                                        <option value="CUT2C">CUT2C</option>
                                                         <option value="WASTE DUMP 4">WASTE DUMP 4</option>
                                                         <option value="VIEW POINT">VIEW POINT</option>
                                                         <option value="NEW TOWER">NEW TOWER</option>
+                                                        <option value="AJOPA">AJOPA</option>
                                                         <option value="BLOCK 5">BLOCK 5</option>
                                                         <option value="MINING OFFICE">MINING OFFICE</option>
                                                         <option value="HME">HME (AMAX OFFICE)</option>
                                                     </select>
                                                 </div>
 
-
-                                            {/* Pit Location */}
-                                            <div className="mb-5" style={{display: params.start === 'Pit' ? 'block' : 'none'}}>
-                                                <label htmlFor="title">Location</label>
-                                                <input id="title" type="text" placeholder="Enter Location" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
-                                            </div>
-
                                             {/* Other Operations */}
                                             <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
-                                                <label htmlFor="title">Other</label>
+                                                <label htmlFor="title">Title</label>
                                                 <input id="title" type="text" placeholder="Other Related" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
 
                                             {/* Activity Type Flow */}
-                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Other' || params.start === 'Admin' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Admin' ? 'block' : 'none'}}>
                                                 <label htmlFor="purpose">Activity Type</label>
                                                 <select id="purpose" className="form-select" value={params.purpose} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
@@ -761,6 +762,70 @@ const getUserRole = () => {
                                                 </div>
                                             </div>
 
+                                            {/* NETWORK FLOW */}
+                                            <div>
+                                                 {/* NETWORK Type */}
+                                                <div className="mb-5" style={{ display: params.purpose === 'network' ? 'block' : 'none' }}>
+                                                    <label htmlFor="issueTypeNetwork">What type of incident operations</label>
+                                                    <select id="issueTypeNetwork" className="form-select" value={params.issueTypeDisp} onChange={(e) => changeValue(e)}>
+                                                        <option value="">Select Type</option>
+                                                        <option value="issue">ISSUE</option>
+                                                        <option value="request">REQUEST</option>
+                                                        <option value="administration">ADMINISTRATION</option>
+                                                        <option value="describe">OTHER</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* Issue Type flow */}
+                                                <div className='flex justify-between mt-2'>
+                                                    <div className="mb-5" style={{ display: params.issueTypeNetwork === 'issue' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issue">Select Issue operation</label>
+                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="Radio">RADIO</option>
+                                                            <option value="Network">NETWORK</option>
+                                                        </select>
+                                                    </div>
+                                                    {/* Radio Screen */}
+                                                    <div className="mb-5" style={{ display: params.issue === 'Radio' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issueDesc">Select Radio Issue type</label>
+                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="communication is off">NO COMMS</option>
+                                                            <option value="communication is on and off">ON AND OFF</option>
+                                                            <option value='communication delays'>DELAYS</option>
+                                                            <option value='is not working'>NOT WORKING</option>
+                                                        </select>
+                                                    </div>
+                                                    {/* Comms */}
+                                                    <div className="mb-5" style={{ display: params.issue === 'Network' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issueDesc">Select Network issue type</label>
+                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="is Off">OFF</option>
+                                                            <option value="is unstable">UNSTABLE COMMS</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* Request flow */}
+                                                <div className='flex justify-between mt-2'>
+                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'request' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issue">Select Request Operation</label>
+                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
+                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
+                                                            <option value="Requests for new screen">NEW SCREEN</option>
+                                                            <option value="Requests for dispatch mount">MOUNT</option>
+                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
+                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
+                                                            <option value="Requests for new GPS">GPS</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {/* Request flow */}
                                             <div className='flex justify-between mt-2'>
                                                     <div className="mb-5" style={{ display: params.issueTypeDisp === 'administration' ? 'block' : 'none' }}>
@@ -779,7 +844,7 @@ const getUserRole = () => {
                                                 </div>
 
                                             {/* priority */}
-                                            <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' || params.title ? 'block' : 'none'}}>
                                                     <label htmlFor="priority">Priority State</label>
                                                     <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
                                                         <option value="">Select</option>
@@ -787,10 +852,23 @@ const getUserRole = () => {
                                                         <option value="medium">Medium</option>
                                                         <option value="high">High</option>
                                                     </select>
-                                                </div>
+                                            </div>
+
+                                            {/* Other comments */}
+                                            <div className="mb-5" style={{display: params.title && params.priority ? 'block' : 'none'}}>
+                                                <label htmlFor="description">Describe Other related</label>
+                                                    <textarea
+                                                        id="description"
+                                                        rows={3}
+                                                        className="form-textarea resize-none min-h-[130px]"
+                                                        placeholder="Enter other descriptions"
+                                                        value={params.description}
+                                                        onChange={(e) => changeValue(e)}
+                                                    ></textarea>   
+                                            </div>
                                                 
                                             {/* comments */}
-                                            <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.priority && !params.title ? 'block' : 'none'}}>
                                                 <label htmlFor="description">Comment (optional)</label>
                                                 <textarea
                                                     id="description"
@@ -809,7 +887,7 @@ const getUserRole = () => {
                                                     Create Ticket
                                                 </button>
                                             </div>
-                                        </form>
+                                    </form>
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>
@@ -852,7 +930,7 @@ const getUserRole = () => {
                                                 <IconX />
                                             </button>
                                             <div className="flex items-center flex-wrap gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                                <div className="ltr:mr-3 rtl:ml-3">{params.title}</div>
+                                                <div className="ltr:mr-3 rtl:ml-3">{params.heavyEquipmentId ? `${params.heavyEquipmentId} Reporting on ${params.issue} Issues` : params.title || `${params.issue} critical issue at ${params.location}`}</div>
                                                 {params.tag && (
                                                     <button
                                                         type="button"
@@ -873,7 +951,10 @@ const getUserRole = () => {
                                                 <div className="ltr:mr-3 rtl:ml-3">Assignee: {`${params.assignee1}${' '}${params.assignee2}`}</div>
                                             </div>
                                             <div className="p-5">
-                                                <div className="text-base">{params.description}</div>
+                                                <div className="text-base">
+                                                {params.heavyEquipmentId ? `${params.operator}'s ${params.issue} ${params.issueDesc}. Reporting on ${params.heavyEquipmentId}. Location: ${params.location}`  : '' || `${!params.title ? `${params.operator} ${params.issue} ${params.issueDesc}. Location: ${params.location}`  : params.description }`}
+                                            
+                                                </div>
 
                                                 <div className="ltr:text-right rtl:text-left mt-8">
                                                     {

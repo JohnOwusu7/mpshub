@@ -213,21 +213,14 @@ const CreateTicket = () => {
                                                     </select>
                                                 </div>
 
-
-                                            {/* Pit Location */}
-                                            <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
-                                                <label htmlFor="title">Location</label>
-                                                <input id="title" type="text" placeholder="Enter Location" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
-                                            </div>
-
                                             {/* Other Operations */}
                                             <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
-                                                <label htmlFor="title">Other</label>
+                                                <label htmlFor="title">Title</label>
                                                 <input id="title" type="text" placeholder="Other Related" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
 
                                             {/* Activity Type Flow */}
-                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Other' || params.start === 'Admin' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Admin' ? 'block' : 'none'}}>
                                                 <label htmlFor="purpose">Activity Type</label>
                                                 <select id="purpose" className="form-select" value={params.purpose} onChange={(e) => changeValue(e)}>
                                                     <option value="">Select Type</option>
@@ -494,7 +487,7 @@ const CreateTicket = () => {
                                                 </div>
 
                                             {/* priority */}
-                                            <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' || params.title ? 'block' : 'none'}}>
                                                     <label htmlFor="priority">Priority State</label>
                                                     <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
                                                         <option value="">Select</option>
@@ -502,10 +495,23 @@ const CreateTicket = () => {
                                                         <option value="medium">Medium</option>
                                                         <option value="high">High</option>
                                                     </select>
-                                                </div>
+                                            </div>
+
+                                            {/* Other comments */}
+                                            <div className="mb-5" style={{display: params.title && params.priority ? 'block' : 'none'}}>
+                                                <label htmlFor="description">Describe Other related</label>
+                                                    <textarea
+                                                        id="description"
+                                                        rows={3}
+                                                        className="form-textarea resize-none min-h-[130px]"
+                                                        placeholder="Enter other descriptions"
+                                                        value={params.description}
+                                                        onChange={(e) => changeValue(e)}
+                                                    ></textarea>   
+                                            </div>
                                                 
                                             {/* comments */}
-                                            <div className="mb-5" style={{display: params.priority ? 'block' : 'none'}}>
+                                            <div className="mb-5" style={{display: params.priority && !params.title ? 'block' : 'none'}}>
                                                 <label htmlFor="description">Comment (optional)</label>
                                                 <textarea
                                                     id="description"
@@ -524,7 +530,7 @@ const CreateTicket = () => {
                                                     Create Ticket
                                                 </button>
                                             </div>
-                                        </form>
+                                    </form>
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

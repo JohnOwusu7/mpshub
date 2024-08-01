@@ -540,7 +540,7 @@ const ActivityHub = () => {
                                                                 {task.heavyEquipmentId ? `${task.heavyEquipmentId} Reporting on ${task.issue} Issues` : task.title || `${task.issue} critical issue at ${task.location}`}
                                                             </div>
                                                             <div className={`text-white-dark overflow-hidden min-w-[300px] line-clamp-1 ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.issue } {task.issueDesc} {task.description}.
+                                                                {task.issue } {task.issueDesc}. {task.description}
                                                             </div>
                                                         </div>
                                                     </td>
@@ -736,7 +736,7 @@ const ActivityHub = () => {
                                             {selectedTask.tag && (
                                                 <div
                                                     className={`badge rounded-3xl capitalize ${
-                                                        selectedTask.purpose === 'dispatch' ? 'badge-outline-primary' : selectedTask.purpose === 'network' ?  'badge-outline-success ' : selectedTask.purpose === 'power' ?  'badge-outline-success ' : selectedTask.purpose === 'smart-cap' ? 'badge-outline-info ' : selectedTask.purpose === 'improvement' ? 'badge-outline-warning ' : selectedTask.purpose === 'systems-admin' ? 'badge-outline-danger ': ''
+                                                        selectedTask.purpose === 'dispatch' ? 'badge-outline-primary' : selectedTask.purpose === 'network' ?  'badge-outline-success ' : selectedTask.purpose === 'power' ?  'badge-outline-success ' : selectedTask.purpose === 'smart-cap' ? 'badge-outline-info ' : selectedTask.purpose === 'improvement' ? 'badge-outline-warning ' : selectedTask.purpose === 'systems-admin' ? 'badge-outline-danger ' : ''
                                                     }`}
                                                 >
                                                     {selectedTask.purpose}
@@ -746,7 +746,8 @@ const ActivityHub = () => {
                                         </div>
                                         <div className="item-center p-5">
                                             {/* <div className="text-base prose" dangerouslySetInnerHTML={{ __html: selectedTask.description }}></div> */}
-                                            {selectedTask.heavyEquipmentId ? `${selectedTask.operator}'s ${selectedTask.issue} ${selectedTask.issueDesc} ${!selectedTask.issue ? selectedTask.description : ''}. Reporting on ${selectedTask.heavyEquipmentId}. Location: ${selectedTask.location}`  : selectedTask.description }
+                                            {selectedTask.heavyEquipmentId ? `${selectedTask.operator}'s ${selectedTask.issue} ${selectedTask.issueDesc}. Reporting on ${selectedTask.heavyEquipmentId}. Location: ${selectedTask.location}`  : '' || `${!selectedTask.title ? `${selectedTask.operator} ${selectedTask.issue} ${selectedTask.issueDesc}. Location: ${selectedTask.location}`  : selectedTask.description }`}
+                                            
                                             {!selectedTask.assignedTo && !selectedTask.tag ? (
                                             <div className='flex justify-between mt-8'>
                                                 <div className="mb-5 flex justify-between gap-4">
