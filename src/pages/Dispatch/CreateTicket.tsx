@@ -200,11 +200,13 @@ const CreateTicket = () => {
                                                     <label htmlFor="location">Location Happening</label>
                                                     <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
                                                         <option value="">Select location</option>
-                                                        <option value="CUT2C">CUT2C</option>
+                                                        <option value="CUT2A">CUT2A</option>
                                                         <option value="CUT2B">CUT2B</option>
+                                                        <option value="CUT2C">CUT2C</option>
                                                         <option value="WASTE DUMP 4">WASTE DUMP 4</option>
                                                         <option value="VIEW POINT">VIEW POINT</option>
                                                         <option value="NEW TOWER">NEW TOWER</option>
+                                                        <option value="AJOPA">AJOPA</option>
                                                         <option value="BLOCK 5">BLOCK 5</option>
                                                         <option value="MINING OFFICE">MINING OFFICE</option>
                                                         <option value="HME">HME (AMAX OFFICE)</option>
