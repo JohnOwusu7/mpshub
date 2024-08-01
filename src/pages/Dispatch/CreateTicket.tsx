@@ -438,7 +438,7 @@ const CreateTicket = () => {
                                                     </div>
                                                     {/* Radio Screen */}
                                                     <div className="mb-5" style={{ display: params.issue === 'Radio' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Screen Issue type</label>
+                                                        <label htmlFor="issueDesc">Select Radio Issue type</label>
                                                         <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
                                                             <option value="">Select Type</option>
                                                             <option value="communication is off">NO COMMS</option>
