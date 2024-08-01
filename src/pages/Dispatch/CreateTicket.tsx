@@ -412,6 +412,70 @@ const CreateTicket = () => {
                                                 </div>
                                             </div>
 
+                                            {/* NETWORK FLOW */}
+                                            <div>
+                                                 {/* NETWORK Type */}
+                                                <div className="mb-5" style={{ display: params.purpose === 'network' ? 'block' : 'none' }}>
+                                                    <label htmlFor="issueTypeNetwork">What type of incident operations</label>
+                                                    <select id="issueTypeNetwork" className="form-select" value={params.issueTypeDisp} onChange={(e) => changeValue(e)}>
+                                                        <option value="">Select Type</option>
+                                                        <option value="issue">ISSUE</option>
+                                                        <option value="request">REQUEST</option>
+                                                        <option value="administration">ADMINISTRATION</option>
+                                                        <option value="describe">OTHER</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* Issue Type flow */}
+                                                <div className='flex justify-between mt-2'>
+                                                    <div className="mb-5" style={{ display: params.issueTypeNetwork === 'issue' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issue">Select Issue operation</label>
+                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="Radio">RADIO</option>
+                                                            <option value="Network">NETWORK</option>
+                                                        </select>
+                                                    </div>
+                                                    {/* Radio Screen */}
+                                                    <div className="mb-5" style={{ display: params.issue === 'Radio' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issueDesc">Select Screen Issue type</label>
+                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="communication is off">NO COMMS</option>
+                                                            <option value="communication is on and off">ON AND OFF</option>
+                                                            <option value='communication delays'>DELAYS</option>
+                                                            <option value='is not working'>NOT WORKING</option>
+                                                        </select>
+                                                    </div>
+                                                    {/* Comms */}
+                                                    <div className="mb-5" style={{ display: params.issue === 'Network' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issueDesc">Select Network issue type</label>
+                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="is Off">OFF</option>
+                                                            <option value="is unstable">UNSTABLE COMMS</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* Request flow */}
+                                                <div className='flex justify-between mt-2'>
+                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'request' ? 'block' : 'none' }}>
+                                                        <label htmlFor="issue">Select Request Operation</label>
+                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
+                                                            <option value="">Select Type</option>
+                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
+                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
+                                                            <option value="Requests for new screen">NEW SCREEN</option>
+                                                            <option value="Requests for dispatch mount">MOUNT</option>
+                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
+                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
+                                                            <option value="Requests for new GPS">GPS</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {/* Request flow */}
                                             <div className='flex justify-between mt-2'>
                                                     <div className="mb-5" style={{ display: params.issueTypeDisp === 'administration' ? 'block' : 'none' }}>
