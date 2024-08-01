@@ -15,7 +15,7 @@ const SafetyDashboard = () => {
     useEffect(() => {
         dispatch(setPageTitle('Safety Work Order'));
     });
-    const defaultParams: any = {id: null, job: ''};
+    const defaultParams: any = {id: null, job: '', department: '', personObserving: '', personBeingObserved: ''};
     const [items, setItems] = useState([defaultParams]);
 
     const deleteRow = (id: any = null) => {
@@ -123,28 +123,28 @@ const SafetyDashboard = () => {
                             {
                                 accessor: 'name',
                                 sortable: true,
-                                render: ({ name, id }) => (
+                                render: ({ department, id }) => (
                                     <div className="flex items-center font-semibold">
                                         <div className="p-0.5 bg-white-dark/30 rounded-full w-max ltr:mr-2 rtl:ml-2">
                                             <img className="h-8 w-8 rounded-full object-cover" src={`/assets/images/profile-${id}.jpeg`} alt="" />
                                         </div>
-                                        <div>{name}</div>
+                                        <div>{department}</div>
                                     </div>
                                 ),
                             },
                             {
-                                accessor: 'email',
+                                accessor: 'personObserving',
                                 sortable: true,
                             },
                             {
-                                accessor: 'date',
+                                accessor: 'personBeingObserved',
                                 sortable: true,
                             },
                             {
-                                accessor: 'amount',
+                                accessor: 'status',
                                 sortable: true,
                                 titleClassName: 'text-right',
-                                render: ({ amount, id }) => <div className="text-right font-semibold">{`$${amount}`}</div>,
+                                render: ({ status, id }) => <div className="text-right font-semibold">{`$${status}`}</div>,
                             },
                             {
                                 accessor: 'status',
