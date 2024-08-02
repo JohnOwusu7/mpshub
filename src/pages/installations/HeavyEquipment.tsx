@@ -9,10 +9,11 @@ interface HeavyEquipment {
     _id: string;
     heavyEquipmentName: string;
     status: string;
+    category: string;
 }
 
 const HeavyEquipment: React.FC = () => {
-    const defaultParams: HeavyEquipment = { _id: '', heavyEquipmentName: '', status: '' };
+    const defaultParams: HeavyEquipment = { _id: '', heavyEquipmentName: '', status: '', category: '',};
     const [params, setParams] = useState<HeavyEquipment>({ ...defaultParams });
     const [addTruck, setAddTruck] = useState<boolean>(false);
     const [trucks, setTrucks] = useState<HeavyEquipment[]>([]);
@@ -82,6 +83,7 @@ const HeavyEquipment: React.FC = () => {
                 _id: truckToEdit._id,
                 heavyEquipmentName: truckToEdit.heavyEquipmentName,
                 status: truckToEdit.status,
+                category: truckToEdit.category,
             });
             setEditingTruckId(truckId);
             setAddTruck(true); // Open the dialog for editing
@@ -199,6 +201,10 @@ const HeavyEquipment: React.FC = () => {
                                                     <option value="ON SITE">On Site</option>
                                                     <option value="DOWN">Down</option>
                                                 </select>
+                                            </div>
+                                            <div className="mb-5">
+                                                <label htmlFor="category">Truck ID</label>
+                                                <input id="category" type="text" placeholder="Enter Category" className="form-input" value={params.category} onChange={changeValue} />
                                             </div>
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger gap-2" onClick={() => { setAddTruck(false); setParams(defaultParams); }}>

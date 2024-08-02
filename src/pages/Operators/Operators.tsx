@@ -9,10 +9,11 @@ interface Operator {
     _id: string;
     operator: string;
     status: string;
+    contract: string;
 }
 
 const Operators: React.FC = () => {
-    const defaultParams: Operator = { _id: '', operator: '', status: '' };
+    const defaultParams: Operator = { _id: '', operator: '', status: '', contract: '' };
     const [params, setParams] = useState<Operator>({ ...defaultParams });
     const [addOperator, setAddOperator] = useState<boolean>(false);
     const [operators, setOperators] = useState<Operator[]>([]);
@@ -82,6 +83,7 @@ const Operators: React.FC = () => {
                 _id: operatorToEdit._id,
                 operator: operatorToEdit.operator,
                 status: operatorToEdit.status,
+                contract: operatorToEdit.contract,
             });
             setEditingOperatorId(operatorId);
             setAddOperator(true); // Open the dialog for editing
@@ -133,6 +135,7 @@ const Operators: React.FC = () => {
                         <tr>
                             <th className='py-2 px-4 border-b'>Operator Name</th>
                             <th className='py-2 px-4 border-b'>Operator Status</th>
+                            <th className='py-2 px-4 border-b'>Contract Based</th>
                             <th className='py-2 px-4 border-b'>Action</th>
                         </tr>
                     </thead>
@@ -141,6 +144,7 @@ const Operators: React.FC = () => {
                             <tr key={index}>
                                 <td className='py-2 px-4 border-b'>{operator.operator}</td>
                                 <td className='py-2 px-4 border-b'>{operator.status}</td>
+                                <td className='py-2 px-4 border-b'>{operator.contract}</td>
                                 <td className='py-2 px-4 border-b'>
                                     <button className="text-blue-600 hover:text-blue-900 mr-2 bg-green-400 px-4 rounded-full" onClick={() => handleEdit(operator._id)}>Edit</button>
                                     <button className="text-red-600 hover:text-red-900 bg-red-200 px-4 rounded-full" onClick={() => handleDelete(operator._id)}>Delete</button>
@@ -199,6 +203,10 @@ const Operators: React.FC = () => {
                                                     <option value="ACTIVE">ACTIVE</option>
                                                     <option value="INACTIVE">INACTIVE</option>
                                                 </select>
+                                            </div>
+                                            <div className="mb-5">
+                                                <label htmlFor="contract">Contract</label>
+                                                <input id="contract" type="text" placeholder="Enter contract section" className="form-input" value={params.contract} onChange={changeValue} />
                                             </div>
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger gap-2" onClick={() => { setAddOperator(false); setParams(defaultParams); }}>
