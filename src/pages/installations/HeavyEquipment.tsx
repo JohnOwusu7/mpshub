@@ -135,6 +135,7 @@ const HeavyEquipment: React.FC = () => {
                         <tr>
                             <th className='py-2 px-4 border-b'>Equipment Name</th>
                             <th className='py-2 px-4 border-b'>Truck Status</th>
+                            <th className='py-2 px-4 border-b'>Contract Based</th>
                             <th className='py-2 px-4 border-b'>Action</th>
                         </tr>
                     </thead>
