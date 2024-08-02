@@ -16,9 +16,8 @@ const SafetyDashboard = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(setPageTitle('Safety Work Order'));
-        fetchPJOfiles();
     });
-    const defaultParams: any = {id: null, job: '', department: '', personObserving: '', personBeingObserved: '', observationsReviewed: ''};
+    const defaultParams: any = {id: null, job: '', department: '', personObserving: '', personBeingObserved: '', obvservationsReviewed: '', status: '', taskProcedures: ''};
     const [pjolists, setPjoLists] = useState([defaultParams]);
     const [items, seItems] = useState([{
         id: 9,
@@ -32,6 +31,10 @@ const SafetyDashboard = () => {
         profile: 'profile-1.jpeg',
     },])
 
+    useEffect(() => {
+        fetchPJOfiles();
+    }, [])
+
     const fetchPJOfiles = async() => {
         try {
             const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.pjos.endpoints.list}`, {
@@ -39,6 +42,7 @@ const SafetyDashboard = () => {
                     Authorization: `Bearer${token}`
                 }
             })
+            console.log('new pjo', response.data)
             setPjoLists(response.data);
         } catch (error) {
             console.error("Error fetching Operators", error);
