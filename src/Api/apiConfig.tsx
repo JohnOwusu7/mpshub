@@ -114,6 +114,11 @@ export const API_CONFIG = {
     endpoints: {
       send: '/users/send',
     }
+  },
+  pjos: {
+    endpoints: {
+      list: '/planned-job-observation',
+    }
   }
 };
 

@@ -6,17 +6,44 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../../store';
 import { setPageTitle } from '../../store/themeConfigSlice';
 import IconTrashLines from '../../components/Icon/IconTrashLines';
-import IconPlus from '../../components/Icon/IconPlus';
 import IconEdit from '../../components/Icon/IconEdit';
 import IconEye from '../../components/Icon/IconEye';
+import axios from 'axios';
+import { API_CONFIG } from '../../Api/apiConfig';
 
 const SafetyDashboard = () => {
+    const token = localStorage.getItem('token');
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(setPageTitle('Safety Work Order'));
+        fetchPJOfiles();
     });
-    const defaultParams: any = {id: null, job: '', department: '', personObserving: '', personBeingObserved: ''};
-    const [items, setItems] = useState([defaultParams]);
+    const defaultParams: any = {id: null, job: '', department: '', personObserving: '', personBeingObserved: '', observationsReviewed: ''};
+    const [pjolists, setPjoLists] = useState([defaultParams]);
+    const [items, seItems] = useState([{
+        id: 9,
+        job: 'Work at Height',
+        personObserving: 'Edwin Oduro',
+        personBeingObserved: 'John Owusu',
+        department: 'Mining',
+        taskProcedures: 'YES',
+        status: { tooltip: 'Completed', color: 'success' },
+        obvservationsReviewed: { tooltip: 'NO', color: 'danger' },
+        profile: 'profile-1.jpeg',
+    },])
+
+    const fetchPJOfiles = async() => {
+        try {
+            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.pjos.endpoints.list}`, {
+                headers: {
+                    Authorization: `Bearer${token}`
+                }
+            })
+            setPjoLists(response.data);
+        } catch (error) {
+            console.error("Error fetching Operators", error);
+        }
+    }
 
     const deleteRow = (id: any = null) => {
         if (window.confirm('Are you sure want to delete selected row ?')) {
@@ -45,7 +72,7 @@ const SafetyDashboard = () => {
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-    const [initialRecords, setInitialRecords] = useState(sortBy(items, 'job'));
+    const [initialRecords, setInitialRecords] = useState(sortBy(pjolists, 'job'));
     const [records, setRecords] = useState(initialRecords);
     const [selectedRecords, setSelectedRecords] = useState<any>([]);
 
@@ -68,13 +95,14 @@ const SafetyDashboard = () => {
 
     useEffect(() => {
         setInitialRecords(() => {
-            return items.filter((item) => {
+            return pjolists.filter((item) => {
                 return (
                     item.job.toLowerCase().includes(search.toLowerCase()) ||
-                    item.name.toLowerCase().includes(search.toLowerCase()) ||
-                    item.email.toLowerCase().includes(search.toLowerCase()) ||
-                    item.date.toLowerCase().includes(search.toLowerCase()) ||
-                    item.amount.toLowerCase().includes(search.toLowerCase()) ||
+                    item.personObserving.toLowerCase().includes(search.toLowerCase()) ||
+                    item.personBeingObserved.toLowerCase().includes(search.toLowerCase()) ||
+                    item.department.toLowerCase().includes(search.toLowerCase()) ||
+                    item.taskProcedures.toLowerCase().includes(search.toLowerCase()) ||
+                    item.obvservationsReviewed.tooltip.toLowerCase().includes(search.toLowerCase()) ||
                     item.status.tooltip.toLowerCase().includes(search.toLowerCase())
                 );
             });
@@ -96,10 +124,6 @@ const SafetyDashboard = () => {
                             <IconTrashLines />
                             Delete
                         </button>
-                        <Link to="/apps/job/add" className="btn btn-primary gap-2">
-                            <IconPlus />
-                            Add New
-                        </Link>
                     </div>
                     <div className="ltr:ml-auto rtl:mr-auto">
                         <input type="text" className="form-input w-auto" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -115,19 +139,17 @@ const SafetyDashboard = () => {
                                 accessor: 'job',
                                 sortable: true,
                                 render: ({ job }) => (
-                                    <NavLink to="/apps/job/preview">
+                                    <NavLink to="/safety/pjo/preview">
                                         <div className="text-primary underline hover:no-underline font-semibold">{`#${job}`}</div>
                                     </NavLink>
                                 ),
                             },
                             {
-                                accessor: 'name',
+                                accessor: 'department',
                                 sortable: true,
                                 render: ({ department, id }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div className="p-0.5 bg-white-dark/30 rounded-full w-max ltr:mr-2 rtl:ml-2">
-                                            <img className="h-8 w-8 rounded-full object-cover" src={`/assets/images/profile-${id}.jpeg`} alt="" />
-                                        </div>
+                                        
                                         <div>{department}</div>
                                     </div>
                                 ),
@@ -140,17 +162,17 @@ const SafetyDashboard = () => {
                                 accessor: 'personBeingObserved',
                                 sortable: true,
                             },
-                            {
-                                accessor: 'status',
-                                sortable: true,
-                                titleClassName: 'text-right',
-                                render: ({ status, id }) => <div className="text-right font-semibold">{`$${status}`}</div>,
-                            },
-                            {
-                                accessor: 'status',
-                                sortable: true,
-                                render: ({ status }) => <span className={`badge badge-outline-${status.color} `}>{status.tooltip}</span>,
-                            },
+                            // {
+                            //     accessor: 'observationsReviewed',
+                            //     sortable: true,
+                            //     // titleClassName: 'text-left',
+                            //     render: ({ obvservationsReviewed, id }) => <span className={`badge badge-outline-${obvservationsReviewed.color} `}>{obvservationsReviewed.tooltip}</span>,
+                            // },
+                            // {
+                            //     accessor: 'status',
+                            //     sortable: true,
+                            //     render: ({ status }) => <span className={`badge badge-outline-${status.color} `}>{status.tooltip}</span>,
+                            // },
                             {
                                 accessor: 'action',
                                 title: 'Actions',
@@ -158,17 +180,17 @@ const SafetyDashboard = () => {
                                 textAlignment: 'center',
                                 render: ({ id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to="/apps/job/edit" className="flex hover:text-info">
+                                        <NavLink to="/safety/pjo/edit" className="flex hover:text-info">
                                             <IconEdit className="w-4.5 h-4.5" />
                                         </NavLink>
-                                        <NavLink to="/apps/job/preview" className="flex hover:text-primary">
+                                        <NavLink to="/safety/pjo/preview" className="flex hover:text-primary">
                                             <IconEye />
                                         </NavLink>
-                                        {/* <NavLink to="" className="flex"> */}
+                                        <NavLink to="" className="flex">
                                         <button type="button" className="flex hover:text-danger" onClick={(e) => deleteRow(id)}>
                                             <IconTrashLines />
                                         </button>
-                                        {/* </NavLink> */}
+                                        </NavLink>
                                     </div>
                                 ),
                             },
