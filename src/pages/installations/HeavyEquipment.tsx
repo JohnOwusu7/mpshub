@@ -144,6 +144,7 @@ const HeavyEquipment: React.FC = () => {
                             <tr key={index}>
                                 <td className='py-2 px-4 border-b'>{truck.heavyEquipmentName}</td>
                                 <td className='py-2 px-4 border-b'>{truck.status}</td>
+                                <td className='py-2 px-4 border-b'>{truck.category}</td>
                                 <td className='py-2 px-4 border-b'>
                                     <button className="text-blue-600 hover:text-blue-900 mr-2 bg-green-400 px-4 rounded-full" onClick={() => handleEdit(truck._id)}>Edit</button>
                                     <button className="text-red-600 hover:text-red-900 bg-red-200 px-4 rounded-full" onClick={() => handleDelete(truck._id)}>Delete</button>
