@@ -1,6 +1,7 @@
 import { API_CONFIG } from './apiConfig';
 import { handleApiError } from './errorHandling';
 import axiosInstance from './axiosInstance';
+import axios from 'axios';
 
 // Define interfaces for API responses
 interface LoginResponse {
@@ -26,6 +27,13 @@ interface AddressData {
 interface SingleFormData {
   // Define the structure of singleFormData according to your requirements
 }
+
+interface SingleOperatorFormData {
+    // Define the structure of singleFormData according to your requirements
+    operator: string;
+    status: string;
+    contract: string;
+  }
 
 export interface ApiResponse {
   success: boolean;
@@ -144,7 +152,7 @@ export const inventoryAdd = async (singleFormData: SingleFormData): Promise<ApiR
 // Inventory Bulk API call
 const token = localStorage.getItem('token');
 
-export const inventoryBulk = async (formData: SingleFormData): Promise<ApiResponse> => {
+export const inventoryBulk = async (formData: SingleOperatorFormData): Promise<ApiResponse> => {
   try {
     const response = await axiosInstance.post(API_CONFIG.equipment.endpoints.bulk, formData);
     console.log('API Response:', response);
@@ -157,6 +165,20 @@ export const inventoryBulk = async (formData: SingleFormData): Promise<ApiRespon
     throw error;
   }
 };
+
+export const operatorsBulk = async (formData: SingleFormData): Promise<ApiResponse> => {
+    try {
+      const response = await axiosInstance.post(API_CONFIG.operators.endpoints.bulk, formData);
+      console.log('API Response:', response);
+
+      const { success, message } = response.data;
+      return { success, message };
+    } catch (error: any) {
+      console.error('API call error:', error);
+      handleApiError(error);
+      throw error;
+    }
+  };
 
 export const addReport = async (data: ReportFormData, token: string): Promise<ApiResponse> => {
     try {

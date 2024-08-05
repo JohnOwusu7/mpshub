@@ -3,6 +3,7 @@ import ContractorsDashboard from '../pages/Contractors/Dashboard';
 import SignOutPage from '../pages/Auth/SignOut';
 import Settings from '../pages/AdminSettings/Settings';
 import SafetyDashboard from '../pages/safety/SafetyDashboard';
+import AddOperatorBulkForm from '../pages/Operators/bulkUpload';
 const Operators = lazy(() => import('../pages/Operators/Operators'))
 
 const AddEquipmentBulkForm = lazy(() => import('../components/Inventory/BulkUpload'));
@@ -219,6 +220,12 @@ const routes: Route[] = [
     {
         path: '/operators/all',
         element: <PrivateRoute path='/installations/heavy-equipment' element={<Operators />} allowedRoles={['ADMIN']} />,
+    },
+
+    {
+        path: '/operators/upload-bulk',
+        element: <PrivateRoute path='/operators/upload-bulk' element={<AddOperatorBulkForm />} allowedRoles={['ADMIN', 'SYSTEMS-ENGINEER']}/>,
+        layout: 'default',
     },
 
     // Admin Settings

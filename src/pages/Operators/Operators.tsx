@@ -4,6 +4,7 @@ import { API_CONFIG } from '../../Api/apiConfig';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
 import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom';
 
 interface Operator {
     _id: string;
@@ -129,6 +130,9 @@ const Operators: React.FC = () => {
         <div className='p-2'>
             <h2 className='text-2xl font mb-4 text-bold'>Operators List</h2>
             <button className='bg-blue-500 hover:bg-gray-300 hover:text-blue-500 text-white font-bold py-2 px-4 rounded' onClick={() => { setParams(defaultParams); setAddOperator(true); }}>Add New Operator</button>
+            <Link to="/operators/upload-bulk" className="mx-5 bg-blue-500 hover:bg-gray-300 hover:text-blue-500 text-white font-bold py-2 px-4 rounded">
+                            Upload Bulk Operators
+            </Link>
             <div className='pt-5'>
                 <table className='min-w-full bg-white border-gray-400'>
                     <thead>

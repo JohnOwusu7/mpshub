@@ -9,11 +9,11 @@ interface HeavyEquipment {
     _id: string;
     heavyEquipmentName: string;
     status: string;
-    category: string;
+    contract: string;
 }
 
 const HeavyEquipment: React.FC = () => {
-    const defaultParams: HeavyEquipment = { _id: '', heavyEquipmentName: '', status: '', category: '',};
+    const defaultParams: HeavyEquipment = { _id: '', heavyEquipmentName: '', status: '', contract: '',};
     const [params, setParams] = useState<HeavyEquipment>({ ...defaultParams });
     const [addTruck, setAddTruck] = useState<boolean>(false);
     const [trucks, setTrucks] = useState<HeavyEquipment[]>([]);
@@ -83,7 +83,7 @@ const HeavyEquipment: React.FC = () => {
                 _id: truckToEdit._id,
                 heavyEquipmentName: truckToEdit.heavyEquipmentName,
                 status: truckToEdit.status,
-                category: truckToEdit.category,
+                contract: truckToEdit.contract,
             });
             setEditingTruckId(truckId);
             setAddTruck(true); // Open the dialog for editing
@@ -144,7 +144,7 @@ const HeavyEquipment: React.FC = () => {
                             <tr key={index}>
                                 <td className='py-2 px-4 border-b'>{truck.heavyEquipmentName}</td>
                                 <td className='py-2 px-4 border-b'>{truck.status}</td>
-                                <td className='py-2 px-4 border-b'>{truck.category}</td>
+                                <td className='py-2 px-4 border-b'>{truck.contract}</td>
                                 <td className='py-2 px-4 border-b'>
                                     <button className="text-blue-600 hover:text-blue-900 mr-2 bg-green-400 px-4 rounded-full" onClick={() => handleEdit(truck._id)}>Edit</button>
                                     <button className="text-red-600 hover:text-red-900 bg-red-200 px-4 rounded-full" onClick={() => handleDelete(truck._id)}>Delete</button>
@@ -205,8 +205,8 @@ const HeavyEquipment: React.FC = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-5">
-                                                <label htmlFor="category">Truck ID</label>
-                                                <input id="category" type="text" placeholder="Enter Category" className="form-input" value={params.category} onChange={changeValue} />
+                                                <label htmlFor="contract">Truck ID</label>
+                                                <input id="contract" type="text" placeholder="Enter Contract section" className="form-input" value={params.contract} onChange={changeValue} />
                                             </div>
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger gap-2" onClick={() => { setAddTruck(false); setParams(defaultParams); }}>
