@@ -761,6 +761,7 @@ const ActivityHub = () => {
                                                     >
                                                         <option value="">Select Section</option>
                                                         <option value="SYSTEMS-ENGINEER">Systems Engineer</option>
+                                                        <option value="ADMIN">Administrative</option>
                                                         <option value="AFRIYIE">Afriyie Contractors</option>
                                                         <option value="RAMJACK">RamJack Contractors</option>
                                                         <option value="DISPATCH">Amax Contractors</option>
@@ -772,7 +773,28 @@ const ActivityHub = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="item-center mt-7" style={{ display: params.tag === 'SYSTEMS-ENGINEER' ? 'block' : 'none' }}>
+                                            <div className="item-center mt-7" style={{ display: params.tag === 'SYSTEMS-ENGINEER' ? 'block' : 'none' }}>
+                                                <label htmlFor="assignee">Assignee</label>
+                                                <select
+                                                    id="assignee"
+                                                    className="form-select"
+                                                    value={selectedAssignee ? (selectedAssignee as any)._id : ''}
+                                                    onChange={(e) => {
+                                                        const selectedUserId = e.target.value;
+                                                        const selectedUser: any = users.find((user: any) => user._id === selectedUserId);
+                                                        setSelectedAssignee(selectedUser);
+                                                    }}
+                                                >
+                                                    <option value="">Select Assignee</option>
+                                                    {users.map((user: any) => (
+                                                    <option key={user._id} value={user._id}>
+                                                        {user.firstName}
+                                                    </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {/* Admin Assign */}
+                                            <div className="item-center mt-7" style={{ display: params.tag === 'ADMIN' ? 'block' : 'none' }}>
                                                 <label htmlFor="assignee">Assignee</label>
                                                 <select
                                                     id="assignee"
