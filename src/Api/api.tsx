@@ -152,7 +152,7 @@ export const inventoryAdd = async (singleFormData: SingleFormData): Promise<ApiR
 // Inventory Bulk API call
 const token = localStorage.getItem('token');
 
-export const inventoryBulk = async (formData: SingleOperatorFormData): Promise<ApiResponse> => {
+export const inventoryBulk = async (formData: SingleFormData): Promise<ApiResponse> => {
   try {
     const response = await axiosInstance.post(API_CONFIG.equipment.endpoints.bulk, formData);
     console.log('API Response:', response);
@@ -166,7 +166,8 @@ export const inventoryBulk = async (formData: SingleOperatorFormData): Promise<A
   }
 };
 
-export const operatorsBulk = async (formData: SingleFormData): Promise<ApiResponse> => {
+
+export const operatorBulk = async (formData: SingleOperatorFormData): Promise<ApiResponse> => {
     try {
       const response = await axiosInstance.post(API_CONFIG.operators.endpoints.bulk, formData);
       console.log('API Response:', response);
