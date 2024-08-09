@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { operatorsBulk } from '../../Api/api';
+import { operatorBulk, inventoryBulk } from '../../Api/api';
 import showMessage from '../../components/Alerts/showMessage';
 
 const AddOperatorBulkForm: React.FC = () => {
@@ -25,7 +25,7 @@ const AddOperatorBulkForm: React.FC = () => {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await operatorsBulk(formData);
+            const response = await operatorBulk(formData);
 
             if (response.success === true) {
                 if (response.message) {

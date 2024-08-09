@@ -30,9 +30,9 @@ interface SingleFormData {
 
 interface SingleOperatorFormData {
     // Define the structure of singleFormData according to your requirements
-    operator: string;
-    status: string;
-    contract: string;
+    // operator: string;
+    // status: string;
+    // contract: string;
   }
 
 export interface ApiResponse {
