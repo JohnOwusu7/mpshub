@@ -23,8 +23,11 @@ interface Report {
     createdAt: string;
     updatedAt: string;
     reportedBy: User;
+    issue: string;
+    location: string;
     tag: string;
     heavyEquipmentId: string;
+    users: User;
 }
 
 const IssueReportsUserList: React.FC = () => {
@@ -32,34 +35,36 @@ const IssueReportsUserList: React.FC = () => {
     const [filteredReports, setFilteredReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [filters, setFilters] = useState<{
         startDate: string;
         endDate: string;
         progress: string;
         name: string;
-        heavyEquipmentId: string;
+        users: string;
+        purpose:string;
     }>({
         startDate: '',
         endDate: '',
         progress: '',
         name: '',
-        heavyEquipmentId: ''
+        users: '',
+        purpose: ''
     });
 
-    // Fetch heavyEquipments data
+    // Fetch Users data
     useEffect(() => {
-        const fetchHeavyEquipments = async () => {
+        const fetchUsers = async () => {
             try {
-                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.heavyEquipments.endpoints.list}`);
-                setHeavyEquipments(response.data);
+                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.list}`);
+                setUsers(response.data);
             } catch (error) {
-                console.error('Error fetching heavyEquipments:', error);
+                console.error('Error fetching Users:', error);
                 
             }
         };
 
-        fetchHeavyEquipments();
+        fetchUsers();
     },[]);
 
     const componentRef = useRef<HTMLDivElement>(null);
@@ -106,7 +111,8 @@ const IssueReportsUserList: React.FC = () => {
             (!filters.startDate || new Date(report.createdAt) >= new Date(filters.startDate)) &&
             (!filters.endDate || new Date(report.createdAt) <= new Date(filters.endDate)) &&
             (!filters.progress || report.progress === filters.progress) &&
-            (!filters.heavyEquipmentId || report.heavyEquipmentId === filters.heavyEquipmentId) &&
+            (!filters.purpose || report.purpose === filters.purpose) &&
+            (!filters.users || report.completedBy || report.reportedBy === filters.users) &&
             (!filters.name || `${report.reportedBy.firstName} ${report.reportedBy.lastName}`.toLowerCase().includes(filters.name.toLowerCase()))
         );
 
@@ -168,15 +174,15 @@ const IssueReportsUserList: React.FC = () => {
                     className="mr-2 p-2 border border-gray-300"
                 />
                 <select 
-                    name="heavyEquipmentId" 
+                    name="users" 
                     className="mr-2 p-2 border border-gray-300" 
-                    value={filters.heavyEquipmentId} 
+                    value={filters.users} 
                     onChange={handleFilterChange}>
                                                     
-                    <option value="">Select Equipment ID</option>
-                    {heavyEquipments.map((heavyEquipment) => (
-                    <option key={heavyEquipment.id} value={heavyEquipment.id}>
-                        {heavyEquipment.heavyEquipmentName}
+                    <option value="">Select User to Filter</option>
+                    {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName}
                     </option>
                     ))}
                 </select>
@@ -207,6 +213,18 @@ const IssueReportsUserList: React.FC = () => {
                     <option value="in-progress">Inprogress</option>
                     <option value="complete">Complete</option>
                 </select>
+                <select
+                    name="purpose"
+                    value={filters.purpose}
+                    onChange={handleFilterChange}
+                    className="mr-2 p-2 border border-gray-300"
+                >
+                    <option value="">Select Contractor</option>
+                    <option value="new">Dispatch</option>
+                    <option value="smart-cap">SmartCap</option>
+                    <option value="network">Networks</option>
+                    <option value="others">Others</option>
+                </select>
             </div>
             <ReactToPrint
                 trigger={() => <button className="btn btn-primary mb-4">Print Reports</button>}
@@ -221,7 +239,6 @@ const IssueReportsUserList: React.FC = () => {
                         <thead className="print:bg-transparent">
                             <tr>
                                 <th className="py-2 px-4 border-b print:border-none">Reported By</th>
-                                <th className="py-2 px-4 border-b print:border-none">Truck ID</th>
                                 <th className="py-2 px-4 border-b print:border-none">Issue Title</th>
                                 <th className="py-2 px-4 border-b print:border-none">Assigned To</th>
                                 <th className="py-2 px-4 border-b print:border-none">Completed By</th>
@@ -236,8 +253,7 @@ const IssueReportsUserList: React.FC = () => {
                             {filteredReports.map((report, index) => (
                                 <tr key={index}>
                                     <td className="py-2 px-4 border-b print:border-none">{`${report?.reportedBy?.firstName} ${report?.reportedBy?.lastName}`}</td>
-                                    <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId}</td>
-                                    <td className="py-2 px-4 border-b print:border-none">{report.title}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId ? `${report.heavyEquipmentId} Reporting on ${report.issue} Issues` : report.title || `${report.issue} critical issue at ${report.location}`}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : report.tag || 'No one'}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report?.completedBy ? `${report?.completedBy?.firstName} ${report?.completedBy?.lastName}` : 'No one'}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
