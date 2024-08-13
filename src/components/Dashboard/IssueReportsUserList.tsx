@@ -27,7 +27,7 @@ interface Report {
     location: string;
     tag: string;
     heavyEquipmentId: string;
-    users: User;
+    users: string;
 }
 
 const IssueReportsUserList: React.FC = () => {
