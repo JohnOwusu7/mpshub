@@ -21,12 +21,12 @@ function SignOutPage() {
                 <img 
                     src="/assets/images/auth/smart.png" 
                     alt="Smart Image" 
-                    className="absolute left-0 top-2/3 h-full max-h-[423px] -translate-y-1/2" 
+                    className="absolute left-0 top-2/3 h-full max-h-[423px] -translate-y-1/2 md:left-[5%]" 
                 />
                 <img 
                     src="/assets/images/auth/truck3.png" 
                     alt="Truck Image" 
-                    className="absolute left-24 top-0 h-[300px] md:left-[15%]" 
+                    className="absolute left-24 top-0 h-[250px] md:left-[5%]" 
                 />
                 <img 
                     src="/assets/images/auth/coming-soon-object3.png" 
@@ -36,7 +36,7 @@ function SignOutPage() {
                 <img 
                     src="/assets/images/auth/moving.png" 
                     alt="Moving Image" 
-                    className="absolute top-[48%] right-[20%]" 
+                    className="absolute top-[48%] right-[5%]" 
                 />
 
                 {/* Centered Content */}
