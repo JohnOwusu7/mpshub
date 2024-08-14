@@ -59,7 +59,7 @@ const ActivityHub = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.list}`);
             const onlyNew = response.data;
             const onlyNewIssues = onlyNew?.filter((issue: any) => {
-                return issue.isAssigned === false;
+                return issue.isAssigned === true;
             });
             setAllTasks(onlyNewIssues);
             // setAllTasks(response.data)
