@@ -26,7 +26,7 @@ function SignOutPage() {
                 <img 
                     src="/assets/images/auth/truck3.png" 
                     alt="Truck Image" 
-                    className="absolute left-24 top-0 h-[250px] md:left-[5%]" 
+                    className="absolute left-24 top-0 h-[350px] md:left-[5%]" 
                 />
                 <img 
                     src="/assets/images/auth/coming-soon-object3.png" 
