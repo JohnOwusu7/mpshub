@@ -27,7 +27,6 @@ interface Report {
     location: string;
     tag: string;
     heavyEquipmentId: string;
-    users: string;
 }
 
 const IssueReportsUserList: React.FC = () => {
@@ -35,20 +34,18 @@ const IssueReportsUserList: React.FC = () => {
     const [filteredReports, setFilteredReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [filters, setFilters] = useState<{
         startDate: string;
         endDate: string;
         progress: string;
         name: string;
-        users: string;
-        purpose: string;
+        purpose:string;
     }>({
         startDate: '',
         endDate: '',
         progress: '',
         name: '',
-        users: '',
         purpose: ''
     });
 
@@ -56,16 +53,16 @@ const IssueReportsUserList: React.FC = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get<User[]>(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.list}`);
+                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.list}`);
                 setUsers(response.data);
             } catch (error) {
                 console.error('Error fetching Users:', error);
-                setError('Failed to fetch users');
+                
             }
         };
 
         fetchUsers();
-    }, []);
+    },[]);
 
     const componentRef = useRef<HTMLDivElement>(null);
     const authenticatedUser = useSelector((state: IRootState) => state.user.user);
@@ -102,33 +99,21 @@ const IssueReportsUserList: React.FC = () => {
         fetchReports();
     }, [fetchReports]);
 
-    const filterReports = useCallback(debounce(() => {
-        console.log('Filters:', filters);
-        console.log('Reports:', reports);
-
-        let filtered = reports.filter(report => {
-            const byUser = !filters.users || 
-                (report.completedBy?.id.toString() === filters.users || report.reportedBy?.id.toString() === filters.users);
-
-            console.log('By User:', byUser, 'Report:', report);
-            
-            return (
-                (!filters.startDate || new Date(report.createdAt) >= new Date(filters.startDate)) &&
-                (!filters.endDate || new Date(report.createdAt) <= new Date(filters.endDate)) &&
-                (!filters.progress || report.progress === filters.progress) &&
-                (!filters.purpose || report.purpose === filters.purpose) &&
-                byUser &&
-                (!filters.name || `${report.reportedBy.firstName} ${report.reportedBy.lastName}`.toLowerCase().includes(filters.name.toLowerCase()))
-            );
-        });
-
-        console.log('Filtered Reports:', filtered);
-        setFilteredReports(filtered);
-    }, 300), [filters, reports]);
-
     useEffect(() => {
         filterReports();
-    }, [filters, reports, filterReports]);
+    }, [filters, reports]);
+
+    const filterReports = useCallback(debounce(() => {
+        let filtered = reports.filter(report =>
+            (!filters.startDate || new Date(report.createdAt) >= new Date(filters.startDate)) &&
+            (!filters.endDate || new Date(report.createdAt) <= new Date(filters.endDate)) &&
+            (!filters.progress || report.progress === filters.progress) &&
+            (!filters.purpose || report.purpose === filters.purpose) &&
+            (!filters.name || `${report.reportedBy.firstName} ${report.reportedBy.lastName}`.toLowerCase().includes(filters.name.toLowerCase()))
+        );
+
+        setFilteredReports(filtered);
+    }, 300), [filters, reports]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFilters({
@@ -184,19 +169,6 @@ const IssueReportsUserList: React.FC = () => {
                     onChange={handleFilterChange}
                     className="mr-2 p-2 border border-gray-300"
                 />
-                <select 
-                    name="users" 
-                    className="mr-2 p-2 border border-gray-300" 
-                    value={filters.users} 
-                    onChange={handleFilterChange}
-                >
-                    <option value="">Select User to Filter</option>
-                    {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                            {user.firstName} {user.lastName}
-                        </option>
-                    ))}
-                </select>
                 <input
                     type="date"
                     name="startDate"
@@ -221,20 +193,8 @@ const IssueReportsUserList: React.FC = () => {
                 >
                     <option value="">All Progress</option>
                     <option value="new">New</option>
-                    <option value="in-progress">In Progress</option>
+                    <option value="in-progress">In progress</option>
                     <option value="complete">Complete</option>
-                </select>
-                <select
-                    name="purpose"
-                    value={filters.purpose}
-                    onChange={handleFilterChange}
-                    className="mr-2 p-2 border border-gray-300"
-                >
-                    <option value="">Select Purpose</option>
-                    <option value="new">Dispatch</option>
-                    <option value="smart-cap">SmartCap</option>
-                    <option value="network">Networks</option>
-                    <option value="others">Others</option>
                 </select>
             </div>
             <ReactToPrint
@@ -264,9 +224,7 @@ const IssueReportsUserList: React.FC = () => {
                             {filteredReports.map((report, index) => (
                                 <tr key={index}>
                                     <td className="py-2 px-4 border-b print:border-none">{`${report?.reportedBy?.firstName} ${report?.reportedBy?.lastName}`}</td>
-                                    <td className="py-2 px-4 border-b print:border-none">
-                                        {report.heavyEquipmentId ? `${report.heavyEquipmentId} Reporting on ${report.issue} Issues` : report.title || `${report.issue} critical issue at ${report.location}`}
-                                    </td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId ? `${report.heavyEquipmentId} Reporting on ${report.issue} Issues` : report.title || `${report.issue} critical issue at ${report.location}`}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : report.tag || 'No one'}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report?.completedBy ? `${report?.completedBy?.firstName} ${report?.completedBy?.lastName}` : 'No one'}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
@@ -285,3 +243,4 @@ const IssueReportsUserList: React.FC = () => {
 };
 
 export default IssueReportsUserList;
+

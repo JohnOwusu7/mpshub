@@ -6,7 +6,6 @@ import ReactToPrint from 'react-to-print';
 interface User {
   firstName: string;
   lastName: string;
-  position: string;
 }
 
 interface Report {
@@ -35,14 +34,14 @@ const IssueReportsList: React.FC = () => {
         startDate: string;
         endDate: string;
         progress: string;
-        position: string;
         name: string;
+        purpose: string;
     }>({
         startDate: '',
         endDate: '',
         progress: '',
-        position: '',
-        name: ''
+        name: '',
+        purpose: '',
     });
 
     const componentRef = useRef<HTMLDivElement>(null);
@@ -72,7 +71,7 @@ const IssueReportsList: React.FC = () => {
             (!filters.startDate || new Date(report.createdAt) >= new Date(filters.startDate)) &&
             (!filters.endDate || new Date(report.createdAt) <= new Date(filters.endDate)) &&
             (!filters.progress || report.progress === filters.progress) &&
-            (!filters.position || report.reportedBy.position.toLowerCase().includes(filters.position.toLowerCase())) &&
+            (!filters.purpose || report.purpose === filters.purpose) &&
             (!filters.name || `${report.reportedBy.firstName} ${report.reportedBy.lastName}`.toLowerCase().includes(filters.name.toLowerCase()))
         );
 
@@ -107,14 +106,6 @@ const IssueReportsList: React.FC = () => {
                 className="mr-2 p-2 border border-gray-300"
             />
             <input
-                type="text"
-                placeholder="Employee Position..."
-                name="position"
-                value={filters.position}
-                onChange={handleFilterChange}
-                className="mr-2 p-2 border border-gray-300"
-            />
-            <input
                 type="date"
                 name="startDate"
                 value={filters.startDate}
@@ -139,6 +130,18 @@ const IssueReportsList: React.FC = () => {
                 <option value="in-progress">Inprogress</option>
                 <option value="complete">Complete</option>
             </select>
+            <select
+                    name="purpose"
+                    value={filters.purpose}
+                    onChange={handleFilterChange}
+                    className="mr-2 p-2 border border-gray-300"
+                >
+                    <option value="">Select Contractor</option>
+                    <option value="dispatch">Dispatch</option>
+                    <option value="smart-cap">SmartCap</option>
+                    <option value="network">Networks</option>
+                    <option value="others">Others</option>
+                </select>
         </div>
         <ReactToPrint
             trigger={() => <button className="btn btn-primary mb-4">Print Reports</button>}
