@@ -144,43 +144,41 @@ const IssueReportsList: React.FC = () => {
             pageStyle="@page { size: A4; margin: 10mm; }"
         />
         <div ref={componentRef} className="print-container">
-            {filteredReports.length === 0 ? (
-                <p>No reports available</p>
-            ) : (
-                <table className="min-w-full bg-white border border-gray-300 print:border-black-400 print:min-w-0">
-                    <thead className="print:bg-transparent">
-                        <tr>
-                            <th className="py-2 px-4 border-b print:border-none">Reported By</th>
-                            <th className="py-2 px-1 border-b print:border-none">Truck ID</th>
-                            <th className="py-2 px-4 border-b print:border-none">Concerns</th>
-                            <th className="py-2 px-4 border-b print:border-none">Assigned To</th>
-                            <th className="py-2 px-4 border-b print:border-none">Completed By</th>
-                            <th className="py-2 px-4 border-b print:border-none">Purpose</th>
-                            <th className="py-2 px-4 border-b print:border-none">Priority</th>
-                            <th className="py-2 px-4 border-b print:border-none">Progress</th>
-                            <th className="py-2 px-4 border-b print:border-none">Issued Date</th>
-                            <th className="py-2 px-4 border-b print:border-none">Completed Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredReports.map((report, index) => (
-                            <tr key={index}>
-                                <td className="py-2 px-4 border-b print:border-none">{`${report?.reportedBy?.firstName} ${report?.reportedBy?.lastName}`}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report.title}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : report.tag || 'No one'}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report?.completedBy ? `${report?.completedBy?.firstName} ${report?.completedBy?.lastName}` : 'No one'}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
-                                <td className="py-2 px-4 print:bg-red border-b print:border-none">{report.priority}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{report.progress}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{new Date(report.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                                <td className="py-2 px-4 border-b print:border-none">{new Date(report.updatedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                {filteredReports.length === 0 ? (
+                    <p>No reports available</p>
+                ) : (
+                    <table className="min-w-full bg-white border border-gray-300 print:border-none print:min-w-0">
+                        <thead className="print:bg-transparent">
+                            <tr>
+                                <th className="py-2 px-4 border-b print:border-none">Reported By</th>
+                                <th className="py-2 px-4 border-b print:border-none">Issue Concerns</th>
+                                <th className="py-2 px-4 border-b print:border-none">Assigned To</th>
+                                <th className="py-2 px-4 border-b print:border-none">Completed By</th>
+                                <th className="py-2 px-4 border-b print:border-none">Purpose</th>
+                                <th className="py-2 px-4 border-b print:border-none">Priority</th>
+                                <th className="py-2 px-4 border-b print:border-none">Progress</th>
+                                <th className="py-2 px-4 border-b print:border-none">Issued Date</th>
+                                <th className="py-2 px-4 border-b print:border-none">Completed Date</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
+                        </thead>
+                        <tbody>
+                            {filteredReports.map((report, index) => (
+                                <tr key={index}>
+                                    <td className="py-2 px-4 border-b print:border-none">{`${report?.reportedBy?.firstName} ${report?.reportedBy?.lastName}`}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.heavyEquipmentId ? `${report.heavyEquipmentId} Reporting on ${report.issue} Issues` : report.title || `${report.issue} critical issue at ${report.location}`}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report?.assignedTo ? `${report?.assignedTo?.firstName} ${report?.assignedTo?.lastName}` : report.tag || 'No one'}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report?.completedBy ? `${report?.completedBy?.firstName} ${report?.completedBy?.lastName}` : 'No one'}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.priority}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{report.progress}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{new Date(report.createdAt).toLocaleString('en-US', { dateStyle: 'medium' })}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{new Date(report.updatedAt).toLocaleString('en-US', { dateStyle: 'medium' })}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
     </div>
 );
 }

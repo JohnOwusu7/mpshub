@@ -239,7 +239,7 @@ const IssueReportsUserList: React.FC = () => {
                         <thead className="print:bg-transparent">
                             <tr>
                                 <th className="py-2 px-4 border-b print:border-none">Reported By</th>
-                                <th className="py-2 px-4 border-b print:border-none">Issue Title</th>
+                                <th className="py-2 px-4 border-b print:border-none">Issue Concerns</th>
                                 <th className="py-2 px-4 border-b print:border-none">Assigned To</th>
                                 <th className="py-2 px-4 border-b print:border-none">Completed By</th>
                                 <th className="py-2 px-4 border-b print:border-none">Purpose</th>
