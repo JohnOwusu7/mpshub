@@ -112,7 +112,7 @@ const IssueReportsUserList: React.FC = () => {
             (!filters.endDate || new Date(report.createdAt) <= new Date(filters.endDate)) &&
             (!filters.progress || report.progress === filters.progress) &&
             (!filters.purpose || report.purpose === filters.purpose) &&
-            (!filters.users || report.completedBy || report.reportedBy === filters.users) &&
+            // (!filters.users || report.completedBy || report.reportedBy === filters.users) &&
             (!filters.name || `${report.reportedBy.firstName} ${report.reportedBy.lastName}`.toLowerCase().includes(filters.name.toLowerCase()))
         );
 
