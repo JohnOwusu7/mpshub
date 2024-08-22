@@ -288,12 +288,6 @@ const getUserRole = () => {
 
     return (
         <div>
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="loader">Loading...</div>
-                </div>
-            ) : (
-                <>
             <BlankWithHeader />
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full mt-5">
                 <div className={`bg-black/60 z-10 w-full h-full rounded-md absolute hidden ${isShowNoteMenu ? '!block xl:!hidden' : ''}`} onClick={() => setIsShowNoteMenu(!isShowNoteMenu)}></div>
@@ -913,7 +907,7 @@ const getUserRole = () => {
                         </div>
                     </div>
                 </Dialog>
-            </Transition>
+                </Transition>
 
                     <Transition appear show={isViewNoteModal} as={Fragment}>
                         <Dialog as="div" open={isViewNoteModal} onClose={() => setIsViewNoteModal(false)} className="relative z-[51]">
@@ -974,7 +968,11 @@ const getUserRole = () => {
                                                 {params.heavyEquipmentId ? `${params.operator}'s ${params.issue} ${params.issueDesc}. Reporting on ${params.heavyEquipmentId}. Location: ${params.location}`  : '' || `${!params.title ? `${params.operator} ${params.issue} ${params.issueDesc}. Location: ${params.location}`  : params.description }`}
                                             
                                                 </div>
-
+                                                {loading ? (
+                                                <div className="flex justify-center items-center h-64">
+                                                    <div className="loader">Loading...</div>
+                                                </div>
+                                                ) : (
                                                 <div className="ltr:text-right rtl:text-left mt-8">
                                                     {
                                                         params.progress === 'new' ? (
@@ -996,6 +994,7 @@ const getUserRole = () => {
                                                         )
                                                     }
                                                 </div>
+                                                )}
                                             </div>
                                         </Dialog.Panel>
                                     </Transition.Child>
@@ -1005,8 +1004,6 @@ const getUserRole = () => {
                     </Transition>
                 </div>
             </div>
-            </>
-            )}
         </div>
     );
 };
