@@ -879,7 +879,8 @@ const ActivityHub = () => {
                     </Dialog>
                 </Transition>
             </div>
-            </>)}
+            </>
+            )}
         </div>
     );
 };

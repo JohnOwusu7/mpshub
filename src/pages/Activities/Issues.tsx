@@ -59,6 +59,7 @@ const getUserRole = () => {
     const [selectedTabs, setSelectedTabs] = useState<any>('');
     const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
     const [operators, setOperators] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const token = localStorage.getItem('token');
     
@@ -103,6 +104,7 @@ const getUserRole = () => {
 
       const fetchIssues = async () => {
         try {
+            setLoading(true);
             const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.list}`);
             const issuesData = response.data;
 
@@ -141,7 +143,9 @@ const getUserRole = () => {
             console.log('Filtered Issues List:', filteredIssues);
         } catch (error: any) {
             console.error('Error fetching issues:', error.message);
-        }
+        } finally {
+            setLoading(false);
+        };
     };
 
       // Call fetchIssues when the component mounts
@@ -167,6 +171,7 @@ const getUserRole = () => {
         params.descriptionText = params.description;
 
         try {
+            setLoading(true);
             // Send the request to add/update the note
             await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.add}`, params, {
                 headers: {
@@ -180,7 +185,9 @@ const getUserRole = () => {
         } catch (error) {
             console.error('Error saving note:', error);
             showMessage('Error saving note. Please try again later.', 'error');
-        }
+        } finally {
+            setLoading(false);
+        };
     };
 
 
@@ -192,6 +199,7 @@ const getUserRole = () => {
 
     const startProgress = async (params: any,) => {
         try {
+            setLoading(true);
             let item = filteredNotesList.find((d: any) => d.id === params.id);
             console.log("item:", item)
             console.log("user ID", params.id)
@@ -208,11 +216,14 @@ const getUserRole = () => {
             console.log('Progress started successfully:', response.data);
         } catch (error) {
             console.error('Error updating progress:', error);
-        }
+        } finally {
+            setLoading(false);
+        };
     };
 
     const completeProgress = async (params: any) => {
         try {
+            setLoading(true);
             let item = filteredNotesList.find((d: any) => d._id === params._id);
             console.log("item:", item)
             console.log("Params:", params)
@@ -228,6 +239,8 @@ const getUserRole = () => {
             showMessage('Task has been completed Successfully.');
         } catch (error) {
             console.log('Error creating');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -275,6 +288,12 @@ const getUserRole = () => {
 
     return (
         <div>
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="loader">Loading...</div>
+                </div>
+            ) : (
+                <>
             <BlankWithHeader />
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full mt-5">
                 <div className={`bg-black/60 z-10 w-full h-full rounded-md absolute hidden ${isShowNoteMenu ? '!block xl:!hidden' : ''}`} onClick={() => setIsShowNoteMenu(!isShowNoteMenu)}></div>
@@ -986,6 +1005,8 @@ const getUserRole = () => {
                     </Transition>
                 </div>
             </div>
+            </>
+            )}
         </div>
     );
 };

@@ -12,6 +12,7 @@ const CreateTicket = () => {
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
     const [operators, setOperators] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const token = localStorage.getItem('token');
 
     // Fetch heavyEquipments data
@@ -61,6 +62,7 @@ const CreateTicket = () => {
         // Rename the 'description' field to 'descriptionText'
         params.descriptionText = params.description;
         try {
+            setLoading(true);
             // Send the request to add/update the note
             await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.add}`, params, {
                 headers: {
@@ -74,6 +76,8 @@ const CreateTicket = () => {
         } catch (error) {
             console.error('Error saving note:', error);
             showMessage('Error reporting Please try again later.', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -109,6 +113,12 @@ const CreateTicket = () => {
 
     return (
         <div>
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="loader">Loading...</div>
+                </div>
+            ) : (
+                <>
             <div className='text-3xl'>
                 <button className="btn btn-primary" type="button" onClick={() => createTicketFunction()}>
                     <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0 " />
@@ -538,6 +548,8 @@ const CreateTicket = () => {
                     </div>
                 </Dialog>
             </Transition>
+            </>
+            )}
         </div>
     );
 };

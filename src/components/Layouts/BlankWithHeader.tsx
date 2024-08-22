@@ -8,7 +8,6 @@ import showMessage from '../Alerts/showMessage';
 
 import { IRootState } from '../../store';
 import { logout } from '../../store/userSlice';
-import IconRouter from '../Icon/IconRouter';
 import IconArrowBackward from '../Icon/IconArrowBackward';
 
 const BlankWithHeader: React.FC = () => {
