@@ -25,6 +25,7 @@ export const API_CONFIG = {
       logout: '/users/logout',
       list: '/users/list',
       listEngineers: '/users/systemEngineers',
+      listAdmin: '/users/administrative',
       getUser: '/users/get-user',
       add: '/users/add',
       edit: '/users/:userId',

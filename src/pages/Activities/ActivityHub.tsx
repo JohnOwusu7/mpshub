@@ -51,20 +51,24 @@ const ActivityHub = () => {
 
 
     const [users, setUsers] = useState([]);
+    const [users1, setUsers1] = useState([]);
     const [selectedAssignee, setSelectedAssignee] = useState(null);
     const [allTasks, setAllTasks] = useState([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const fetchIssues = async () => {
         try {
+            setLoading(true);
             const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.list}`);
             const onlyNew = response.data;
             const onlyNewIssues = onlyNew?.filter((issue: any) => {
                 return issue.isAssigned === false;
             });
             setAllTasks(onlyNewIssues);
-            // setAllTasks(response.data)
         } catch (error: any) {
             console.error('Error fetching issues:', error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -166,17 +170,21 @@ const ActivityHub = () => {
     const deleteTask = async (task: any, type: string = '') => {
         if (type === 'delete') {
             try {
+                setLoading(true);
                 await axios.put(`${API_CONFIG.baseURL}/issues/deleteToTrash/${task._id}`);
-            task.status = 'trash';
-            console.log('successfully')
-            showMessage('Task has been stored to trash.');
+                task.status = 'trash';
+                console.log('successfully')
+                showMessage('Task has been stored to trash.');
             } catch (error) {
                 console.log('Error creating')
+            } finally {
+                setLoading(false);
             }
 
         }
         if (type === 'deletePermanent') {
             try {
+                setLoading(true);
                 // Send a request to the delete endpoint to permanently delete the task
                 await axios.delete(`${API_CONFIG.baseURL}/issues/${task._id}`);
                 // If the request succeeds, remove the task from the list
@@ -186,40 +194,66 @@ const ActivityHub = () => {
                 console.error('Error permanently deleting task:', error);
                 showMessage('Unable deleting Task.');
                 // Handle error
+            } finally {
+                setLoading(false);
             }
         } else if (type === 'restore') {
             try {
+                setLoading(true);
                 await axios.put(`${API_CONFIG.baseURL}/issues/restoreFromTrash/${task._id}`);
             task.status = 'trash';
             showMessage('Task has been restored successfully.');
             } catch (error) {
                 console.log('Error creating')
+            } finally {
+                setLoading(false);
             }
             task.status = '';
         }
         searchTasks(false);
     };
 
-    // fetch users
+    // fetch Systems Engineers
     useEffect(() => {
         const fetchUsers = async () => {
           try {
+            setLoading(true);
             const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.listEngineers}`);
             setUsers(response.data);
           } catch (error: any) {
             console.error('Error fetching users:', error.message);
 
+          } finally {
+            setLoading(false);
           }
         };
 
         fetchUsers();
-      }, []);
+    }, []);
+
+    // fetch Admins
+    useEffect(() => {
+        const fetchUsers1 = async () => {
+          try {
+            setLoading(true);
+            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.listAdmin}`);
+            setUsers1(response.data);
+          } catch (error: any) {
+            console.error('Error fetching users:', error.message);
+
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        fetchUsers1();
+    }, []);
 
       // After issue creation for assignment
         const assignTask = async (selectedTask: any, assignedTo: any,) => {
             const taskId = selectedTask._id;
             const tag = params.tag;
-
+            setLoading(true);
             try {
                 if(assignedTo) {
                         const response = await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.assignNew}/${taskId}`, { assignedTo, tag }, {
@@ -244,6 +278,8 @@ const ActivityHub = () => {
             } catch (error) {
                 console.error('Error assigning task:', error);
                 showMessage('Error assiging task.', 'error');
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -267,6 +303,12 @@ const ActivityHub = () => {
 
     return (
         <div>
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="loader">Loading...</div>
+                </div>
+            ) : (
+                <>
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
                 <div
                     className={`panel p-4 flex-none w-[240px] max-w-full absolute xl:relative z-10 space-y-4 xl:h-auto h-full xl:block ltr:xl:rounded-r-md ltr:rounded-r-none rtl:xl:rounded-l-md rtl:rounded-l-none hidden ${
@@ -744,82 +786,84 @@ const ActivityHub = () => {
                                             )}
                                             {`Reported By ${selectedTask.reportedBy.firstName} ${' '} ${selectedTask.reportedBy.lastName}(${selectedTask.reportedBy.role})`}
                                         </div>
+
+                                        {/* Assigning Tasks */}
                                         <div className="item-center p-5">
                                             {/* <div className="text-base prose" dangerouslySetInnerHTML={{ __html: selectedTask.description }}></div> */}
                                             {selectedTask.heavyEquipmentId ? `${selectedTask.operator}'s ${selectedTask.issue} ${selectedTask.issueDesc}. Reporting on ${selectedTask.heavyEquipmentId}. Location: ${selectedTask.location}`  : '' || `${!selectedTask.title ? `${selectedTask.operator} ${selectedTask.issue} ${selectedTask.issueDesc}. Location: ${selectedTask.location}`  : selectedTask.description }`}
                                             
                                             {!selectedTask.assignedTo && !selectedTask.tag ? (
-                                            <div className='flex justify-between mt-8'>
-                                                <div className="mb-5 flex justify-between gap-4">
-                                                    <div className="mt-7">
-                                                    <label htmlFor="tag">Section</label>
+                                                <div className='flex justify-between mt-8'>
+                                                    <div className="mb-5 flex justify-between gap-4">
+                                                        <div className="mt-7">
+                                                        <label htmlFor="tag">Section</label>
+                                                        <select
+                                                            id="tag"
+                                                            className="form-select"
+                                                            value={params.tag}
+                                                            onChange={(e) => setParams({ ...params, tag: e.target.value })}
+                                                        >
+                                                            <option value="">Select Section</option>
+                                                            <option value="SYSTEMS-ENGINEER">Systems Engineer</option>
+                                                            <option value="ADMIN">Administrative</option>
+                                                            <option value="AFRIYIE">Afriyie Contractors</option>
+                                                            <option value="RAMJACK">RamJack Contractors</option>
+                                                            <option value="DISPATCH">Amax Contractors</option>
+                                                            <option value="GEOTECH">Geotech Engineer</option>
+                                                            <option value="BENEWISE">Beniwise Contractors</option>
+                                                        </select>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                        </div>
+                                                    </div>
+
+                                                <div className="item-center mt-7" style={{ display: params.tag === 'SYSTEMS-ENGINEER' ? 'block' : 'none' }}>
+                                                    <label htmlFor="assignee">Assignee</label>
                                                     <select
-                                                        id="tag"
+                                                        id="assignee"
                                                         className="form-select"
-                                                        value={params.tag}
-                                                        onChange={(e) => setParams({ ...params, tag: e.target.value })}
+                                                        value={selectedAssignee ? (selectedAssignee as any)._id : ''}
+                                                        onChange={(e) => {
+                                                            const selectedUserId = e.target.value;
+                                                            const selectedUser: any = users.find((user: any) => user._id === selectedUserId);
+                                                            setSelectedAssignee(selectedUser);
+                                                        }}
                                                     >
-                                                        <option value="">Select Section</option>
-                                                        <option value="SYSTEMS-ENGINEER">Systems Engineer</option>
-                                                        <option value="ADMIN">Administrative</option>
-                                                        <option value="AFRIYIE">Afriyie Contractors</option>
-                                                        <option value="RAMJACK">RamJack Contractors</option>
-                                                        <option value="DISPATCH">Amax Contractors</option>
-                                                        <option value="GEOTECH">Geotech Engineer</option>
-                                                        <option value="BENEWISE">Beniwise Contractors</option>
+                                                        <option value="">Select Assignee</option>
+                                                        {users.map((user: any) => (
+                                                        <option key={user._id} value={user._id}>
+                                                            {user.firstName}
+                                                        </option>
+                                                        ))}
                                                     </select>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                    </div>
                                                 </div>
-                                            {/* Systems Engineers */}
-                                            <div className="item-center mt-7" style={{ display: params.tag === 'SYSTEMS-ENGINEER' ? 'block' : 'none' }}>
-                                                <label htmlFor="assignee">Assignee</label>
-                                                <select
-                                                    id="assignee"
-                                                    className="form-select"
-                                                    value={selectedAssignee ? (selectedAssignee as any)._id : ''}
-                                                    onChange={(e) => {
-                                                        const selectedUserId = e.target.value;
-                                                        const selectedUser: any = users.find((user: any) => user._id === selectedUserId);
-                                                        setSelectedAssignee(selectedUser);
-                                                    }}
-                                                >
-                                                    <option value="">Select Assignee</option>
-                                                    {users.map((user: any) => (
-                                                    <option key={user._id} value={user._id}>
-                                                        {user.firstName}
-                                                    </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            {/* Admin Assign */}
-                                            <div className="item-center mt-7" style={{ display: params.tag === 'ADMIN' ? 'block' : 'none' }}>
-                                                <label htmlFor="assignee">Assignee</label>
-                                                <select
-                                                    id="assignee"
-                                                    className="form-select"
-                                                    value={selectedAssignee ? (selectedAssignee as any)._id : ''}
-                                                    onChange={(e) => {
-                                                        const selectedUserId = e.target.value;
-                                                        const selectedUser: any = users.find((user: any) => user._id === selectedUserId);
-                                                        setSelectedAssignee(selectedUser);
-                                                    }}
-                                                >
-                                                    <option value="">Select Assignee</option>
-                                                    {users.map((user: any) => (
-                                                    <option key={user._id} value={user._id}>
-                                                        {user.firstName}
-                                                    </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div className="flex justify-end items-center mt-8" >
-                                                <button type="button" className="btn btn-outline-danger" onClick={() => assignTask(selectedTask, selectedAssignee)}>
-                                                    Assign
-                                                </button>
-                                            </div>
-                                            </div>
+                                                {/* Admin Assign */}
+                                                <div className="item-center mt-7" style={{ display: params.tag === 'ADMIN' ? 'block' : 'none' }}>
+                                                    <label htmlFor="assignee">Assignee</label>
+                                                    <select
+                                                        id="assignee"
+                                                        className="form-select"
+                                                        value={selectedAssignee ? (selectedAssignee as any)._id : ''}
+                                                        onChange={(e) => {
+                                                            const selectedUserId = e.target.value;
+                                                            const selectedUser: any = users1.find((user: any) => user._id === selectedUserId);
+                                                            setSelectedAssignee(selectedUser);
+                                                        }}
+                                                    >
+                                                        <option value="">Select Assignee</option>
+                                                        {users1.map((user: any) => (
+                                                        <option key={user._id} value={user._id}>
+                                                            {user.firstName}
+                                                        </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="flex justify-end items-center mt-8" >
+                                                    <button type="button" className="btn btn-outline-danger" onClick={() => assignTask(selectedTask, selectedAssignee)}>
+                                                        Assign
+                                                    </button>
+                                                </div>
+                                                </div>
                                             ) : (
                                             <div className="flex justify-end items-center mt-8" >
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setViewTaskModal(false)}>
@@ -835,6 +879,7 @@ const ActivityHub = () => {
                     </Dialog>
                 </Transition>
             </div>
+            </>)}
         </div>
     );
 };
