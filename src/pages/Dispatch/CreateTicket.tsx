@@ -12,7 +12,7 @@ const CreateTicket = () => {
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
     const [operators, setOperators] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const token = localStorage.getItem('token');
 
     // Fetch heavyEquipments data
