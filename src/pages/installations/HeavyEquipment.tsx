@@ -205,8 +205,12 @@ const HeavyEquipment: React.FC = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-5">
-                                                <label htmlFor="contract">Truck ID</label>
-                                                <input id="contract" type="text" placeholder="Enter Contract section" className="form-input" value={params.contract} onChange={changeValue} />
+                                                <label htmlFor="contract">OWNER</label>
+                                                <select id="contract" className="form-select" value={params.contract} onChange={changeValue}>
+                                                    <option value="">Select status</option>
+                                                    <option value="BENIWISE">BENIWISE</option>
+                                                    <option value="AMAX">AMAX</option>
+                                                </select>
                                             </div>
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger gap-2" onClick={() => { setAddTruck(false); setParams(defaultParams); }}>

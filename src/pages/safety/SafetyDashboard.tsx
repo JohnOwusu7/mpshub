@@ -8,6 +8,8 @@ import IconEdit from '../../components/Icon/IconEdit';
 import IconEye from '../../components/Icon/IconEye';
 import axios from 'axios';
 import { API_CONFIG } from '../../Api/apiConfig';
+import Swal from 'sweetalert2';
+import showAlert from '../../components/Alerts/toDelete';
 
 // TypeScript Interfaces
 interface Status {
@@ -110,10 +112,29 @@ const SafetyDashboard: React.FC = () => {
         setItems(filtered);
     }, [search, pjolists]);
 
-    // Handle row deletion
-    const deleteRow = (id: number | null = null) => {
-        if (window.confirm('Are you sure you want to delete the selected row?')) {
-            // Implement row deletion logic here
+    const deleteRow = async (id: number | null = null) => {
+        const response = await showAlert({
+            message: 'Are you sure you want to delete selected row?',
+            success: false,
+            result: '',
+        });
+
+        if (response.isConfirmed) {
+            const updatedItems = items.filter(item => item.id !== id);
+             try {
+                await axios.delete(`${API_CONFIG.baseURL}${API_CONFIG.pjos.endpoints.delete}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+            } catch (error) {
+                console.error('Error deleting Forms', error);
+                
+            }
+            setItems(updatedItems);
+            Swal.fire('Deleted!', 'Your item has been deleted.', 'success');
+        } else if (response.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire('Cancelled', 'Your item is safe :)', 'error');
         }
     };
 

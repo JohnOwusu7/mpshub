@@ -127,7 +127,7 @@ const IssueReportsList: React.FC = () => {
             >
                 <option value="">All Progress</option>
                 <option value="new">New</option>
-                <option value="in-progress">Inprogress</option>
+                <option value="in-progress">In progress</option>
                 <option value="complete">Complete</option>
             </select>
             <select

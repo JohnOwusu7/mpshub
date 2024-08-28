@@ -120,6 +120,7 @@ export const API_CONFIG = {
   pjos: {
     endpoints: {
       list: '/planned-job-observation',
+      delete: '/pjos/:id',
     }
   }
 };

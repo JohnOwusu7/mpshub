@@ -4,7 +4,8 @@ import SignOutPage from '../pages/Auth/SignOut';
 import Settings from '../pages/AdminSettings/Settings';
 import SafetyDashboard from '../pages/safety/SafetyDashboard';
 import AddOperatorBulkForm from '../pages/Operators/bulkUpload';
-const Operators = lazy(() => import('../pages/Operators/Operators'))
+const Preview = lazy(() => import('../pages/safety/Preview'));
+const Operators = lazy(() => import('../pages/Operators/Operators'));
 
 const AddEquipmentBulkForm = lazy(() => import('../components/Inventory/BulkUpload'));
 const InventoryAnalytics = lazy(() => import('../pages/Dashboard/InventoryAnalytics'));
@@ -236,8 +237,12 @@ const routes: Route[] = [
 
     // Safety Hubs
     {
-        path: '/safety/dashboard',
-        element: <PrivateRoute path='/safety/dashboard' element={<SafetyDashboard />} allowedRoles={['ADMIN']} />,
+        path: '/safety/pjo',
+        element: <PrivateRoute path='/safety/pjo' element={<SafetyDashboard />} allowedRoles={['ADMIN']} />,
+    },
+    {
+        path: '/safety/pjo/preview',
+        element: <PrivateRoute path='/safety/pjo/preview' element={<Preview />} allowedRoles={['ADMIN']} />,
     },
 
 ];
