@@ -177,7 +177,7 @@ const deleteUser = async (user: User | null = null) => {
     });
   };
 
-  const roleList = ['ADMIN', 'SYSTEMS-ENGINEER', 'DISPATCH', 'RAMJACK', 'AFRIYIE', 'BENEWISE', 'GEOTECH', 'MANAGER'];
+  const roleList = ['ADMIN', 'SYSTEMS-ENGINEER', 'DISPATCH', 'RAMJACK', 'AFRIYIE', 'BENEWISE', 'GEOTECH', 'MANAGER', 'SAFETY',];
 
   return (
     <div>
