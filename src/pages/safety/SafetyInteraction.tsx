@@ -156,79 +156,82 @@ const SafetyInteractionRecord: React.FC = () => {
                 </div>
 
                 <div className="datatables pagination-padding">
-                    <DataTable
-                        className="whitespace-nowrap table-hover job-table"
-                        records={filteredRecords}
-                        columns={[
-                            {
-                                accessor: 'doneBy',
-                                sortable: true,
-                                render: (item) => (
-                                    <button
-                                        type="button"
-                                        className="text-primary underline hover:no-underline font-semibold"
-                                        onClick={() => handlePreview(item)}
-                                    >
-                                        {`#${item.doneBy}`}
-                                    </button>
-                                ),
-                            },
-                            {
-                                accessor: 'areaDept',
-                                sortable: true,
-                                render: ({ areaDept }) => (
-                                    <div className="flex items-center font-semibold">
-                                        <div>{areaDept}</div>
-                                    </div>
-                                ),
-                            },
-                            {
-                                accessor: 'interactionPersonnel',
-                                sortable: true,
-                            },
-                            {
-                                accessor: 'significantAspects',
-                                sortable: true,
-                            },
-                            {
-                                accessor: 'action',
-                                title: 'Actions',
-                                sortable: false,
-                                textAlignment: 'center',
-                                render: ({ id }) => (
-                                    <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to="/safety/sir/edit" className="flex hover:text-info">
-                                            <IconEdit className="w-4.5 h-4.5" />
-                                        </NavLink>
-                                        <button
-                                            type="button"
-                                            className="flex hover:text-primary"
-                                            onClick={() => handlePreview(item)}
-                                        >
-                                            <IconEye />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="flex hover:text-danger"
-                                            onClick={() => deleteRow(id)}
-                                        >
-                                            <IconTrashLines />
-                                        </button>
-                                    </div>
-                                ),
-                            },
-                        ]}
-                        highlightOnHover
-                        totalRecords={items.length}
-                        recordsPerPage={pageSize}
-                        page={page}
-                        onPageChange={(p) => setPage(p)}
-                        recordsPerPageOptions={[10, 20, 30, 50, 100]}
-                        onRecordsPerPageChange={setPageSize}
-                        sortStatus={sortStatus}
-                        onSortStatusChange={setSortStatus}
-                        paginationText={({ from, to, totalRecords }) => `Showing ${from} to ${to} of ${totalRecords} entries`}
+                <DataTable
+                    className="whitespace-nowrap table-hover job-table"
+                    records={filteredRecords}
+                    columns={[
+                        {
+                        accessor: 'doneBy',
+                        sortable: true,
+                        render: (item) => (
+                            <button
+                            type="button"
+                            className="text-primary underline hover:no-underline font-semibold"
+                            onClick={() => handlePreview(item)} // Correctly passing item here
+                            >
+                            {`#${item.doneBy}`}
+                            </button>
+                        ),
+                        },
+                        {
+                        accessor: 'areaDept',
+                        sortable: true,
+                        render: (item) => ( // Pass full item object
+                            <div className="flex items-center font-semibold">
+                            <div>{item.areaDept}</div>
+                            </div>
+                        ),
+                        },
+                        {
+                        accessor: 'interactionPersonnel',
+                        sortable: true,
+                        render: (item) => item.interactionPersonnel // Simple render, if needed
+                        },
+                        {
+                        accessor: 'significantAspects',
+                        sortable: true,
+                        render: (item) => item.significantAspects // Simple render, if needed
+                        },
+                        {
+                        accessor: 'action',
+                        title: 'Actions',
+                        sortable: false,
+                        textAlignment: 'center',
+                        render: (item) => ( // Corrected here to use item
+                            <div className="flex gap-4 items-center w-max mx-auto">
+                            <NavLink to="/safety/sir/edit" className="flex hover:text-info">
+                                <IconEdit className="w-4.5 h-4.5" />
+                            </NavLink>
+                            <button
+                                type="button"
+                                className="flex hover:text-primary"
+                                onClick={() => handlePreview(item)} // Correct usage of item
+                            >
+                                <IconEye />
+                            </button>
+                            <button
+                                type="button"
+                                className="flex hover:text-danger"
+                                onClick={() => deleteRow(item.id)} // Use item.id here
+                            >
+                                <IconTrashLines />
+                            </button>
+                            </div>
+                        ),
+                        },
+                    ]}
+                    highlightOnHover
+                    totalRecords={items.length}
+                    recordsPerPage={pageSize}
+                    page={page}
+                    onPageChange={(p) => setPage(p)}
+                    recordsPerPageOptions={[10, 20, 30, 50, 100]}
+                    onRecordsPerPageChange={setPageSize}
+                    sortStatus={sortStatus}
+                    onSortStatusChange={setSortStatus}
+                    paginationText={({ from, to, totalRecords }) => `Showing ${from} to ${to} of ${totalRecords} entries`}
                     />
+
                 </div>
             </div>
         </div>

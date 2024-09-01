@@ -34,7 +34,7 @@ interface Item {
 const SafetyDashboard: React.FC = () => {
     const token = localStorage.getItem('token') || '';
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Use useNavigate hook
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(setPageTitle('Safety Work Order'));
@@ -183,30 +183,33 @@ const SafetyDashboard: React.FC = () => {
                             {
                                 accessor: 'department',
                                 sortable: true,
-                                render: ({ department }) => (
+                                render: (item) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{department}</div>
+                                        <div>{item.department}</div>
                                     </div>
                                 ),
                             },
                             {
                                 accessor: 'personObserving',
                                 sortable: true,
+                                render: (item) => item.personObserving,
                             },
                             {
                                 accessor: 'personBeingObserved',
                                 sortable: true,
+                                render: (item) => item.personBeingObserved,
                             },
                             {
                                 accessor: 'status',
                                 sortable: true,
+                                render: (item) => item.status.tooltip,
                             },
                             {
                                 accessor: 'action',
                                 title: 'Actions',
                                 sortable: false,
                                 textAlignment: 'center',
-                                render: ({ id }) => (
+                                render: (item) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
                                         <NavLink to="/safety/pjo/edit" className="flex hover:text-info">
                                             <IconEdit className="w-4.5 h-4.5" />
@@ -221,7 +224,7 @@ const SafetyDashboard: React.FC = () => {
                                         <button
                                             type="button"
                                             className="flex hover:text-danger"
-                                            onClick={() => deleteRow(id)}
+                                            onClick={() => deleteRow(item.id)}
                                         >
                                             <IconTrashLines />
                                         </button>

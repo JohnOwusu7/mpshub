@@ -90,7 +90,7 @@ const Preview = () => {
                         <div>FORM NO.: IDP/HSE/F/012</div>
                         <div>{item.job}</div>
                         <div>{item.department}</div>
-                        <div>{item.date}</div>
+                        {/* <div>{item.</div> */}
                     </div>
                 </div>
 
