@@ -43,6 +43,9 @@ const Login = () => {
                     case 'MANAGER':
                         navigate('/');
                         break;
+                    case 'SAFETY':
+                        navigate('/safety/pjo');
+                        break;
                     case 'DISPATCH':
                     case 'SYSTEMS-ENGINEER':
                     case 'AFRIYIE':
