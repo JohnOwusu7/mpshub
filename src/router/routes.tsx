@@ -4,6 +4,9 @@ import SignOutPage from '../pages/Auth/SignOut';
 import Settings from '../pages/AdminSettings/Settings';
 import SafetyDashboard from '../pages/safety/SafetyDashboard';
 import AddOperatorBulkForm from '../pages/Operators/bulkUpload';
+import PlannedJobObservation from '../pages/safety/PlannedJob';
+import SafetyInteractionRecord from '../pages/safety/SafetyInteraction';
+import PreviewSafetyInteractionRecord from '../pages/safety/PreviewSafetyInteraction';
 const Preview = lazy(() => import('../pages/safety/Preview'));
 const Operators = lazy(() => import('../pages/Operators/Operators'));
 
@@ -237,12 +240,24 @@ const routes: Route[] = [
 
     // Safety Hubs
     {
+        path: '/safety/dashboard',
+        element: <PrivateRoute path='/safety/dashboard' element={<SafetyDashboard />} allowedRoles={['ADMIN', 'SAFETY']} />,
+    },
+    {
         path: '/safety/pjo',
-        element: <PrivateRoute path='/safety/pjo' element={<SafetyDashboard />} allowedRoles={['ADMIN']} />,
+        element: <PrivateRoute path='/safety/pjo' element={<PlannedJobObservation />} allowedRoles={['ADMIN', 'SAFETY']} />,
+    },
+    {
+        path: '/safety/sir',
+        element: <PrivateRoute path='/safety/sir' element={<SafetyInteractionRecord />} allowedRoles={['ADMIN', 'SAFETY']} />,
     },
     {
         path: '/safety/pjo/preview',
-        element: <PrivateRoute path='/safety/pjo/preview' element={<Preview />} allowedRoles={['ADMIN']} />,
+        element: <PrivateRoute path='/safety/pjo/preview' element={<Preview />} allowedRoles={['ADMIN', 'SAFETY']} />,
+    },
+    {
+        path: '/safety/sir/preview',
+        element: <PrivateRoute path='/safety/sir/preview' element={<PreviewSafetyInteractionRecord />} allowedRoles={['ADMIN', 'SAFETY']} />,
     },
 
 ];

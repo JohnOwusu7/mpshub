@@ -122,6 +122,12 @@ export const API_CONFIG = {
       list: '/planned-job-observation',
       delete: '/pjos/:id',
     }
+  },
+  sirs: {
+    endpoints: {
+      list: '/safety-interaction-records',
+      delete: '/sirs/:id',
+    }
   }
 };
 

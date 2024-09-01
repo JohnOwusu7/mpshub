@@ -315,7 +315,7 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
 
     ],
     MANAGER: [
-        
+
         {
             label: 'Manager\'s Dashboard',
             link: '/',
@@ -324,6 +324,19 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
         {
             label: 'Inventory Dashboard',
             link: '/dashboard/inventory',
+            icon: <IconMenuDashboard />,
+        },
+    ],
+    SAFETY: [
+
+        {
+            label: 'Planned Job Observation',
+            link: '/safety/pjo',
+            icon: <IconDesktop />,
+        },
+        {
+            label: 'Safety Interaction Record',
+            link: '/safety/sir',
             icon: <IconMenuDashboard />,
         },
     ]

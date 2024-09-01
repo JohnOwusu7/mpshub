@@ -17,21 +17,17 @@ interface Status {
     color: string;
 }
 
-interface ObservationsReviewed extends Status {}
-
 interface Item {
     id: number;
-    job: string;
-    personObserving: string;
-    personBeingObserved: string;
-    department: string;
-    taskProcedures: string;
+    doneBy: string;
+    interactionPersonnel: string;
+    areaDept: string;
+    significantAspects: string;
     status: Status;
-    obvservationsReviewed: ObservationsReviewed;
     profile: string;
 }
 
-const SafetyDashboard: React.FC = () => {
+const SafetyInteractionRecord: React.FC = () => {
     const token = localStorage.getItem('token') || '';
     const dispatch = useDispatch();
     const navigate = useNavigate(); // Use useNavigate hook
@@ -40,14 +36,14 @@ const SafetyDashboard: React.FC = () => {
         dispatch(setPageTitle('Safety Work Order'));
     }, [dispatch]);
 
-    const [pjolists, setPjoLists] = useState<Item[]>([]);
+    const [sirlists, setSirLists] = useState<Item[]>([]);
     const [items, setItems] = useState<Item[]>([]);
     const [filteredRecords, setFilteredRecords] = useState<Item[]>([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-        columnAccessor: 'job',
+        columnAccessor: 'doneBy',
         direction: 'asc',
     });
 
@@ -55,12 +51,12 @@ const SafetyDashboard: React.FC = () => {
     useEffect(() => {
         const fetchPJOfiles = async () => {
             try {
-                const response = await axios.get<Item[]>(`${API_CONFIG.baseURL}${API_CONFIG.pjos.endpoints.list}`, {
+                const response = await axios.get<Item[]>(`${API_CONFIG.baseURL}${API_CONFIG.sirs.endpoints.list}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setPjoLists(response.data);
+                setSirLists(response.data);
                 setItems(response.data);
             } catch (error) {
                 console.error("Error fetching PJO files:", error);
@@ -99,17 +95,14 @@ const SafetyDashboard: React.FC = () => {
     // Handle search
     useEffect(() => {
         const searchLower = search.toLowerCase();
-        const filtered = pjolists.filter(item =>
-            item.job.toLowerCase().includes(searchLower) ||
-            item.personObserving.toLowerCase().includes(searchLower) ||
-            item.personBeingObserved.toLowerCase().includes(searchLower) ||
-            item.department.toLowerCase().includes(searchLower) ||
-            item.taskProcedures.toLowerCase().includes(searchLower) ||
-            item.obvservationsReviewed.tooltip.toLowerCase().includes(searchLower) ||
-            item.status.tooltip.toLowerCase().includes(searchLower)
+        const filtered = sirlists.filter(item =>
+            item.doneBy.toLowerCase().includes(searchLower) ||
+            item.interactionPersonnel.toLowerCase().includes(searchLower) ||
+            item.areaDept.toLowerCase().includes(searchLower) ||
+            item.significantAspects.toLowerCase().includes(searchLower)
         );
         setItems(filtered);
-    }, [search, pjolists]);
+    }, [search, sirlists]);
 
     const deleteRow = async (id: number | null = null) => {
         const response = await showAlert({
@@ -138,7 +131,7 @@ const SafetyDashboard: React.FC = () => {
     };
 
     const handlePreview = (item: Item) => {
-        navigate('/safety/pjo/preview', { state: { item } });
+        navigate('/safety/sir/preview', { state: { item } });
     };
 
     return (
@@ -168,7 +161,7 @@ const SafetyDashboard: React.FC = () => {
                         records={filteredRecords}
                         columns={[
                             {
-                                accessor: 'job',
+                                accessor: 'doneBy',
                                 sortable: true,
                                 render: (item) => (
                                     <button
@@ -176,29 +169,25 @@ const SafetyDashboard: React.FC = () => {
                                         className="text-primary underline hover:no-underline font-semibold"
                                         onClick={() => handlePreview(item)}
                                     >
-                                        {`#${item.job}`}
+                                        {`#${item.doneBy}`}
                                     </button>
                                 ),
                             },
                             {
-                                accessor: 'department',
+                                accessor: 'areaDept',
                                 sortable: true,
-                                render: ({ department }) => (
+                                render: ({ areaDept }) => (
                                     <div className="flex items-center font-semibold">
-                                        <div>{department}</div>
+                                        <div>{areaDept}</div>
                                     </div>
                                 ),
                             },
                             {
-                                accessor: 'personObserving',
+                                accessor: 'interactionPersonnel',
                                 sortable: true,
                             },
                             {
-                                accessor: 'personBeingObserved',
-                                sortable: true,
-                            },
-                            {
-                                accessor: 'status',
+                                accessor: 'significantAspects',
                                 sortable: true,
                             },
                             {
@@ -208,7 +197,7 @@ const SafetyDashboard: React.FC = () => {
                                 textAlignment: 'center',
                                 render: ({ id }) => (
                                     <div className="flex gap-4 items-center w-max mx-auto">
-                                        <NavLink to="/safety/pjo/edit" className="flex hover:text-info">
+                                        <NavLink to="/safety/sir/edit" className="flex hover:text-info">
                                             <IconEdit className="w-4.5 h-4.5" />
                                         </NavLink>
                                         <button
@@ -246,4 +235,4 @@ const SafetyDashboard: React.FC = () => {
     );
 };
 
-export default SafetyDashboard;
+export default SafetyInteractionRecord;

@@ -99,7 +99,7 @@ const Users: React.FC = () => {
     }
 
     if (!params._id) {
-      params.password = 'admin@abc';
+      params.password = 'safety2024';
       params.role = role;
     }
 
@@ -333,7 +333,7 @@ const deleteUser = async (user: User | null = null) => {
                                             <div className="mb-5">
                                                 <label htmlFor="name">Positon</label>
                                                 <input id="position" type="text" placeholder="Enter User Position" className="form-input" value={params.position} onChange={(e) => changeValue(e)} />
-                                            </div>   
+                                            </div>
                                             <div className="mb-5">
                                                 <label htmlFor="address">Employee ID</label>
                                                 <input

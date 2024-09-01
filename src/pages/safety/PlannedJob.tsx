@@ -31,7 +31,7 @@ interface Item {
     profile: string;
 }
 
-const SafetyDashboard: React.FC = () => {
+const PlannedJobObservation: React.FC = () => {
     const token = localStorage.getItem('token') || '';
     const dispatch = useDispatch();
     const navigate = useNavigate(); // Use useNavigate hook
@@ -246,4 +246,4 @@ const SafetyDashboard: React.FC = () => {
     );
 };
 
-export default SafetyDashboard;
+export default PlannedJobObservation;
