@@ -832,7 +832,7 @@ const ActivityHub = () => {
                                                         <option value="">Select Assignee</option>
                                                         {users.map((user: any) => (
                                                         <option key={user._id} value={user._id}>
-                                                            {user.firstName}
+                                                            {user.firstName} {' '} {user.lastName}
                                                         </option>
                                                         ))}
                                                     </select>
@@ -853,7 +853,7 @@ const ActivityHub = () => {
                                                         <option value="">Select Assignee</option>
                                                         {users1.map((user: any) => (
                                                         <option key={user._id} value={user._id}>
-                                                            {user.firstName}
+                                                            {user.firstName} {' '} {user.lastName}
                                                         </option>
                                                         ))}
                                                     </select>
