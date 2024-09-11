@@ -1,20 +1,11 @@
 import { lazy } from 'react';
-import ContractorsDashboard from '../pages/Contractors/Dashboard';
-import SignOutPage from '../pages/Auth/SignOut';
-import Settings from '../pages/AdminSettings/Settings';
-import SafetyDashboard from '../pages/safety/SafetyDashboard';
-import AddOperatorBulkForm from '../pages/Operators/bulkUpload';
-import PlannedJobObservation from '../pages/safety/PlannedJob';
-import SafetyInteractionRecord from '../pages/safety/SafetyInteraction';
-import PreviewSafetyInteractionRecord from '../pages/safety/PreviewSafetyInteraction';
+
 const Preview = lazy(() => import('../pages/safety/Preview'));
 const Operators = lazy(() => import('../pages/Operators/Operators'));
-
 const AddEquipmentBulkForm = lazy(() => import('../components/Inventory/BulkUpload'));
 const InventoryAnalytics = lazy(() => import('../pages/Dashboard/InventoryAnalytics'));
 const EditProfile = lazy(() => import('../pages/Users/EditProfile'));
 const CreateTicket  = lazy(() => import('../pages/Dispatch/CreateTicket'));
-const TransactionFilterForm = lazy(() => import('../pages/Dashboard/Report'));
 const GetItemPage = lazy(() => import('../components/Inventory/getItemPage'));
 const EquipmentList = lazy(() => import('../pages/Inventory/EquipmentList'));
 const AddEquipmentForm = lazy(() => import('../components/Inventory/AddInventory'));
@@ -24,7 +15,6 @@ const PrivateRoute = lazy(() => import ('../components/Authorization/PrivateRout
 const Profile = lazy(() => import('../pages/Users/Profile'));
 const Issues = lazy(() => import('../pages/Activities/Issues'));
 const RequestPassword = lazy(() => import('../pages/Auth/RequestPassword'))
-
 const ActivityHub = lazy(() => import('../pages/Activities/ActivityHub'));
 const Users = lazy(() => import('../pages/Users/Users'));
 const Add = lazy(() => import('../pages/Apps/Invoice/Add'));
@@ -33,8 +23,15 @@ const ReplaceItem = lazy(() => import('../components/Inventory/replaceItem'))
 const UnauthorizedAccess = lazy(() => import('../components/Error'));
 const NotFound = lazy(() => import('../components/NotFound'));
 const DailyReport = lazy(() => import('../pages/Activities/DailyReport'));
-
 const HeavyEquipment = lazy(() => import('../pages/installations/HeavyEquipment'));
+const ContractorsDashboard = lazy(() => import('../pages/Contractors/Dashboard'));
+const SignOutPage = lazy(() => import('../pages/Auth/SignOut'));
+const Settings = lazy(() => import('../pages/AdminSettings/Settings'));
+const SafetyDashboard = lazy(() => import('../pages/safety/SafetyDashboard'));
+const AddOperatorBulkForm = lazy(() => import('../pages/Operators/bulkUpload'));
+const PlannedJobObservation = lazy(() => import('../pages/safety/PlannedJob'));
+const SafetyInteractionRecord = lazy(()=> import('../pages/safety/SafetyInteraction'));
+const PreviewSafetyInteractionRecord = lazy(()=> import('../pages/safety/PreviewSafetyInteraction'));
 
 type Route = {
     path: string;
