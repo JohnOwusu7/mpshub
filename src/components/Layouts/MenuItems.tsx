@@ -75,38 +75,6 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             ],
         },
         {
-            label: 'IP Address',
-            link: '/address',
-            icon: <IconMenuContacts />,
-            children: [
-                {
-                    label: 'MAPS',
-                    link: '/address/maps',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'PTP1',
-                    link: '/address/ptp1',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Shovel List',
-                    link: '/address/shovels',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Trucks',
-                    link: '/address/trucks',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Dispatch Devices',
-                    link: '/address/dispatch-computers',
-                    icon: <IconMenuContacts />,
-                },
-            ],
-        },
-        {
             label: 'Activity Hub',
             link: '/task-manager',
             icon: <IconMenuTodo />,
@@ -217,38 +185,6 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             icon: <IconMenuScrumboard />,
         },
         {
-            label: 'IP Address Lists',
-            link: '/address',
-            icon: <IconMenuContacts />,
-            children: [
-                {
-                    label: 'MAPS',
-                    link: '/address/maps',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'PTP1',
-                    link: '/address/ptp1',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Shovel List',
-                    link: '/address/shovels',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Trucks',
-                    link: '/address/trucks',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Dispatch Devices',
-                    link: '/address/dispatch-computers',
-                    icon: <IconMenuContacts />,
-                },
-            ],
-        },
-        {
             label: 'Afriyie Daily Reports',
             link: '/daily/report',
             icon: <IconMenuNotes />,
@@ -259,38 +195,6 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             label: 'Dash HUB',
             link: '/dashboard',
             icon: <IconDesktop />,
-        },
-        {
-            label: 'IP Address List',
-            link: '/address',
-            icon: <IconMenuContacts />,
-            children: [
-                {
-                    label: 'MAPS',
-                    link: '/address/maps',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'PTP1',
-                    link: '/address/ptp1',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Shovel List',
-                    link: '/address/shovels',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Trucks',
-                    link: '/address/trucks',
-                    icon: <IconMenuContacts />,
-                },
-                {
-                    label: 'Dispatch Devices',
-                    link: '/address/dispatch-computers',
-                    icon: <IconMenuContacts />,
-                },
-            ],
         },
         {
             label: 'Inventory Management',
