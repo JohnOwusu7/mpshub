@@ -135,17 +135,17 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
     DISPATCH: [
         {
             label: 'Dispatch Hub',
-            link: '/task-manager',
+            link: '/dashboard',
             icon: <IconMenuNotes />,
         },
         {
-            label: 'Dispatch ticket forum',
+            label: 'Create ticket',
             link: '/ticket',
             icon: <IconMenuNotes />,
         },
         {
             label: 'Assign Ticket',
-            link: '/assign',
+            link: '/task-manager',
             icon: <IconMenuScrumboard />,
         },
     ],
