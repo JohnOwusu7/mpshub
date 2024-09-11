@@ -21,6 +21,7 @@ import IconX from '../../components/Icon/IconX';
 import IconRestore from '../../components/Icon/IconRestore';
 import axios from 'axios';
 import { API_CONFIG } from '../../Api/apiConfig';
+import { useNavigate } from 'react-router-dom';
 
 const ActivityHub = () => {
     const dispatch = useDispatch();
@@ -55,6 +56,8 @@ const ActivityHub = () => {
     const [selectedAssignee, setSelectedAssignee] = useState(null);
     const [allTasks, setAllTasks] = useState([]);
     const [loading, setLoading] = useState<boolean>(true);
+
+    const navigate = useNavigate();
 
     const fetchIssues = async () => {
         try {
@@ -261,7 +264,8 @@ const ActivityHub = () => {
                                 Authorization: `Bearer ${token}`
                             }
                         });
-                        setViewTaskModal(false)
+                        setViewTaskModal(false);
+                        navigate('/dashboard');
                         showMessage('Assigned successfully.');
                         return response;
                 } else if (tag) {
@@ -270,7 +274,8 @@ const ActivityHub = () => {
                                 Authorization: `Bearer ${token}`
                             }
                         });
-                        setViewTaskModal(false)
+                        setViewTaskModal(false);
+                        navigate('/dashboard');
                         showMessage('Assigned successfully.');
                         return response;
 
@@ -832,7 +837,7 @@ const ActivityHub = () => {
                                                         <option value="">Select Assignee</option>
                                                         {users.map((user: any) => (
                                                         <option key={user._id} value={user._id}>
-                                                            {user.firstName}
+                                                            {user.firstName} {' '} {user.lastName}
                                                         </option>
                                                         ))}
                                                     </select>
@@ -853,7 +858,7 @@ const ActivityHub = () => {
                                                         <option value="">Select Assignee</option>
                                                         {users1.map((user: any) => (
                                                         <option key={user._id} value={user._id}>
-                                                            {user.firstName}
+                                                            {user.firstName} {' '} {user.lastName}
                                                         </option>
                                                         ))}
                                                     </select>

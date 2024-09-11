@@ -103,14 +103,19 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
     DISPATCH: [
         {
             label: 'Dispatch Hub',
-            link: '/activity',
+            link: '/dashboard',
             icon: <IconMenuNotes />,
         },
         {
-            label: 'Dispatch ticket forum',
+            label: 'Create ticket',
             link: '/ticket',
             icon: <IconMenuNotes />,
-        }
+        },
+        {
+            label: 'Assign Ticket',
+            link: '/task-manager',
+            icon: <IconMenuScrumboard />,
+        },
     ],
     GEOTECH: [
         {
@@ -215,6 +220,11 @@ const roleBasedMenuItems: { [key: string]: MenuItem[] } = {
             label: 'Equipmnts Usage',
             link: '/get-item',
             icon: <IconMenuTodo />,
+        },
+        {
+            label: 'Assign Ticket',
+            link: '/task-manager',
+            icon: <IconMenuScrumboard />,
         },
 
     ],

@@ -84,7 +84,7 @@ const routes: Route[] = [
     // Contractors Dashboard
     {
         path: '/dashboard',
-        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAMJACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE', 'GEOTECH']}/>,
+        element: <PrivateRoute path="/dashboard" element={<ContractorsDashboard />} allowedRoles={['SYSTEMS-ENGINEER', 'RAMJACK', 'AFRIYIE', 'DISPATCH', 'BENEWISE', 'GEOTECH', 'ADMIN']}/>,
         layout: 'default',
     },
 
@@ -112,7 +112,7 @@ const routes: Route[] = [
     },
     {
         path: '/task-manager',
-        element: <PrivateRoute path='/task-manager' element={<ActivityHub /> } allowedRoles={['ADMIN', 'MANAGER']}/>,
+        element: <PrivateRoute path='/task-manager' element={<ActivityHub /> } allowedRoles={['ADMIN', 'MANAGER', 'DISPATCH', 'SYSTEMS-ENGINEER']}/>,
         layout: 'default',
     },
     {
