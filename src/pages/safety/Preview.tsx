@@ -58,7 +58,7 @@ const Preview = () => {
     const { item } = location.state as { item: PlannedJobObservation };
 
     useEffect(() => {
-        dispatch(setPageTitle('Invoice Preview'));
+        dispatch(setPageTitle('Planned Job Preview'));
     }, [dispatch]);
 
     const exportTable = () => {
@@ -67,36 +67,65 @@ const Preview = () => {
 
     return (
         <div>
+            <style>
+                {`
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    .printable, .printable * {
+                        visibility: visible;
+                    }
+                    .printable {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding: 20px;
+                        box-sizing: border-box;
+                        page-break-before: always;
+                        page-break-after: always;
+                    }
+                    @page {
+                        size: auto; 
+                        margin: 20mm;
+                    }
+                }
+                `}
+            </style>
             <div className="flex items-center lg:justify-end justify-center flex-wrap gap-4 mb-6">
-                <button type="button" className="btn btn-primary gap-2" onClick={exportTable}>
+                <button
+                    type="button"
+                    className="btn btn-primary gap-2"
+                    onClick={exportTable}
+                >
                     <IconPrinter />
                     Print {item.job}
                 </button>
-
                 <Link to="/apps/invoice/edit" className="btn btn-warning gap-2">
                     <IconEdit />
                     Edit
                 </Link>
             </div>
-            <div className="panel">
+            <div className="panel printable">
                 <div className="flex justify-between flex-wrap gap-4 px-4">
                     <div className="text-2xl font-semibold uppercase">Planned Job Observation</div>
                     <div className="shrink-0">
-                        <img src="/logo1.png" alt="Logo" className="w-14 ltr:ml-auto rtl:mr-auto" />
+                        <img src="/logo1.png" alt="Logo" className="w-14" />
                     </div>
                 </div>
-                <div className="ltr:text-right rtl:text-left px-4">
+                <div className="px-4">
                     <div className="space-y-1 mt-6 text-white-dark">
                         <div>FORM NO.: IDP/HSE/F/012</div>
                         <div>{item.job}</div>
                         <div>{item.department}</div>
-                        {/* <div>{item.</div> */}
                     </div>
                 </div>
 
                 <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
 
-                {/* Section 2 */}
                 <div className="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">
                     <div className="flex-1">
                         <div className="space-y-1 text-white-dark">
@@ -146,7 +175,6 @@ const Preview = () => {
 
                 <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
 
-                {/* Section 3 */}
                 <section>
                     <h2 className="text-xl font-semibold mb-4">Evaluation</h2>
                     <div className="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">

@@ -11,14 +11,6 @@ import { API_CONFIG } from '../../Api/apiConfig';
 import Swal from 'sweetalert2';
 import showAlert from '../../components/Alerts/toDelete';
 
-// TypeScript Interfaces
-interface Status {
-    tooltip: string;
-    color: string;
-}
-
-interface ObservationsReviewed extends Status {}
-
 interface Item {
     id: number;
     job: string;
@@ -26,8 +18,8 @@ interface Item {
     personBeingObserved: string;
     department: string;
     taskProcedures: string;
-    status: Status;
-    obvservationsReviewed: ObservationsReviewed;
+    status: string;
+    obvservationsReviewed: string;
     profile: string;
 }
 
@@ -105,8 +97,8 @@ const PlannedJobObservation: React.FC = () => {
             item.personBeingObserved.toLowerCase().includes(searchLower) ||
             item.department.toLowerCase().includes(searchLower) ||
             item.taskProcedures.toLowerCase().includes(searchLower) ||
-            item.obvservationsReviewed.tooltip.toLowerCase().includes(searchLower) ||
-            item.status.tooltip.toLowerCase().includes(searchLower)
+            item.obvservationsReviewed.toLowerCase().includes(searchLower) ||
+            item.status.toLowerCase().includes(searchLower)
         );
         setItems(filtered);
     }, [search, pjolists]);
@@ -202,7 +194,7 @@ const PlannedJobObservation: React.FC = () => {
                             {
                                 accessor: 'status',
                                 sortable: true,
-                                render: (item) => item.status.tooltip,
+                                render: (item) => item.status,
                             },
                             {
                                 accessor: 'action',
