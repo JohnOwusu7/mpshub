@@ -97,7 +97,7 @@ const PlannedJobObservation: React.FC = () => {
             item.personBeingObserved.toLowerCase().includes(searchLower) ||
             item.department.toLowerCase().includes(searchLower) ||
             item.taskProcedures.toLowerCase().includes(searchLower) ||
-            item.obvservationsReviewed.toLowerCase().includes(searchLower) ||
+            item.obvservationsReviewed.toLowerCase().includes(searchLower)
             // item.status.toLowerCase().includes(searchLower)
         );
         setItems(filtered);
