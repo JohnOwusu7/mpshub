@@ -49,7 +49,7 @@ interface PlannedJobObservation {
     signatureObserver: string;
     signatureObserved: string;
     observersGeneralComments: string;
-    status: string;
+    // status: string;
 }
 
 const Preview = () => {
@@ -164,10 +164,6 @@ const Preview = () => {
                             <div className="mb-2">
                                 <div className="text-white-dark">Observations Reviewed</div>
                                 <div>{item.observationsReviewed ? 'Yes' : 'No'}</div>
-                            </div>
-                            <div className="mb-2">
-                                <div className="text-white-dark">Submission Status:</div>
-                                <div>{item.status}</div>
                             </div>
                         </div>
                     </div>

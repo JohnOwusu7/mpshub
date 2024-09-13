@@ -18,7 +18,7 @@ interface Item {
     personBeingObserved: string;
     department: string;
     taskProcedures: string;
-    status: string;
+    // status: string;
     obvservationsReviewed: string;
     profile: string;
 }
@@ -98,7 +98,7 @@ const PlannedJobObservation: React.FC = () => {
             item.department.toLowerCase().includes(searchLower) ||
             item.taskProcedures.toLowerCase().includes(searchLower) ||
             item.obvservationsReviewed.toLowerCase().includes(searchLower) ||
-            item.status.toLowerCase().includes(searchLower)
+            // item.status.toLowerCase().includes(searchLower)
         );
         setItems(filtered);
     }, [search, pjolists]);
@@ -191,11 +191,11 @@ const PlannedJobObservation: React.FC = () => {
                                 sortable: true,
                                 render: (item) => item.personBeingObserved,
                             },
-                            {
-                                accessor: 'status',
-                                sortable: true,
-                                render: (item) => item.status,
-                            },
+                            // {
+                            //     accessor: 'status',
+                            //     sortable: true,
+                            //     render: (item) => item.status,
+                            // },
                             {
                                 accessor: 'action',
                                 title: 'Actions',
