@@ -176,7 +176,7 @@ const IssueReportsList: React.FC = () => {
                                     <td className="py-2 px-4 border-b print:border-none">{report.purpose}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report.priority}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{report.progress}</td>
-                                    <td className="py-2 px-4 border-b print:border-none">{new Date(report.createdAt).toLocaleString('en-US', { dateStyle: 'medium' })}</td>
+                                    <td className="py-2 px-4 border-b print:border-none">{new Date(report.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'medium' })}</td>
                                     <td className="py-2 px-4 border-b print:border-none">{new Date(report.updatedAt).toLocaleString('en-US', { dateStyle: 'medium' })}</td>
                                 </tr>
                             ))}
