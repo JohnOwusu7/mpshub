@@ -99,7 +99,7 @@ const Users: React.FC = () => {
     }
 
     if (!params._id) {
-      params.password = 'afriyie.2024';
+      params.password = 'admin@123';
       params.role = role;
     }
 
