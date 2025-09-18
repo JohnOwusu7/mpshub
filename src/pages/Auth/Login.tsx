@@ -84,20 +84,20 @@ const Login = () => {
                         <div className="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"></div>
                         <div className="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
                             <div className="mt-24 hidden w-full max-w-[430px] lg:block">
-                                <img src="/assets/images/auth/login.svg" alt="Cover Image" className="w-full" />
+                                <img src="/minesphere.png" alt="Cover Image" className="w-full" />
                             </div>
                         </div>
                     </div>
                     <div className="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
                         <div className="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full">
                             <Link to="/" className="block w-8 lg:hidden">
-                                <img src="/favicon.png" alt="Logo" className="mx-auto w-10" />
+                                <img src="/minesphere.png" alt="Logo" className="mx-auto w-10" />
                             </Link>
                         </div>
                         <div className="w-full max-w-[440px] lg:mt-16">
                             <div className="mb-10">
-                                <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in</h1>
-                                <p className="text-base font-bold leading-normal text-white-dark">Enter your Employee ID and password to login</p>
+                                <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Login</h1>
+                                <p className="text-base font-bold leading-normal text-white-dark">Enter your credentials to access MineSphere</p>
                             </div>
                             <form className="space-y-5 dark:text-white" onSubmit={handleLogin}>
                                 <div>
@@ -139,7 +139,7 @@ const Login = () => {
                                 Request New
                             </Link>
                         </div>
-                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}.Mining Projects & Systems HUB All Rights Reserved.</p>
+                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}. Qaretech Innovative. MineSphere. All rights reserved.</p>
                     </div>
                 </div>
             </div>

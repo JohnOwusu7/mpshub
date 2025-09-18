@@ -144,7 +144,7 @@ const themeConfigSlice = createSlice({
         },
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload} | EIS `;
+            document.title = `${payload} | MineSphere `;
         },
     },
 });

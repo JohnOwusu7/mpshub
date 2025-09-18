@@ -113,7 +113,7 @@ const Preview = () => {
                 <div className="flex justify-between flex-wrap gap-4 px-4">
                     <div className="text-2xl font-semibold uppercase">Planned Job Observation</div>
                     <div className="shrink-0">
-                        <img src="/logo1.png" alt="Logo" className="w-14" />
+                        <img src="/minesphere.png" alt="Logo" className="w-14" />
                     </div>
                 </div>
                 <div className="px-4">

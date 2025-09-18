@@ -1,6 +1,6 @@
 {
-  "short_name": "Equipment Issuing System Dashboard",
-  "name": "Equipment Issuing system",
+  "short_name": "MineSphere All In One Mining Solutions",
+  "name": "MineSphere",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "minesphere.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "minesphere.png",
       "type": "image/png",
       "sizes": "512x512"
     }

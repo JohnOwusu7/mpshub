@@ -40,22 +40,22 @@ function SignOutPage() {
                 />
 
                 {/* Centered Content */}
-                <div className="relative flex flex-col justify-center rounded-md bg-white/30 backdrop-blur-lg dark:bg-black/50 px-6 py-20 lg:min-h-[250px]">
+                <div className="relative flex max-w-md mx-auto flex-col justify-center rounded-md bg-white/30 backdrop-blur-lg dark:bg-black/50 px-6 py-10 min-h-[200px]">
                     {/* Logo */}
                     <img 
                         className="mx-auto w-48 mb-6" 
-                        src="/logomain.png" 
+                        src="/minesphere.png" 
                         alt="Logo" 
                     />
 
                     {/* Heading */}
                     <div className="text-center text-4xl font-extrabold leading-tight mb-4">
-                        Mining Project and Systems HUB!
+                        MineSphere
                     </div>
 
                     {/* Subheading */}
                     <div className="text-center text-3xl font-semibold leading-tight mb-6">
-                        Welcome!
+                        You have been successfully signed out.
                     </div>
 
                     {/* Sign In Link */}
@@ -63,17 +63,8 @@ function SignOutPage() {
                         href='/auth' 
                         className='block text-center text-2xl font-semibold tracking-tight leading-tight mt-8'
                     >
-                        Sign In...
+                        Return to Login
                     </a>
-
-                    {/* Optional Maintenance Image */}
-                    {/* <div className='text-center mt-8'>
-                        <img 
-                            src="/maintanance.png" 
-                            alt="Maintenance" 
-                            className="w-30 h-30 object-cover mx-auto" 
-                        />
-                    </div> */}
                 </div>
             </div>
         </div>

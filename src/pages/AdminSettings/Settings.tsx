@@ -314,7 +314,7 @@ const Settings = () => {
                                             return (
                                                 <div className="sortable-list " key={project.id + '' + task.id}>
                                                     <div className="shadow bg-[#f4f4f4] dark:bg-white-dark/20 p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
-                                                        {task.image ? <img src="logomain.png" alt="images" className="h-32 w-full object-cover rounded-md" /> : ''}
+                                                        {task.image ? <img src="minesphere.png" alt="images" className="h-32 w-full object-cover rounded-md" /> : ''}
                                                         <div className="text-base font-medium">{task.title}</div>
                                                         <p className="break-all">{task.description}</p>
                                                         <div className="flex gap-2 items-center flex-wrap">
