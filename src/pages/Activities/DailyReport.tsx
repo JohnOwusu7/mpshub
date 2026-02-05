@@ -116,12 +116,12 @@ const DailyReport: React.FC = () => {
                         <div className="lg:w-1/2 w-full lg:max-w-fit">
                             <div className="flex items-center">
                                 <label htmlFor="name" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
-                                    {user.firstName} {user.lastName}
+                                    {user.firstName} {(user as any).lastName ?? ''}
                                 </label>
                                 </div>
                             <div className="flex items-center mt-4">
                                 <label htmlFor="section" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
-                                {user.position}
+                                {(user as any).position ?? ''}
                                 </label>
                             </div>
                         </div>

@@ -170,13 +170,13 @@ const CompanyDashboard: React.FC = () => {
             });
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
-            showMessage('Failed to load dashboard data.', 'error');
+            showMessage({ message: 'Failed to load dashboard data.', success: false });
         } finally {
             setLoading(false);
         }
     };
 
-    const companyName = companyInfo?.companyName || user?.companyName || 'Your Company';
+    const companyName = companyInfo?.companyName || (user as any)?.companyName || 'Your Company';
     const greeting = (() => {
         const hour = new Date().getHours();
         if (hour < 12) return 'Good morning';

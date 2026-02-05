@@ -18,7 +18,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const userData = useSelector((state: IRootState) => state.user.userData);
+  const userData = useSelector((state: IRootState) => state.user.user);
   const [roles, setRoles] = useState<CompanyRole[]>([]);
   const [roleTemplates, setRoleTemplates] = useState<RoleTemplate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

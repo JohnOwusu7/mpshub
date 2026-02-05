@@ -196,7 +196,10 @@ const PaymentManagement: React.FC = () => {
                 paymentDate: new Date(formData.paymentDate).toISOString(),
             };
 
-            await createPaymentTransactionApi(paymentData);
+            await createPaymentTransactionApi({
+                ...paymentData,
+                paymentMethod: paymentData.paymentMethod as PaymentTransaction['paymentMethod'],
+            });
             showMessage({ message: 'Payment transaction created successfully.', success: true });
             setShowCreateModal(false);
             resetForm();

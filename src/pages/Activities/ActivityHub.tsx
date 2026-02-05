@@ -52,7 +52,7 @@ const ActivityHub = () => {
 
     const [users, setUsers] = useState<any[]>([]);
     const [selectedAssignee, setSelectedAssignee] = useState<any>(null);
-    const [allTasks, setAllTasks] = useState([]);
+    const [allTasks, setAllTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     // Assignment: 'user' | 'subsection' | 'reassign'
     const [assignMode, setAssignMode] = useState<'user' | 'subsection' | 'reassign'>('user');

@@ -121,7 +121,7 @@ export interface User {
     permissions: string[]; // Permissions from the CompanyRole
     position: string;
     companyId: string;
-    companyName: string; // Added companyName
+    companyName?: string; // Optional, e.g. when populated from list-all
     departmentId?: string; // New field for department, optional
     sectionId?: string; // New field for section, optional
     subsectionId?: string; // New field for subsection, optional

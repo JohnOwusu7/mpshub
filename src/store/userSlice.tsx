@@ -50,6 +50,9 @@ interface UserState {
     subsectionId?: string;
     sectionId?: string;
     departmentId?: string;
+    subsection?: any;
+    section?: any;
+    department?: any;
   } | null;
   error: string | null;
 }

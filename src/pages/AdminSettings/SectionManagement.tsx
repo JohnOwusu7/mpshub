@@ -237,7 +237,7 @@ const SectionManagement = () => {
                   return (
                     <tr key={section._id}>
                       <td>{section.name}</td>
-                      <td>{section.departmentId ? section.departmentId.name : 'N/A'}</td>
+                      <td>{section.departmentId ? (typeof section.departmentId === 'object' && section.departmentId && 'name' in section.departmentId ? (section.departmentId as { name: string }).name : 'N/A') : 'N/A'}</td>
                       <td>{section.description}</td>
                       <td className="text-center">
                         <div className="flex justify-center space-x-2">

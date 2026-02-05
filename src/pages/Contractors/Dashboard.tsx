@@ -33,7 +33,7 @@ const ContractorsDashboard: React.FC = () => {
         const issues = response.data;
 
         // Filter issues by tag matching the user's role
-        const filteredIssuesCount = issues.filter(issue => issue.tag === authenticatedUser.role);
+        const filteredIssuesCount = issues.filter(issue => issue.tag === authenticatedUser?.roleName || authenticatedUser?.role);
         const filteredNewIssuesCount = filteredIssuesCount.filter(issue => issue.progress === 'new').length;
         const filteredProgressIssuesCount = filteredIssuesCount.filter(issue => issue.progress === 'in-progress').length;
 
@@ -48,7 +48,7 @@ const ContractorsDashboard: React.FC = () => {
     };
 
     fetchIssues();
-  }, [authenticatedUser.role]);
+  }, [authenticatedUser?.roleName, authenticatedUser?.role]);
 
   return (
     <div className="flex flex-col w-full px-4 sm:px-8 md:px-16 lg:px-24">
@@ -56,7 +56,7 @@ const ContractorsDashboard: React.FC = () => {
         <div className="flex flex-auto items-center min-w-0">
           <div className="flex flex-col min-w-0 mx-4 sm:mx-8">
             <div className="text-lg md:text-3xl lg:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-              {authenticatedUser && `Welcome back, ${authenticatedUser.firstName} ${authenticatedUser.lastName}!`}
+              {authenticatedUser ? `Welcome back, ${authenticatedUser.firstName} ${authenticatedUser.lastName || ''}!` : ''}
             </div>
             <div className="flex items-center mt-10">
               <IconMenuApps />

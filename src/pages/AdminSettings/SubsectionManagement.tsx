@@ -326,7 +326,7 @@ const SubsectionManagement = () => {
                   return (
                     <tr key={subsection._id}>
                       <td>{subsection.name}</td>
-                      <td>{subsection.sectionId ? (typeof subsection.sectionId === 'object' ? subsection.sectionId.name : sections.find(s => s._id === subsection.sectionId)?.name || 'N/A') : 'N/A'}</td>
+                      <td>{subsection.sectionId ? (typeof subsection.sectionId === 'object' ? (subsection.sectionId as { name?: string }).name : sections.find(s => s._id === subsection.sectionId)?.name) || 'N/A' : 'N/A'}</td>
                       <td>{subsection.description}</td>
                       <td>{subsection.isActive ? 'Active' : 'Inactive'}</td>
                       <td className="text-center">

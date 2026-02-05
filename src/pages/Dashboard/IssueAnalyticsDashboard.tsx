@@ -30,7 +30,8 @@ interface Issue {
         firstName: string;
         lastName: string;
     };
-    issuedDate: string;
+    issuedDate?: string;
+    createdAt?: string;
     isComplete: boolean;
     isAssigned: boolean;
 }
@@ -184,7 +185,7 @@ const IssueAnalyticsDashboard: React.FC = () => {
             setRecentActivity(recent);
         } catch (error: any) {
             console.error('Error fetching issues:', error);
-            showMessage('Failed to load analytics data.', 'error');
+            showMessage({ message: 'Failed to load analytics data.', success: false });
         } finally {
             setLoading(false);
         }
