@@ -13,7 +13,7 @@ import DailyReportDashboard from './DailyReportDashboard';
 const Analytics = () => {
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(setPageTitle('Analytics Admin'));
+        dispatch(setPageTitle('MineSphere Analytics Dashboard'));
     });
 
     // Fetch issues from backend
@@ -35,6 +35,8 @@ const fetchIssues = async () => {
   const [percentNotComplete, setPercentNotComplete] = useState(0);
   const [notCompleted, setNotCompleted] = useState<any[]>([]);
   const [viewPending, setViewPending] = useState<any>(false);
+  const [issuesCreatedOverTime, setIssuesCreatedOverTime] = useState<any>({ series: [{ data: [] }], options: {} });
+  const [topAssignees, setTopAssignees] = useState<any[]>([]);
 
   useEffect(() => {
     const getIssuesAndCount = async () => {
@@ -53,6 +55,79 @@ const fetchIssues = async () => {
       setPercentComplete(percentageComplete);
       setPercentNotComplete(percentageNotComplete);
       setNotCompleted(pending);
+
+      // Calculate top assignees with pending issues
+      const assigneesWithPending: { [key: string]: { name: string; count: number } } = {};
+      pending.forEach((issue: any) => {
+          const assigneeName = issue?.assignedTo ? `${issue.assignedTo.firstName} ${issue.assignedTo.lastName}` : 'Unassigned';
+          if (assigneesWithPending[assigneeName]) {
+              assigneesWithPending[assigneeName].count++;
+          } else {
+              assigneesWithPending[assigneeName] = { name: assigneeName, count: 1 };
+          }
+      });
+
+      const sortedAssignees = Object.values(assigneesWithPending).sort((a, b) => b.count - a.count).slice(0, 5); // Get top 5
+      setTopAssignees(sortedAssignees);
+
+      // Process issues created over time
+      const issuesByDate: { [key: string]: number } = {};
+      issues.forEach((issue: any) => {
+          const date = new Date(issue.issuedDate).toISOString().split('T')[0];
+          issuesByDate[date] = (issuesByDate[date] || 0) + 1;
+      });
+
+      const sortedDates = Object.keys(issuesByDate).sort();
+      const seriesData = sortedDates.map((date) => issuesByDate[date]);
+
+      setIssuesCreatedOverTime({
+          series: [{ data: seriesData }],
+          options: {
+              chart: {
+                  height: 58,
+                  type: 'line',
+                  fontFamily: 'Nunito, sans-serif',
+                  sparkline: {
+                      enabled: true,
+                  },
+                  dropShadow: {
+                      enabled: true,
+                      blur: 3,
+                      color: '#2196F3',
+                      opacity: 0.4,
+                  },
+              },
+              stroke: {
+                  curve: 'smooth',
+                  width: 2,
+              },
+              colors: ['#2196F3'],
+              grid: {
+                  padding: {
+                      top: 5,
+                      bottom: 5,
+                      left: 5,
+                      right: 5,
+                  },
+              },
+              tooltip: {
+                  x: {
+                      show: false,
+                  },
+                  y: {
+                      title: {
+                          formatter: () => {
+                              return '';
+                          },
+                      },
+                  },
+              },
+              xaxis: {
+                  categories: sortedDates,
+                  labels: { show: false },
+              },
+          },
+      });
     };
     getIssuesAndCount();
   }, []);
@@ -170,11 +245,11 @@ const fetchIssues = async () => {
                         <div className="grid sm:grid-cols-2 gap-8 text-sm text-[#515365] font-bold">
                             <div>
                                 <div>
-                                    <div>Total Activities</div>
+                                    <div>Issues Created Over Time</div>
                                     <div className="text-[#f8538d] text-3xl font-bold">{totalCount}</div>
                                 </div>
 
-                                <ReactApexChart series={totalActivities.series} options={totalActivities.options} type="line" height={58} className="overflow-hidden" />
+                                <ReactApexChart series={issuesCreatedOverTime.series} options={issuesCreatedOverTime.options} type="line" height={58} className="overflow-hidden" />
                             </div>
 
                             <div>
@@ -260,11 +335,30 @@ const fetchIssues = async () => {
                             </div>
 
                             <div className="w-full absolute bottom-0 flex items-center justify-between p-5 -mx-5">
-                                <Link to={'/task-manager'} className="btn btn-secondary btn-lg w-full border-0 bg-gradient-to-r from-[#3d38e1] to-[#1e9afe]">
+                                <Link to="/activity" className="btn btn-secondary btn-lg w-full border-0 bg-gradient-to-r from-[#3d38e1] to-[#1e9afe]">
                                     View Hub
                                 </Link>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 mt-6">
+                    <div className="panel h-full">
+                        <h5 className="font-semibold text-lg dark:text-white-light mb-5">Top Assignees with Pending Issues</h5>
+                        <ul className="space-y-4">
+                            {topAssignees.length > 0 ? (
+                                topAssignees.map((assignee, index) => (
+                                    <li key={index} className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div className="font-semibold">{assignee.name}</div>
+                                        </div>
+                                        <div className="badge badge-outline-danger dark:bg-transparent">{assignee.count} Pending</div>
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="text-center text-white-dark">No assignees with pending issues.</li>
+                            )}
+                        </ul>
                     </div>
                 </div>
                 <Transition appear show={viewPending} as={Fragment}>
@@ -308,7 +402,7 @@ const fetchIssues = async () => {
                                                      <tr key={index}>
                                                         <td className='py-2 px-2 border-b'>{notC?.assignedTo ? `${notC?.assignedTo?.firstName} ${notC?.assignedTo?.lastName}` : notC.tag || 'No one'}</td>
                                                         <td className='py-2 px-4 border-b'>{notC.title}</td>
-                                                        <td className='py-2 px-2 border-b'>{notC.progress}</td>
+                                                        <td className='py-2 px-2 border-b'>{new Date(notC.issuedDate).toLocaleDateString()}</td>
                                                      </tr> 
                                                 ))} 
                                             </tbody>

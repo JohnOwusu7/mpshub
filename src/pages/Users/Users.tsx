@@ -2,71 +2,187 @@ import React, { useState, Fragment, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import Swal from 'sweetalert2';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import axios from 'axios';
+import axiosInstance from '../../Api/axiosInstance';
 
 import IconUserPlus from '../../components/Icon/IconUserPlus';
 import IconSearch from '../../components/Icon/IconSearch';
 import IconX from '../../components/Icon/IconX';
 import { API_CONFIG } from '../../Api/apiConfig';
+import { User, CompanyRole, getAllCompanyRolesApi, IDepartment, ISection, ISubsection, getAllDepartmentsApi, getAllSectionsByDepartmentApi, getAllSubsectionsBySectionApi } from '../../Api/api'; // Import User and CompanyRole interfaces, and API function
 
-interface User {
-  [x: string]: any;
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  position: string;
-  identityNo: string;
-  status: string;
-  password: string;
+interface UserData extends User {
+  password?: string; // Password is only sent during creation, not retrieved
+  department?: IDepartment; // Populated department object
+  section?: ISection; // Populated section object
+  subsection?: ISubsection; // Populated subsection object
 }
 
 const Users: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<User[]>([]);
-  const [role, setRole] = useState<string>('');
-
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [companyRoles, setCompanyRoles] = useState<CompanyRole[]>([]); // New state for company-specific roles
+  const [selectedRole, setSelectedRole] = useState<string>(''); // To store the _id of the selected role
+  const userState = useSelector((state: any) => state.user);
+  const [departments, setDepartments] = useState<IDepartment[]>([]);
+  const [sections, setSections] = useState<ISection[]>([]);
+  const [subsections, setSubsections] = useState<ISubsection[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+  const [selectedSectionId, setSelectedSectionId] = useState<string>('');
+  const [selectedSubsectionId, setSelectedSubsectionId] = useState<string>('');
 
   useEffect(() => {
     dispatch(setPageTitle('Users'));
-
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get<User[]>(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.list}`);
-        setUsers(response.data);
-        setLoading(false);
-        setUserList(response.data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [dispatch]);
+    fetchCompanyRoles();
+    fetchDepartments();
+  }, [dispatch, userState.user.companyId]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get<UserData[]>(API_CONFIG.users.endpoints.list);
+      // Filter departments by isActive: true
+      const activeDepartments = response.data.filter(user => user.department?.isActive !== false);
+      setUsers(activeDepartments);
+      setUserList(activeDepartments);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCompanyRoles = async () => {
+    try {
+      const response = await getAllCompanyRolesApi();
+      if (response && Array.isArray(response)) {
+        // Filter out SUPER-ADMIN role for regular company admins
+        const filteredRoles = userState.user.roleName === 'SUPER-ADMIN' 
+            ? response 
+            : response.filter(role => role.roleName !== 'SUPER-ADMIN');
+        setCompanyRoles(filteredRoles);
+        // Set a default selected role if not in edit mode
+        if (!params._id && filteredRoles.length > 0) {
+          setSelectedRole(filteredRoles[0]._id);
+        }
+      } else {
+        showMessage('Failed to fetch company roles.', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching company roles:', error);
+      showMessage('Error fetching company roles.', 'error');
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await getAllDepartmentsApi();
+      const activeDepartments = response.filter(dept => dept.isActive);
+      setDepartments(activeDepartments);
+      if (activeDepartments.length > 0) {
+        // Set the selected department to the first active one by default, or an empty string if none
+        setSelectedDepartmentId(activeDepartments[0]._id);
+      } else {
+        setSelectedDepartmentId('');
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      showMessage('Error fetching departments.', 'error');
+    }
+  };
+
+  const fetchSections = async (departmentId: string) => {
+    if (!departmentId) {
+      setSections([]);
+      setSelectedSectionId('');
+      setSubsections([]);
+      setSelectedSubsectionId('');
+      return;
+    }
+    try {
+      // Pass companyId if available (for SUPER-ADMIN) or let it use headers (for regular admins)
+      const companyId = userState.user?.companyId;
+      const response = await getAllSectionsByDepartmentApi(departmentId, companyId);
+      setSections(response);
+      if (response.length > 0) {
+        setSelectedSectionId(response[0]._id);
+      } else {
+        setSelectedSectionId('');
+        setSubsections([]);
+        setSelectedSubsectionId('');
+      }
+    } catch (error) {
+      console.error(`Error fetching sections for department ${departmentId}:`, error);
+      showMessage('Error fetching sections.', 'error');
+      setSections([]);
+      setSelectedSectionId('');
+      setSubsections([]);
+      setSelectedSubsectionId('');
+    }
+  };
+
+  const fetchSubsections = async (sectionId: string) => {
+    if (!sectionId) {
+      setSubsections([]);
+      setSelectedSubsectionId('');
+      return;
+    }
+    try {
+      const companyId = userState.user?.companyId;
+      const response = await getAllSubsectionsBySectionApi(sectionId, companyId);
+      setSubsections(response);
+      if (response.length > 0) {
+        setSelectedSubsectionId(response[0]._id);
+      } else {
+        setSelectedSubsectionId('');
+      }
+    } catch (error) {
+      console.error(`Error fetching subsections for section ${sectionId}:`, error);
+      showMessage('Error fetching subsections.', 'error');
+      setSubsections([]);
+      setSelectedSubsectionId('');
+    }
+  };
+
+  useEffect(() => {
+    if (userState.user.companyId && selectedDepartmentId) {
+      fetchSections(selectedDepartmentId);
+    }
+  }, [selectedDepartmentId, userState.user.companyId]);
+
+  useEffect(() => {
+    if (userState.user.companyId && selectedSectionId) {
+      fetchSubsections(selectedSectionId);
+    } else {
+      setSubsections([]);
+      setSelectedSubsectionId('');
+    }
+  }, [selectedSectionId, userState.user.companyId]);
 
   const [addUserModal, setAddUserModal] = useState<boolean>(false);
 
-  const [defaultParams] = useState<User>({
+  const [defaultParams] = useState<Partial<UserData>>({
     _id: '',
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     role: '',
+    roleName: '',
+    permissions: [],
     position: '',
     identityNo: '',
-    status: '',
-    password: ''
+    status: 'ACTIVE' as const,
+    password: '',
+    departmentId: '',
+    sectionId: '',
   });
 
-  const [params, setParams] = useState<User>({ ...defaultParams });
+  const [params, setParams] = useState<any>({ ...defaultParams });
 
   const changeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, id } = e.target;
@@ -74,93 +190,112 @@ const Users: React.FC = () => {
   };
 
   const [search, setSearch] = useState<string>('');
-  const [userList, setUserList] = useState<User[]>([]);
+  const [userList, setUserList] = useState<UserData[]>([]);
 
-  const [filteredItems, setFilteredItems] = useState<User[]>(userList);
+  const [filteredItems, setFilteredItems] = useState<UserData[]>(userList);
   useEffect(() => {
     setFilteredItems(() => {
-      return userList.filter((item: User) => {
+      return userList.filter((item: UserData) => {
         return (
           item.firstName.toLowerCase().includes(search.toLowerCase()) ||
           item.lastName.toLowerCase().includes(search.toLowerCase()) ||
           item.email.toLowerCase().includes(search.toLowerCase()) ||
           item.identityNo.toLowerCase().includes(search.toLowerCase()) ||
           item.phone.toLowerCase().includes(search.toLowerCase()) ||
-          item.role.toLowerCase().includes(search.toLowerCase())
+          item.roleName.toLowerCase().includes(search.toLowerCase()) // Search by roleName
         );
       });
     });
   }, [search, userList]);
 
   const saveUser = async () => {
-    if (!params.firstName || !params.lastName || !params.email || !params.phone || !role || !params.identityNo || !params.position) {
+    if (!params.firstName || !params.lastName || !params.email || !params.phone || !selectedRole || !params.identityNo || !params.position) {
       showMessage('Please fill in all required fields.', 'error');
       return;
     }
 
+    const roleDoc = companyRoles.find(role => role._id === selectedRole);
+    if (!roleDoc) {
+      showMessage('Selected role not found.', 'error');
+      return;
+    }
+
+    const userPayload: any = { ...params, role: selectedRole, roleName: roleDoc.roleName, companyId: userState.user.companyId, departmentId: selectedDepartmentId, sectionId: selectedSectionId, subsectionId: selectedSubsectionId || params.subsectionId || undefined };
+
     if (!params._id) {
-      params.password = 'admin@123';
-      params.role = role;
+      userPayload.password = 'admin@123'; // Default password for new users
     }
 
     try {
       if (params._id) {
-        let updatedUser = { ...params, role: role };
-        await axios.put(`${API_CONFIG.baseURL}/users/${params._id}/update`, updatedUser);
-        showMessage('User has been updated successfully.');
-        navigate('/users/list');
+        // For update, exclude password if it's not being changed
+        const { password, ...updateData } = userPayload;
+        await axiosInstance.put(API_CONFIG.users.endpoints.edit.replace(':userId', params._id), updateData);
+        showMessage('User has been updated successfully.', 'success');
       } else {
-        await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.add}`, params);
-        showMessage('User has been added successfully.');
-        navigate('/users/list');
+        await axiosInstance.post(API_CONFIG.users.endpoints.add, userPayload);
+        showMessage('User has been added successfully.', 'success');
       }
 
-      const response = await axios.get<User[]>(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.list}`);
-      setUsers(response.data);
-
+      fetchUsers(); // Refresh the user list
       setAddUserModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving user:', error);
-      showMessage('Failed to save user. Please try again.', 'error');
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to save user. Please try again.';
+      showMessage(errorMessage, 'error');
     }
   };
 
-  const editUser = (user: User | null = null) => {
-    const editedParams = {
-        ...defaultParams,
-        role: user ? user.role : role
-    };
-
+  const editUser = async (user: UserData | null = null) => {
     if (user) {
-        setParams({ ...user }); // Update the params with user object
+      setParams({ ...user });
+      setSelectedRole(user.role); // Set the selected role based on user's role ObjectId
+      const deptId = user.departmentId || '';
+      const secId = user.sectionId || '';
+      setSelectedDepartmentId(deptId); // Set selected department
+      setSelectedSectionId(secId); // Set selected section
+      setSelectedSubsectionId(user.subsectionId || ''); // Set selected subsection
+      // Fetch sections for the user's department
+      if (deptId) {
+        await fetchSections(deptId);
+        // Fetch subsections for the user's section
+        if (secId) {
+          await fetchSubsections(secId);
+        }
+      }
     } else {
-        setParams(editedParams); // Set the params with the editedParams object
+      setParams({ ...defaultParams });
+      setSelectedRole(companyRoles.length > 0 ? companyRoles[0]._id : ''); // Set to first role or empty
+      const deptId = departments.length > 0 ? departments[0]._id : '';
+      setSelectedDepartmentId(deptId); // Set to first department or empty
+      setSelectedSectionId(''); // Clear section when adding new user
+      setSelectedSubsectionId(''); // Clear subsection when adding new user
+      // Fetch sections for the default department
+      if (deptId) {
+        await fetchSections(deptId);
+      }
     }
+    setAddUserModal(true);
+  };
 
-    setAddUserModal(true); // Open the Add User modal
-};
-
-const deleteUser = async (user: User | null = null) => {
+  const deleteUser = async (user: UserData | null = null) => {
     if (!user) {
-        showMessage('Invalid user selected for deletion.', 'error');
-        return;
+      showMessage('Invalid user selected for deletion.', 'error');
+      return;
     }
 
-    try {
-        // Make the necessary API call to delete the user
-        await axios.delete(`${API_CONFIG.baseURL}/users/${user._id}`);
-
-        // Update the user list after deletion using the function form of setUsers
+    if (window.confirm(`Are you sure you want to delete user ${user.firstName} ${user.lastName}?`)) {
+      try {
+        await axiosInstance.delete(API_CONFIG.users.endpoints.delete.replace(':userId', user._id));
         setUsers(prevUsers => prevUsers.filter(u => u._id !== user._id));
-
-        showMessage('User has been deleted successfully.');
-    } catch (error) {
+        showMessage('User has been deleted successfully.', 'success');
+      } catch (error: any) {
         console.error('Error deleting user:', error);
-        showMessage('Failed to delete user. Please try again.', 'error');
+        const errorMessage = error.response?.data?.error || 'Failed to delete user. Please try again.';
+        showMessage(errorMessage, 'error');
+      }
     }
-};
-
-
+  };
 
   const showMessage = (msg: string = '', type: string = 'success') => {
     const toast: any = Swal.mixin({
@@ -176,8 +311,6 @@ const deleteUser = async (user: User | null = null) => {
       padding: '10px 20px',
     });
   };
-
-  const roleList = ['ADMIN', 'SYSTEMS-ENGINEER', 'DISPATCH', 'RAMJACK', 'AFRIYIE', 'BENEWISE', 'GEOTECH', 'MANAGER', 'SAFETY',];
 
   return (
     <div>
@@ -214,9 +347,9 @@ const deleteUser = async (user: User | null = null) => {
                      {loading ? (
                     <div>Loading...</div>
                 ) : (
-                    filteredItems.map((user: any) => {
+                    filteredItems.map((user: UserData) => {
                         return (
-                            <div className="bg-white dark:bg-[#1c232f] rounded-md overflow-hidden text-center shadow relative" key={user._id}>
+                            <div className="bg-white dark:bg-[#1c232f] rounded-md overflow-hidden text-center shadow relative" key={user.identityNo}>
                                 <div className="bg-white dark:bg-[#1c232f] rounded-md overflow-hidden text-center shadow relative">
                                     <div
                                         className="bg-white/40 rounded-t-md bg-center bg-cover p-6 pb-0 bg-"
@@ -253,9 +386,21 @@ const deleteUser = async (user: User | null = null) => {
                                                 <div className="text-white-dark">{user.phone}</div>
                                             </div>
                                             <div className="flex items-center">
-                                                <div className="flex-none ltr:mr-2 rtl:ml-2"> Department:</div>
-                                                <div className="text-white-dark">{'Mining'}</div>
+                                                <div className="flex-none ltr:mr-2 rtl:ml-2"> Role:</div>
+                                                <div className="text-white-dark">{user.roleName}</div> {/* Display roleName */}
                                             </div>
+                                            {user.department?.name && (
+                                              <div className="flex items-center">
+                                                <div className="flex-none ltr:mr-2 rtl:ml-2">Department:</div>
+                                                <div className="text-white-dark">{user.department.name}</div>
+                                              </div>
+                                            )}
+                                            {user.section?.name && (
+                                              <div className="flex items-center">
+                                                <div className="flex-none ltr:mr-2 rtl:ml-2">Section:</div>
+                                                <div className="text-white-dark">{user.section.name}</div>
+                                              </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="mt-6 flex gap-4 absolute bottom-0 w-full ltr:left-0 rtl:right-0 p-6">
@@ -297,7 +442,7 @@ const deleteUser = async (user: User | null = null) => {
                                         <IconX />
                                     </button>
                                     <div className="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                        {params.id ? 'Edit User' : 'Add User'}
+                                        {params._id ? 'Edit User' : 'Add User'}
                                     </div>
                                     <div className="p-5">
                                         <form>
@@ -318,18 +463,104 @@ const deleteUser = async (user: User | null = null) => {
                                                 <input id="phone" type="text" placeholder="Enter Phone Number" className="form-input" value={params.phone} onChange={(e) => changeValue(e)} />
                                             </div>
                                             <div className="mb-5">
-                                                <label htmlFor="role"> Section
+                                                <label htmlFor="role"> Role
                                                 <select
                                                     id="role"
                                                     name="role"
                                                     className="form-select flex-1"
-                                                    onChange={(e) => setRole(e.target.value)} >
-                                                    {roleList.map((i) => (
-                                                        <option key={i} value={i}>{i}</option>
+                                                    value={selectedRole}
+                                                    onChange={(e) => setSelectedRole(e.target.value)} 
+                                                >
+                                                    <option value="" disabled>Select a Role</option>
+                                                    {companyRoles.map((roleItem) => (
+                                                        <option key={roleItem._id} value={roleItem._id}>
+                                                            {roleItem.roleName}
+                                                        </option>
                                                     ))}
                                                 </select>
                                                 </label>
                                                </div>
+                                            <div className="mb-5">
+                                                <label htmlFor="departmentId">Department</label>
+                                                <select
+                                                    id="departmentId"
+                                                    name="departmentId"
+                                                    className="form-select flex-1"
+                                                    value={selectedDepartmentId}
+                                                    onChange={async (e) => {
+                                                      const newDeptId = e.target.value;
+                                                      setSelectedDepartmentId(newDeptId);
+                                                      setSelectedSectionId('');
+                                                      setParams({ ...params, departmentId: newDeptId, sectionId: '' }); // Reset section when department changes
+                                                      // Immediately fetch sections for the selected department
+                                                      if (newDeptId) {
+                                                        await fetchSections(newDeptId);
+                                                      } else {
+                                                        setSections([]);
+                                                      }
+                                                    }}
+                                                >
+                                                    <option value="">Select a Department</option>
+                                                    {departments.map((deptItem) => (
+                                                        <option key={deptItem._id} value={deptItem._id}>
+                                                            {deptItem.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="mb-5">
+                                                <label htmlFor="sectionId">Section</label>
+                                                <select
+                                                    id="sectionId"
+                                                    name="sectionId"
+                                                    className="form-select flex-1"
+                                                    value={selectedSectionId}
+                                                    onChange={async (e) => {
+                                                      const newSectionId = e.target.value;
+                                                      setSelectedSectionId(newSectionId);
+                                                      setSelectedSubsectionId('');
+                                                      setParams({ ...params, sectionId: newSectionId, subsectionId: '' }); // Reset subsection when section changes
+                                                      // Immediately fetch subsections for the selected section
+                                                      if (newSectionId) {
+                                                        await fetchSubsections(newSectionId);
+                                                      } else {
+                                                        setSubsections([]);
+                                                      }
+                                                    }}
+                                                    disabled={!selectedDepartmentId || sections.length === 0}
+                                                >
+                                                    <option value="">Select a Section</option>
+                                                    {sections.map((sectionItem) => (
+                                                        <option key={sectionItem._id} value={sectionItem._id}>
+                                                            {sectionItem.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="mb-5">
+                                                <label htmlFor="subsectionId">Subsection (Optional)</label>
+                                                <select
+                                                    id="subsectionId"
+                                                    name="subsectionId"
+                                                    className="form-select flex-1"
+                                                    value={selectedSubsectionId}
+                                                    onChange={(e) => { 
+                                                      setSelectedSubsectionId(e.target.value); 
+                                                      setParams({ ...params, subsectionId: e.target.value }); 
+                                                    }}
+                                                    disabled={!selectedSectionId || subsections.length === 0}
+                                                >
+                                                    <option value="">No Subsection (Optional)</option>
+                                                    {subsections.map((subsectionItem) => (
+                                                        <option key={subsectionItem._id} value={subsectionItem._id}>
+                                                            {subsectionItem.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {selectedSectionId && subsections.length === 0 && (
+                                                  <p className="text-xs text-gray-500 mt-1">No subsections available for this section. Subsections are optional.</p>
+                                                )}
+                                            </div>
                                             <div className="mb-5">
                                                 <label htmlFor="name">Positon</label>
                                                 <input id="position" type="text" placeholder="Enter User Position" className="form-input" value={params.position} onChange={(e) => changeValue(e)} />
@@ -344,6 +575,19 @@ const deleteUser = async (user: User | null = null) => {
                                                     onChange={(e) => changeValue(e)}
                                                 ></input>
                                             </div>
+                                            {!params._id && (
+                                                <div className="mb-5">
+                                                    <label htmlFor="password">Password (Default: admin@123)</label>
+                                                    <input 
+                                                        id="password"
+                                                        type="password"
+                                                        placeholder="Enter Password (default for new users: admin@123)"
+                                                        className="form-input"
+                                                        value={params.password}
+                                                        onChange={(e) => setParams({ ...params, password: e.target.value })}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setAddUserModal(false)}>
                                                     Cancel

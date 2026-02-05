@@ -8,7 +8,7 @@ import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
 import IconCaretsDown from '../Icon/IconCaretsDown';
 import IconCaretDown from '../Icon/IconCaretDown';
-import roleBasedMenuItems from './MenuItems';
+import { useGenerateMenuItems } from './MenuItems'; // Changed to use the custom hook
 
 interface RoleBasedMenuItems {
     [key: string]: { label: string; link: string; icon: JSX.Element; children?: { label: string; link: string; }[] };
@@ -62,13 +62,14 @@ const Sidebar = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
-    // Get menu items based on user role or default
+    // Get menu items dynamically (hook must be called at top level)
+    const menuItems = useGenerateMenuItems();
+
     const getMenuItems = () => {
-        if (!user) {
-            return null; // Return null or handle the case when user is null
+        if (!menuItems) {
+            return null;
         }
-        const roleMenuItems = (roleBasedMenuItems[user.role] || roleBasedMenuItems.DEFAULT) as MenuItem[];
-        return roleMenuItems.map((item: MenuItem, index: number) => {
+        return menuItems.map((item, index: number) => {
             if (item.children) {
                 // Render grouped menu item with sub-menu
                 return (

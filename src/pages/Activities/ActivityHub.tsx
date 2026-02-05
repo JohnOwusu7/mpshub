@@ -10,18 +10,17 @@ import { setPageTitle } from '../../store/themeConfigSlice';
 import IconClipboardText from '../../components/Icon/IconClipboardText';
 import IconListCheck from '../../components/Icon/IconListCheck';
 import IconThumbUp from '../../components/Icon/IconThumbUp';
-import IconTrashLines from '../../components/Icon/IconTrashLines';
 import IconSquareRotated from '../../components/Icon/IconSquareRotated';
 import IconPlus from '../../components/Icon/IconPlus';
 import IconSearch from '../../components/Icon/IconSearch';
 import IconMenu from '../../components/Icon/IconMenu';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
-import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
 import IconX from '../../components/Icon/IconX';
-import IconRestore from '../../components/Icon/IconRestore';
-import axios from 'axios';
+import IconUser from '../../components/Icon/IconUser';
 import { API_CONFIG } from '../../Api/apiConfig';
-import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../Api/axiosInstance';
+import { getAllDepartmentsApi, getAllSectionsByDepartmentApi, getAllSubsectionsBySectionApi } from '../../Api/api';
+import CreateTicketModal from '../../components/CreateTicketModal';
 
 const ActivityHub = () => {
     const dispatch = useDispatch();
@@ -51,25 +50,27 @@ const ActivityHub = () => {
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
 
 
-    const [users, setUsers] = useState([]);
-    const [users1, setUsers1] = useState([]);
-    const [selectedAssignee, setSelectedAssignee] = useState(null);
+    const [users, setUsers] = useState<any[]>([]);
+    const [selectedAssignee, setSelectedAssignee] = useState<any>(null);
     const [allTasks, setAllTasks] = useState([]);
     const [loading, setLoading] = useState<boolean>(true);
-
-    const navigate = useNavigate();
+    // Assignment: 'user' | 'subsection' | 'reassign'
+    const [assignMode, setAssignMode] = useState<'user' | 'subsection' | 'reassign'>('user');
+    const [subsections, setSubsections] = useState<any[]>([]);
+    const [allSections, setAllSections] = useState<any[]>([]);
+    const [selectedSubsection, setSelectedSubsection] = useState<any>(null);
+    const [selectedReassignSection, setSelectedReassignSection] = useState<any>(null);
+    const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
 
     const fetchIssues = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.list}`);
-            const onlyNew = response.data;
-            const onlyNewIssues = onlyNew?.filter((issue: any) => {
-                return issue.isAssigned === false;
-            });
-            setAllTasks(onlyNewIssues);
+            const response = await axiosInstance.get(API_CONFIG.issues.endpoints.list);
+            const data = response.data || [];
+            setAllTasks(Array.isArray(data) ? data : []);
         } catch (error: any) {
             console.error('Error fetching issues:', error.message);
+            setAllTasks([]);
         } finally {
             setLoading(false);
         }
@@ -103,20 +104,19 @@ const ActivityHub = () => {
         if (isResetPage) {
             pager.currentPage = 1;
         }
-        let res;
-        if (selectedTab === 'complete' || selectedTab === 'trash') {
-            res = allTasks.filter((d: any) => d.status === selectedTab);
-        } else {
-            res = allTasks.filter((d: any) => d.status !== 'trash');
-        }
-
-        if (selectedTab === 'dispatch' || selectedTab === 'network' || selectedTab === 'power' || selectedTab === 'smart-cap' || selectedTab === 'improvement' || selectedTab === 'systems-admin') {
-            res = res.filter((d: any) => d.purpose === selectedTab);
+        let res: any[];
+        if (selectedTab === 'complete') {
+            res = allTasks.filter((d: any) => d.isComplete === true);
+        } else if (selectedTab === 'unassigned') {
+            res = allTasks.filter((d: any) => !d.isComplete && !d.assignedTo && !d.assignedToSubsectionId);
         } else if (selectedTab === 'high' || selectedTab === 'medium' || selectedTab === 'low') {
-            res = res.filter((d: any) => d.priority === selectedTab);
+            res = allTasks.filter((d: any) => !d.isComplete && (d.priority || '').toLowerCase() === selectedTab);
+        } else {
+            res = allTasks.filter((d: any) => !d.isComplete);
         }
-        setFilteredTasks([...res.filter((d: any) => d.title?.toLowerCase().includes(searchTask))]);
-        getPager(res.filter((d: any) => d.title?.toLowerCase().includes(searchTask)));
+        const bySearch = res.filter((d: any) => (d.title || '').toLowerCase().includes((searchTask || '').toLowerCase()));
+        setFilteredTasks([...bySearch]);
+        getPager(bySearch);
     };
 
     const getPager = (res: any) => {
@@ -141,152 +141,98 @@ const ActivityHub = () => {
         setIsShowTaskMenu(false);
     };
 
-    const token = localStorage.getItem('token');
-
     const taskComplete = async (task: any = null) => {
-        let item = filteredTasks.find((d: any) => d._id === task._id);
         try {
-            await axios.put(`${API_CONFIG.baseURL}/issues/complete/${task._id}`, {task} ,{
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-        console.log('successfully')
-        showMessage('Task has been completed Successfully.');
-        } catch (error) {
-            console.log('Error creating')
+            await axiosInstance.put(`${API_CONFIG.issues.endpoints.completeProgress}/${task._id}`);
+            showMessage('Task has been completed successfully.');
+            fetchIssues();
+        } catch (err: any) {
+            showMessage(err?.response?.data?.error || 'Failed to complete task.', 'error');
         }
-        item.status = item.status === 'complete' ? '' : 'complete';
-        searchTasks(false);
     };
 
     const viewTask = async (item: any = null) => {
         setSelectedTask(item);
-        console.log('Item', item)
-        setTimeout(() => {
-            setViewTaskModal(true);
-        });
+        const current = item?.assignedTo;
+        const sectionId = item?.sectionId?._id || item?.sectionId;
+        setSelectedReassignSection(null);
+        setAssignMode(item?.assignedTo ? 'user' : item?.assignedToSubsectionId ? 'subsection' : 'user');
+        setViewTaskModal(true);
+        // Fetch users in the issue's section for "Assign to person" dropdown (so FMS issue → FMS users only)
+        try {
+            const url = sectionId
+                ? `${API_CONFIG.users.endpoints.list}?sectionId=${encodeURIComponent(sectionId)}`
+                : API_CONFIG.users.endpoints.list;
+            const response = await axiosInstance.get(url);
+            const data = response.data?.data ?? response.data;
+            const sectionUsers = Array.isArray(data) ? data : [];
+            setUsers(sectionUsers);
+            setSelectedAssignee(current ? (sectionUsers.find((u: any) => u._id === current._id) || current) : null);
+        } catch {
+            setUsers([]);
+            setSelectedAssignee(null);
+        }
+        const sub = item?.assignedToSubsectionId;
+        setSelectedSubsection(null);
+        if (sectionId) {
+            try {
+                const subs = await getAllSubsectionsBySectionApi(sectionId);
+                setSubsections(Array.isArray(subs) ? subs : []);
+                if (sub) setSelectedSubsection((Array.isArray(subs) ? subs : []).find((s: any) => s._id === (sub._id || sub)));
+            } catch {
+                setSubsections([]);
+            }
+        } else {
+            setSubsections([]);
+        }
+        try {
+            const depts = await getAllDepartmentsApi();
+            const sectionLists = await Promise.all((depts || []).map((d: any) => getAllSectionsByDepartmentApi(d._id)));
+            const flat = (sectionLists || []).flat();
+            setAllSections(flat);
+        } catch {
+            setAllSections([]);
+        }
     };
 
 
-    const deleteTask = async (task: any, type: string = '') => {
-        if (type === 'delete') {
-            try {
-                setLoading(true);
-                await axios.put(`${API_CONFIG.baseURL}/issues/deleteToTrash/${task._id}`);
-                task.status = 'trash';
-                console.log('successfully')
-                showMessage('Task has been stored to trash.');
-            } catch (error) {
-                console.log('Error creating')
-            } finally {
-                setLoading(false);
+    const assignTask = async () => {
+        let body: { assignedToUserId?: string; assignedToSubsectionId?: string; reassignToSectionId?: string } = {};
+        if (assignMode === 'user') {
+            if (!selectedAssignee?._id) {
+                showMessage('Please select a user.', 'error');
+                return;
             }
-
+            body.assignedToUserId = selectedAssignee._id;
+        } else if (assignMode === 'subsection') {
+            if (!selectedSubsection?._id) {
+                showMessage('Please select a subsection.', 'error');
+                return;
+            }
+            body.assignedToSubsectionId = selectedSubsection._id;
+        } else {
+            if (!selectedReassignSection?._id) {
+                showMessage('Please select a section to reassign to.', 'error');
+                return;
+            }
+            body.reassignToSectionId = selectedReassignSection._id;
         }
-        if (type === 'deletePermanent') {
-            try {
-                setLoading(true);
-                // Send a request to the delete endpoint to permanently delete the task
-                await axios.delete(`${API_CONFIG.baseURL}/issues/${task._id}`);
-                // If the request succeeds, remove the task from the list
-                setAllTasks(allTasks.filter((d: any) => d._id !== task._id));
-                showMessage('Task has been deleted successfully.');
-            } catch (error) {
-                console.error('Error permanently deleting task:', error);
-                showMessage('Unable deleting Task.');
-                // Handle error
-            } finally {
-                setLoading(false);
-            }
-        } else if (type === 'restore') {
-            try {
-                setLoading(true);
-                await axios.put(`${API_CONFIG.baseURL}/issues/restoreFromTrash/${task._id}`);
-            task.status = 'trash';
-            showMessage('Task has been restored successfully.');
-            } catch (error) {
-                console.log('Error creating')
-            } finally {
-                setLoading(false);
-            }
-            task.status = '';
+        setLoading(true);
+        try {
+            await axiosInstance.put(`${API_CONFIG.issues.endpoints.assign}/${selectedTask._id}`, body);
+            setViewTaskModal(false);
+            setSelectedAssignee(null);
+            setSelectedSubsection(null);
+            setSelectedReassignSection(null);
+            showMessage(assignMode === 'reassign' ? 'Reassigned to section.' : 'Assigned successfully.');
+            fetchIssues();
+        } catch (error: any) {
+            console.error('Error assigning task:', error);
+            showMessage(error?.response?.data?.error || error?.response?.data?.message || 'Error assigning task.', 'error');
+        } finally {
+            setLoading(false);
         }
-        searchTasks(false);
     };
-
-    // fetch Systems Engineers
-    useEffect(() => {
-        const fetchUsers = async () => {
-          try {
-            setLoading(true);
-            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.listEngineers}`);
-            setUsers(response.data);
-          } catch (error: any) {
-            console.error('Error fetching users:', error.message);
-
-          } finally {
-            setLoading(false);
-          }
-        };
-
-        fetchUsers();
-    }, []);
-
-    // fetch Admins
-    useEffect(() => {
-        const fetchUsers1 = async () => {
-          try {
-            setLoading(true);
-            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.users.endpoints.listAdmin}`);
-            setUsers1(response.data);
-          } catch (error: any) {
-            console.error('Error fetching users:', error.message);
-
-          } finally {
-            setLoading(false);
-          }
-        };
-
-        fetchUsers1();
-    }, []);
-
-      // After issue creation for assignment
-        const assignTask = async (selectedTask: any, assignedTo: any,) => {
-            const taskId = selectedTask._id;
-            const tag = params.tag;
-            setLoading(true);
-            try {
-                if(assignedTo) {
-                        const response = await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.assignNew}/${taskId}`, { assignedTo, tag }, {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        });
-                        setViewTaskModal(false);
-                        navigate('/dashboard');
-                        showMessage('Assigned successfully.');
-                        return response;
-                } else if (tag) {
-                        const response = await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.assignContractor}/${taskId}`, { tag }, {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        });
-                        setViewTaskModal(false);
-                        navigate('/dashboard');
-                        showMessage('Assigned successfully.');
-                        return response;
-
-                }
-            } catch (error) {
-                console.error('Error assigning task:', error);
-                showMessage('Error assiging task.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
 
 
     const showMessage = (msg = '', type = 'success') => {
@@ -347,169 +293,78 @@ const ActivityHub = () => {
                                         <div className="ltr:ml-3 rtl:mr-3">Inbox</div>
                                     </div>
                                     <div className="bg-primary-light dark:bg-[#060818] rounded-md py-0.5 px-2 font-semibold whitespace-nowrap">
-                                        {allTasks && allTasks.filter((d: any) => d.status !== 'trash').length}
+                                        {allTasks.filter((d: any) => !d.isComplete).length}
                                     </div>
                                 </button>
                                 <button
                                     type="button"
                                     className={`w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10 ${
-                                        selectedTab === 'complete' && 'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]'
+                                        selectedTab === 'unassigned' ? 'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]' : ''
                                     }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('complete');
-                                    }}
+                                    onClick={() => { tabChanged(); setSelectedTab('unassigned'); }}
+                                >
+                                    <div className="flex items-center">
+                                        <IconUser className="w-4.5 h-4.5 shrink-0" />
+                                        <div className="ltr:ml-3 rtl:mr-3">Unassigned</div>
+                                    </div>
+                                    <div className="bg-primary-light dark:bg-[#060818] rounded-md py-0.5 px-2 font-semibold whitespace-nowrap">
+                                        {allTasks.filter((d: any) => !d.isComplete && !d.assignedTo && !d.assignedToSubsectionId).length}
+                                    </div>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10 ${
+                                        selectedTab === 'complete' ? 'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]' : ''
+                                    }`}
+                                    onClick={() => { tabChanged(); setSelectedTab('complete'); }}
                                 >
                                     <div className="flex items-center">
                                         <IconThumbUp className="w-5 h-5 shrink-0" />
                                         <div className="ltr:ml-3 rtl:mr-3">Done</div>
                                     </div>
                                     <div className="bg-primary-light dark:bg-[#060818] rounded-md py-0.5 px-2 font-semibold whitespace-nowrap">
-                                        {allTasks && allTasks.filter((d: any) => d.status === 'complete').length}
-                                    </div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10 ${
-                                        selectedTab === 'trash' && 'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('trash');
-                                    }}
-                                >
-                                    <div className="flex items-center">
-                                        <IconTrashLines className="shrink-0" />
-                                        <div className="ltr:ml-3 rtl:mr-3">Trash</div>
+                                        {allTasks.filter((d: any) => d.isComplete).length}
                                     </div>
                                 </button>
                                 <div className="h-px w-full border-b border-white-light dark:border-[#1b2e4b]"></div>
-                                <div className="text-white-dark px-1 py-3">Tags</div>
+                                <div className="text-white-dark px-1 py-3">Priority</div>
                                 <button
                                     type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-primary ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'dispatch' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
+                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium text-danger ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
+                                        selectedTab === 'high' ? 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]' : ''
                                     }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('dispatch');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-primary shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Dispatch</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-info ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'smart-cap' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('smart-cap');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-info shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Smart Cap</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-success ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'network' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('network');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-success shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Network</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-success ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'power' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('power');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-success shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Power</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-danger ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'systems-admin' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('systems-admin');
-                                    }}
+                                    onClick={() => { tabChanged(); setSelectedTab('high'); }}
                                 >
                                     <IconSquareRotated className="fill-danger shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Systems admin</div>
+                                    <div className="ltr:ml-3 rtl:mr-3">High</div>
                                 </button>
                                 <button
                                     type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-warning ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'improvement' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
+                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium text-primary ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
+                                        selectedTab === 'medium' ? 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]' : ''
                                     }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('improvement');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-warning shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Improvement</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-warning ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'low' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('low');
-                                    }}
-                                >
-                                    <IconSquareRotated className="fill-warning shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Low</div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-primary ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'medium' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
-                                    }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('medium');
-                                    }}
+                                    onClick={() => { tabChanged(); setSelectedTab('medium'); }}
                                 >
                                     <IconSquareRotated className="fill-primary shrink-0" />
                                     <div className="ltr:ml-3 rtl:mr-3">Medium</div>
                                 </button>
                                 <button
                                     type="button"
-                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-danger ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
-                                        selectedTab === 'high' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'
+                                    className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium text-warning ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${
+                                        selectedTab === 'low' ? 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]' : ''
                                     }`}
-                                    onClick={() => {
-                                        tabChanged();
-                                        setSelectedTab('high');
-                                    }}
+                                    onClick={() => { tabChanged(); setSelectedTab('low'); }}
                                 >
-                                    <IconSquareRotated className="fill-danger shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">High</div>
+                                    <IconSquareRotated className="fill-warning shrink-0" />
+                                    <div className="ltr:ml-3 rtl:mr-3">Low</div>
                                 </button>
 
                             </div>
                         </PerfectScrollbar>
                         <div className="ltr:left-0 rtl:right-0 absolute bottom-0 p-4 w-full">
-                            <button className="btn btn-primary w-full" type="button">
+                            <button className="btn btn-primary w-full" type="button" onClick={() => setShowCreateTicketModal(true)}>
                                 <IconPlus className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                Log a Call
+                                Create ticket
                             </button>
                         </div>
                     </div>
@@ -526,7 +381,7 @@ const ActivityHub = () => {
                                     <input
                                         type="text"
                                         className="form-input peer ltr:!pr-10 rtl:!pl-10"
-                                        placeholder="Searchr..."
+                                        placeholder="Search..."
                                         value={searchTask}
                                         onChange={(e) => setSearchTask(e.target.value)}
                                         onKeyUp={() => searchTasks()}
@@ -567,28 +422,51 @@ const ActivityHub = () => {
                         {pagedTasks.length ? (
                             <div className="table-responsive grow overflow-y-auto sm:min-h-[300px] min-h-[400px]">
                                 <table className="table-hover">
+                                    <thead>
+                                        <tr className="text-white-dark border-b border-white-light dark:border-[#1b2e4b]">
+                                            <th className="w-1 py-3 ltr:pl-4 rtl:pr-4 ltr:pr-2 rtl:pl-2 font-semibold"> </th>
+                                            <th className="py-3 ltr:pl-2 rtl:pr-2 font-semibold">Task</th>
+                                            <th className="w-36 py-3 ltr:pl-2 rtl:pr-2 font-semibold">Section</th>
+                                            <th className="w-28 py-3 ltr:pl-2 rtl:pr-2 font-semibold">Priority</th>
+                                            <th className="w-40 py-3 ltr:pl-2 rtl:pr-2 font-semibold">Date</th>
+                                            <th className="py-3 ltr:pl-2 rtl:pr-2 font-semibold">Reported / Assigned</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
                                         {pagedTasks.map((task: any) => {
+                                            const sectionName = (task.sectionId as any)?.name || '—';
+                                            const deptName = (task.departmentId as any)?.name;
                                             return (
-                                                <tr className={`group cursor-pointer ${task.status === 'complete' ? 'bg-white-light/30 dark:bg-[#1a2941]' : ''}`} key={task._id}>
+                                                <tr className={`group cursor-pointer ${task.isComplete ? 'bg-white-light/30 dark:bg-[#1a2941]' : ''}`} key={task._id}>
                                                     <td className="w-1">
-                                                        <input
-                                                            type="checkbox"
-                                                            id={`chk-${task._id}`}
-                                                            className="form-checkbox"
-                                                            disabled={selectedTab === 'trash'}
-                                                            onClick={() => taskComplete(task)}
-                                                            defaultChecked={task.status === 'complete'}
-                                                        />
+                                                        {!task.isComplete && (
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`chk-${task._id}`}
+                                                                className="form-checkbox"
+                                                                onClick={() => taskComplete(task)}
+                                                                title="Mark complete"
+                                                            />
+                                                        )}
                                                     </td>
                                                     <td>
                                                         <div onClick={() => viewTask(task)}>
-                                                            <div className={`group-hover:text-primary font-semibold text-base whitespace-nowrap ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.heavyEquipmentId ? `${task.heavyEquipmentId} Reporting on ${task.issue} Issues` : task.title || `${task.issue} critical issue at ${task.location}`}
+                                                            <div className={`group-hover:text-primary font-semibold text-base whitespace-nowrap ${task.isComplete ? 'line-through' : ''}`}>
+                                                                {task.title || 'No title'}
                                                             </div>
-                                                            <div className={`text-white-dark overflow-hidden min-w-[300px] line-clamp-1 ${task.status === 'complete' ? 'line-through' : ''}`}>
-                                                                {task.issue } {task.issueDesc}. {task.description}
+                                                            <div className={`text-white-dark overflow-hidden min-w-[200px] line-clamp-1 ${task.isComplete ? 'line-through' : ''}`}>
+                                                                {(task.description || task.descriptionText || '').slice(0, 80)}{(task.description || task.descriptionText || '').length > 80 ? '…' : ''}
                                                             </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="w-36 align-top pt-3">
+                                                        <div onClick={() => viewTask(task)} className="flex flex-col gap-0.5">
+                                                            <span className="badge badge-outline-success font-semibold whitespace-nowrap" title={deptName ? `Department: ${deptName}` : ''}>
+                                                                {sectionName}
+                                                            </span>
+                                                            {deptName && (
+                                                                <span className="text-[11px] text-white-dark truncate max-w-[8rem]" title={deptName}>{deptName}</span>
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className="w-1">
@@ -625,46 +503,10 @@ const ActivityHub = () => {
                                                                 </div>
                                                             )}
 
-                                                            {task.purpose && (
-                                                                <div className="dropdown">
-                                                                    <Dropdown
-                                                                        offset={[0, 5]}
-                                                                        placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                                                        btnClassName="align-middle"
-                                                                        button={
-                                                                            <span
-                                                                                className={`badge rounded-full capitalize hover:top-0 hover:text-white ${
-                                                                                    task.purpose === 'dispatch'
-                                                                                        ? 'badge-outline-primary hover:bg-primary'
-                                                                                        : task.purpose === 'network'
-                                                                                        ? 'badge-outline-success hover:bg-success'
-                                                                                        : task.purpose === 'power'
-                                                                                        ? 'badge-outline-success hover:bg-success'
-                                                                                        : task.purpose === 'smart-cap'
-                                                                                        ? 'badge-outline-info hover:bg-info'
-                                                                                        : task.purpose === 'improvement'
-                                                                                        ? 'badge-outline-warning hover:bg-warning'
-                                                                                        : task.purpose === 'systems-admin'
-                                                                                        ? 'badge-outline-danger hover:bg-danger'
-                                                                                        : task.purpose === 'dispatch' && isTagMenu === task._id
-                                                                                        ? 'text-white bg-primary '
-                                                                                        : task.purpose === 'network' && isTagMenu === task._id
-                                                                                        ? 'text-white bg-success '
-                                                                                        : task.purpose === 'smart-cap' && isTagMenu === task._id
-                                                                                        ? 'text-white bg-info '
-                                                                                        : task.purpose === 'improvement' && isTagMenu === task._id
-                                                                                        ? 'text-white bg-warning '
-                                                                                        : task.purpose === 'systems-admin' && isTagMenu === task._id
-                                                                                        ? 'text-white bg-danger '
-                                                                                        : ''
-                                                                                }`}
-                                                                            >
-                                                                                {task.purpose}
-                                                                            </span>
-                                                                        }
-                                                                    >
-                                                                    </Dropdown>
-                                                                </div>
+                                                            {task.progress && (
+                                                                <span className="badge rounded-full capitalize badge-outline-info">
+                                                                    {task.progress}
+                                                                </span>
                                                             )}
                                                         </div>
                                                     </td>
@@ -674,46 +516,9 @@ const ActivityHub = () => {
                                                     <td className="w-1">
                                                         <div className="flex items-center justify-between w-max ltr:ml-auto rtl:mr-auto">
                                                             <div className="ltr:mr-2.5 rtl:ml-2.5 flex-shrink-0">
-                                                                Reported By: {`${task?.reportedBy?.firstName} ${'-'} ${task?.reportedBy?.role}`}
-
-                                                            </div>
-                                                            <div className="dropdown">
-                                                                <Dropdown
-                                                                    offset={[0, 5]}
-                                                                    placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                                                    btnClassName="align-middle"
-                                                                    button={<IconHorizontalDots className="rotate-90 opacity-70" />}
-                                                                >
-                                                                    <ul className="whitespace-nowrap">
-                                                                        {selectedTab !== 'trash' && (
-                                                                            <>
-                                                                                <li>
-                                                                                    <button type="button" onClick={() => deleteTask(task, 'delete')}>
-                                                                                        <IconTrashLines className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                                                                        Delete
-                                                                                    </button>
-                                                                                </li>
-
-                                                                            </>
-                                                                        )}
-                                                                        {selectedTab === 'trash' && (
-                                                                            <>
-                                                                                <li>
-                                                                                    <button type="button" onClick={() => deleteTask(task, 'deletePermanent')}>
-                                                                                        <IconTrashLines className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                                                                        Permanent Delete
-                                                                                    </button>
-                                                                                </li>
-                                                                                <li>
-                                                                                    <button type="button" onClick={() => deleteTask(task, 'restore')}>
-                                                                                        <IconRestore className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                                                                        Restore Task
-                                                                                    </button>
-                                                                                </li>
-                                                                            </>
-                                                                        )}
-                                                                    </ul>
-                                                                </Dropdown>
+                                                                Reported by: {task?.reportedBy ? `${(task.reportedBy as any).firstName} ${(task.reportedBy as any).lastName || ''}` : '—'}
+                                                                {task?.assignedTo && ` · Assigned to: ${(task.assignedTo as any).firstName} ${(task.assignedTo as any).lastName || ''}`}
+                                                                {task?.assignedToSubsectionId && !task?.assignedTo && ` · Subsection: ${(task.assignedToSubsectionId as any)?.name || '—'}`}
                                                             </div>
                                                         </div>
                                                     </td>
@@ -761,121 +566,151 @@ const ActivityHub = () => {
                                         >
                                             <IconX />
                                         </button>
-                                        <div className="flex items-center flex-wrap gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                            <div>{selectedTask.title}</div>
-                                            {selectedTask.priority && (
-                                                <div
-                                                    className={`badge rounded-3xl capitalize ${
-                                                        selectedTask.priority === 'medium'
-                                                            ? 'badge-outline-primary'
-                                                            : selectedTask.priority === 'low'
-                                                            ? 'badge-outline-warning '
-                                                            : selectedTask.priority === 'high'
-                                                            ? 'badge-outline-danger '
-                                                            : ''
-                                                    }`}
-                                                >
-                                                    {selectedTask.priority}
-
-                                                </div>
-
-                                            )}
-                                            {selectedTask.tag && (
-                                                <div
-                                                    className={`badge rounded-3xl capitalize ${
-                                                        selectedTask.purpose === 'dispatch' ? 'badge-outline-primary' : selectedTask.purpose === 'network' ?  'badge-outline-success ' : selectedTask.purpose === 'power' ?  'badge-outline-success ' : selectedTask.purpose === 'smart-cap' ? 'badge-outline-info ' : selectedTask.purpose === 'improvement' ? 'badge-outline-warning ' : selectedTask.purpose === 'systems-admin' ? 'badge-outline-danger ' : ''
-                                                    }`}
-                                                >
-                                                    {selectedTask.purpose}
-                                                </div>
-                                            )}
-                                            {`Reported By ${selectedTask.reportedBy.firstName} ${' '} ${selectedTask.reportedBy.lastName}(${selectedTask.reportedBy.role})`}
+                                        <div className="flex flex-col gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                                            <div className="flex items-center flex-wrap gap-2">
+                                                <div>{selectedTask.title}</div>
+                                                {selectedTask.priority && (
+                                                    <div
+                                                        className={`badge rounded-3xl capitalize ${
+                                                            selectedTask.priority === 'medium'
+                                                                ? 'badge-outline-primary'
+                                                                : selectedTask.priority === 'low'
+                                                                ? 'badge-outline-warning '
+                                                                : selectedTask.priority === 'high'
+                                                                ? 'badge-outline-danger '
+                                                                : ''
+                                                        }`}
+                                                    >
+                                                        {selectedTask.priority}
+                                                    </div>
+                                                )}
+                                                {selectedTask.reportedBy && (
+                                                    <span className="text-white-dark text-sm">
+                                                        Reported by {(selectedTask.reportedBy as any).firstName} {(selectedTask.reportedBy as any).lastName}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 flex-wrap text-sm">
+                                                <span className="font-semibold text-white-dark">Ownership:</span>
+                                                <span className="badge badge-outline-success">
+                                                    Section: {(selectedTask.sectionId as any)?.name || '—'}
+                                                </span>
+                                                {(selectedTask.departmentId as any)?.name && (
+                                                    <span className="badge badge-outline-info">
+                                                        Dept: {(selectedTask.departmentId as any).name}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        {/* Assigning Tasks */}
-                                        <div className="item-center p-5">
-                                            {/* <div className="text-base prose" dangerouslySetInnerHTML={{ __html: selectedTask.description }}></div> */}
-                                            {selectedTask.heavyEquipmentId ? `${selectedTask.operator}'s ${selectedTask.issue} ${selectedTask.issueDesc}. Reporting on ${selectedTask.heavyEquipmentId}. Location: ${selectedTask.location}`  : '' || `${!selectedTask.title ? `${selectedTask.operator} ${selectedTask.issue} ${selectedTask.issueDesc}. Location: ${selectedTask.location}`  : selectedTask.description }`}
-                                            
-                                            {!selectedTask.assignedTo && !selectedTask.tag ? (
-                                                <div className='flex justify-between mt-8'>
-                                                    <div className="mb-5 flex justify-between gap-4">
-                                                        <div className="mt-7">
-                                                        <label htmlFor="tag">Section</label>
+                                        <div className="p-5">
+                                            <p className="text-white-dark mb-4">{(selectedTask.description || selectedTask.descriptionText || '').slice(0, 500) || 'No description.'}</p>
+                                            {selectedTask.location && <p className="text-sm text-white-dark"><strong>Location:</strong> {selectedTask.location}</p>}
+                                            {(selectedTask.assignedTo || selectedTask.assignedToSubsectionId) && (
+                                                <p className="text-sm text-white-dark mt-2 mb-2">
+                                                    {selectedTask.assignedTo
+                                                        ? `Assigned to: ${(selectedTask.assignedTo as any)?.firstName} ${(selectedTask.assignedTo as any)?.lastName || ''}`
+                                                        : selectedTask.assignedToSubsectionId
+                                                        ? `Assigned to subsection: ${(selectedTask.assignedToSubsectionId as any)?.name || '—'}`
+                                                        : ''}
+                                                </p>
+                                            )}
+                                            <div className="mt-6">
+                                                <label className="block mb-2">Assignment</label>
+                                                <div className="space-y-2 mb-4">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" name="assignMode" checked={assignMode === 'user'} onChange={() => { setAssignMode('user'); setSelectedSubsection(null); setSelectedReassignSection(null); }} />
+                                                        <span>Assign to a person</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" name="assignMode" checked={assignMode === 'subsection'} onChange={() => { setAssignMode('subsection'); setSelectedAssignee(null); setSelectedReassignSection(null); }} />
+                                                        <span>Assign to subsection (team)</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input type="radio" name="assignMode" checked={assignMode === 'reassign'} onChange={() => { setAssignMode('reassign'); setSelectedAssignee(null); setSelectedSubsection(null); }} />
+                                                        <span>Reassign to another section</span>
+                                                    </label>
+                                                </div>
+                                                {assignMode === 'user' && (
+                                                    <div className="mb-4">
+                                                        <label htmlFor="assignee" className="block mb-1 text-sm">Select user</label>
                                                         <select
-                                                            id="tag"
-                                                            className="form-select"
-                                                            value={params.tag}
-                                                            onChange={(e) => setParams({ ...params, tag: e.target.value })}
+                                                            id="assignee"
+                                                            className="form-select w-full"
+                                                            value={selectedAssignee?._id || ''}
+                                                            onChange={(e) => {
+                                                                const id = e.target.value;
+                                                                setSelectedAssignee(users.find((u: any) => u._id === id) || null);
+                                                            }}
                                                         >
-                                                            <option value="">Select Section</option>
-                                                            <option value="SYSTEMS-ENGINEER">Systems Engineer</option>
-                                                            <option value="ADMIN">Administrative</option>
-                                                            <option value="AFRIYIE">Afriyie Contractors</option>
-                                                            <option value="RAMJACK">RamJack Contractors</option>
-                                                            <option value="DISPATCH">Amax Contractors</option>
-                                                            <option value="GEOTECH">Geotech Engineer</option>
-                                                            <option value="BENEWISE">Beniwise Contractors</option>
+                                                            <option value="">Select user</option>
+                                                            {users.map((user: any) => (
+                                                                <option key={user._id} value={user._id}>
+                                                                    {user.firstName} {user.lastName}
+                                                                </option>
+                                                            ))}
                                                         </select>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                        </div>
                                                     </div>
-
-                                                <div className="item-center mt-7" style={{ display: params.tag === 'SYSTEMS-ENGINEER' ? 'block' : 'none' }}>
-                                                    <label htmlFor="assignee">Assignee</label>
-                                                    <select
-                                                        id="assignee"
-                                                        className="form-select"
-                                                        value={selectedAssignee ? (selectedAssignee as any)._id : ''}
-                                                        onChange={(e) => {
-                                                            const selectedUserId = e.target.value;
-                                                            const selectedUser: any = users.find((user: any) => user._id === selectedUserId);
-                                                            setSelectedAssignee(selectedUser);
-                                                        }}
+                                                )}
+                                                {assignMode === 'subsection' && (
+                                                    <div className="mb-4">
+                                                        <label htmlFor="subsection" className="block mb-1 text-sm">Select subsection</label>
+                                                        <select
+                                                            id="subsection"
+                                                            className="form-select w-full"
+                                                            value={selectedSubsection?._id || ''}
+                                                            onChange={(e) => {
+                                                                const id = e.target.value;
+                                                                setSelectedSubsection(subsections.find((s: any) => s._id === id) || null);
+                                                            }}
+                                                        >
+                                                            <option value="">Select subsection</option>
+                                                            {subsections.map((s: any) => (
+                                                                <option key={s._id} value={s._id}>{s.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                )}
+                                                {assignMode === 'reassign' && (
+                                                    <div className="mb-4">
+                                                        <label htmlFor="reassignSection" className="block mb-1 text-sm">Select section</label>
+                                                        <select
+                                                            id="reassignSection"
+                                                            className="form-select w-full"
+                                                            value={selectedReassignSection?._id || ''}
+                                                            onChange={(e) => {
+                                                                const id = e.target.value;
+                                                                setSelectedReassignSection(allSections.find((s: any) => s._id === id) || null);
+                                                            }}
+                                                        >
+                                                            <option value="">Select section</option>
+                                                            {allSections.map((s: any) => (
+                                                                <option key={s._id} value={s._id}>
+                                                                    {s.name}{s.departmentId?.name ? ` (${s.departmentId.name})` : ''}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                )}
+                                                <div className="flex justify-end gap-2 mt-4">
+                                                    <button type="button" className="btn btn-outline-danger" onClick={() => setViewTaskModal(false)}>Cancel</button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary"
+                                                        onClick={() => assignTask()}
+                                                        disabled={
+                                                            (assignMode === 'user' && !selectedAssignee?._id) ||
+                                                            (assignMode === 'subsection' && !selectedSubsection?._id) ||
+                                                            (assignMode === 'reassign' && !selectedReassignSection?._id)
+                                                        }
                                                     >
-                                                        <option value="">Select Assignee</option>
-                                                        {users.map((user: any) => (
-                                                        <option key={user._id} value={user._id}>
-                                                            {user.firstName} {' '} {user.lastName}
-                                                        </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                {/* Admin Assign */}
-                                                <div className="item-center mt-7" style={{ display: params.tag === 'ADMIN' ? 'block' : 'none' }}>
-                                                    <label htmlFor="assignee">Assignee</label>
-                                                    <select
-                                                        id="assignee"
-                                                        className="form-select"
-                                                        value={selectedAssignee ? (selectedAssignee as any)._id : ''}
-                                                        onChange={(e) => {
-                                                            const selectedUserId = e.target.value;
-                                                            const selectedUser: any = users1.find((user: any) => user._id === selectedUserId);
-                                                            setSelectedAssignee(selectedUser);
-                                                        }}
-                                                    >
-                                                        <option value="">Select Assignee</option>
-                                                        {users1.map((user: any) => (
-                                                        <option key={user._id} value={user._id}>
-                                                            {user.firstName} {' '} {user.lastName}
-                                                        </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                <div className="flex justify-end items-center mt-8" >
-                                                    <button type="button" className="btn btn-outline-danger" onClick={() => assignTask(selectedTask, selectedAssignee)}>
-                                                        Assign
+                                                        {assignMode === 'reassign' ? 'Reassign to section' : selectedTask.assignedTo || selectedTask.assignedToSubsectionId ? 'Update assignment' : 'Assign'}
                                                     </button>
                                                 </div>
-                                                </div>
-                                            ) : (
-                                            <div className="flex justify-end items-center mt-8" >
-                                                <button type="button" className="btn btn-outline-danger" onClick={() => setViewTaskModal(false)}>
-                                                    Close
-                                                </button>
                                             </div>
-                                            )}
+                                            <div className="flex justify-end mt-4">
+                                                <button type="button" className="btn btn-outline-secondary" onClick={() => setViewTaskModal(false)}>Close</button>
+                                            </div>
                                         </div>
                                     </Dialog.Panel>
                                 </Transition.Child>
@@ -884,6 +719,11 @@ const ActivityHub = () => {
                     </Dialog>
                 </Transition>
             </div>
+            <CreateTicketModal
+                open={showCreateTicketModal}
+                onClose={() => setShowCreateTicketModal(false)}
+                onSuccess={() => fetchIssues()}
+            />
             </>
             )}
         </div>

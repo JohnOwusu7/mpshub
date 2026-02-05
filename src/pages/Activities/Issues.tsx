@@ -16,7 +16,7 @@ import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconEye from '../../components/Icon/IconEye';
 import IconX from '../../components/Icon/IconX';
-import axios from 'axios';
+import axiosInstance from '../../Api/axiosInstance';
 import { API_CONFIG } from '../../Api/apiConfig';
 import IconMoodSmile from '../../components/Icon/IconMoodSmile';
 import { useNavigate } from 'react-router-dom';
@@ -36,20 +36,26 @@ const authenticatedUser = useSelector((state: IRootState) => state.user.user);
 const getUserRole = () => {
     // If the authenticated user object exists
     if (authenticatedUser) {
-        // Extract the role property from the user object
-        return authenticatedUser.role;
+        // Extract the roleName property from the user object
+        return authenticatedUser.roleName;
     } else {
-        // If user is not authenticated or user object doesn't contain role property
+        // If user is not authenticated or user object doesn't contain roleName property
         return 'guest';
     }
 };
+
+const userPermissions = authenticatedUser?.permissions || [];
+const canCreateIssue = userPermissions.includes('issue:create');
+const canManageIssues = userPermissions.includes('issue:manage'); // For editing and deleting
+const canWorkOnIssues = userPermissions.includes('issue:work_on'); // For starting progress
+const canResolveIssues = userPermissions.includes('issue:resolve'); // For completing tasks
 
     useEffect(() => {
         dispatch(setPageTitle('Activity Tracker'));
     });
     const [notesList, setNoteList] = useState([]);
 
-    const defaultParams: any = { id: null, heavyEquipmentId: '', title: '', description: '', priority: '', user: '', issue: '', issueDesc: '', operator: '', location: '', };
+    const defaultParams: any = { id: null, title: '', description: '', priority: '', user: '', tag: '', location: '', };
     const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
     const [createTicket, setCreateTicket] = useState<any>(false);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
@@ -57,80 +63,43 @@ const getUserRole = () => {
     const [filteredNotesList, setFilteredNotesList] = useState<any>([]);
     const [selectedTab, setSelectedTab] = useState<any>('all');
     const [selectedTabs, setSelectedTabs] = useState<any>('');
-    const [heavyEquipments, setHeavyEquipments] = useState<any[]>([]);
-    const [operators, setOperators] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     const token = localStorage.getItem('token');
     
 
-    // Fetch heavyEquipments data
-    useEffect(() => {
-        const fetchHeavyEquipments = async () => {
-            try {
-                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.heavyEquipments.endpoints.list}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setHeavyEquipments(response.data);
-            } catch (error) {
-                console.error('Error fetching heavyEquipments:', error);
-                showMessage('Error fetching heavyEquipments. Please try again later.', 'error');
-            }
-        };
-
-        fetchHeavyEquipments();
-    }, [token]);
-
-    // Fetch operators data
-    useEffect(() => {
-        const fetchOperators = async () => {
-            try {
-                const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.operators.endpoints.list}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setOperators(response.data);
-            } catch (error) {
-                console.error('Error fetching operators:', error);
-                showMessage('Error fetching operators. Please try again later.', 'error');
-            }
-        };
-
-        fetchOperators();
-    }, [token]);    
-
+    // No longer fetching heavyEquipments data
+    // No longer fetching operators data
+    
       const fetchIssues = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.list}`);
+            const response = await axiosInstance.get(API_CONFIG.issues.endpoints.list);
             const issuesData = response.data;
 
-            const userRole = getUserRole();
+            const userRole = getUserRole(); // Now returns roleName
 
-            // Filter the issues
-            const filteredIssues = issuesData.filter((issue: { tag: any; isComplete:boolean }) => {
-                return issue.tag === userRole && !issue.isComplete;
+            // Filter the issues - display all if user has issue:view, otherwise restrict based on tag
+            const filteredIssues = issuesData.filter((issue: any) => {
+                if (userPermissions.includes('issue:view')) {
+                    return !issue.isComplete; // View all incomplete issues if issue:view is present
+                } else if (issue.tag === userRole) {
+                    return !issue.isComplete; // Fallback: show issues tagged for their role if no general view
+                }
+                return false; // No access
             });
 
             // Normalize the filtered data
-            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; heavyEquipmentId: any; descriptionText: any; operator: any; createdAt: any; location: any; tag: any; priority: any; progress: any; issue: any; issueDesc: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
+            const normalizedData = filteredIssues.map((item: { _id: any; reportedBy: { firstName: any; }; title: any; descriptionText: any; createdAt: any; location: any; tag: any; priority: any; progress: any; updatedAt: any; isComplete: any; assignedTo: { firstName: any; lastName: any; }; }) => ({
                 id: item._id,
                 user: item.reportedBy.firstName,
                 title: item.title,
-                heavyEquipmentId: item.heavyEquipmentId,
                 description: item.descriptionText,
                 date: item.createdAt,
                 tag: item.tag,
                 priority: item.priority,
                 progress: item.progress,
-                issue: item.issue,
-                issueDesc: item.issueDesc,
                 location: item.location,
-                operator: item.operator,
-                // role: item.role,
                 updatedAt: item.updatedAt,
                 isComplete: item.isComplete,
                 assignee1: item?.assignedTo?.firstName || item.tag,
@@ -172,12 +141,9 @@ const getUserRole = () => {
 
         try {
             setLoading(true);
+            console.log("Sending issue data:", params);
             // Send the request to add/update the note
-            await axios.post(`${API_CONFIG.baseURL}${API_CONFIG.issues.endpoints.add}`, params, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            await axiosInstance.post(API_CONFIG.issues.endpoints.add, params);
 
             showMessage('Ticket has been sent successfully.');
             setCreateTicket(false);
@@ -205,11 +171,7 @@ const getUserRole = () => {
             console.log("user ID", params.id)
 
             // Send a POST request to update the progress of the note
-            const response = await axios.put(`${API_CONFIG.baseURL}/issues/start-progress/${params.id}`, {params}, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            });
+            const response = await axiosInstance.put(`/issues/start-progress/${params.id}`, {params});
             setIsViewNoteModal(false)
             navigate('/dashboard');
             showMessage('Progress started Successfully.');
@@ -228,11 +190,7 @@ const getUserRole = () => {
             console.log("item:", item)
             console.log("Params:", params)
             console.log("user param ID", params.id)
-            await axios.put(`${API_CONFIG.baseURL}/issues/complete-progress/${params.id}`, {params}, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            await axiosInstance.put(`/issues/complete-progress/${params.id}`, {params});
             setIsViewNoteModal(false)
             navigate('/dashboard');
             console.log('successfully')
@@ -287,9 +245,9 @@ const getUserRole = () => {
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
     return (
-        <div>
+        <Fragment>
             <BlankWithHeader />
-            <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full mt-5">
+            <div className="h-full">
                 <div className={`bg-black/60 z-10 w-full h-full rounded-md absolute hidden ${isShowNoteMenu ? '!block xl:!hidden' : ''}`} onClick={() => setIsShowNoteMenu(!isShowNoteMenu)}></div>
                 <div
                     className={`panel
@@ -380,10 +338,12 @@ const getUserRole = () => {
                         </PerfectScrollbar>
                     </div>
                     <div className="ltr:left-0 rtl:right-0 absolute bottom-0 p-4 w-full">
-                        <button className="btn btn-primary w-full" type="button" onClick={() => editNote()}>
-                            <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0" />
-                            Create A ticket
-                        </button>
+                        {canCreateIssue && (
+                            <button className="btn btn-primary w-full" type="button" onClick={() => editNote()}>
+                                <IconPlus className="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0" />
+                                Create A ticket
+                            </button>
+                        )}
                     </div>
                 </div>
                 <div className="panel flex-1 overflow-auto h-full">
@@ -443,12 +403,14 @@ const getUserRole = () => {
                                                             button={<IconHorizontalDots className="rotate-90 opacity-70 hover:opacity-100" />}
                                                         >
                                                             <ul className="text-sm font-medium">
-                                                                <li>
-                                                                    <button type="button" onClick={() => editNote(note)}>
-                                                                        <IconPencil className="w-4 h-4 ltr:mr-3 rtl:ml-3 shrink-0" />
-                                                                        Edit
-                                                                    </button>
-                                                                </li>
+                                                                {canManageIssues && (
+                                                                    <li>
+                                                                        <button type="button" onClick={() => editNote(note)}>
+                                                                            <IconPencil className="w-4 h-4 ltr:mr-3 rtl:ml-3 shrink-0" />
+                                                                            Edit
+                                                                        </button>
+                                                                    </li>
+                                                                )}
                                                                 <li>
                                                                     <button type="button" onClick={() => viewNote(note)}>
                                                                         <IconEye className="w-4.5 h-4.5 ltr:mr-3 rtl:ml-3 shrink-0" />
@@ -461,10 +423,16 @@ const getUserRole = () => {
                                                 </div>
                                                 <div>
                                                     <h4 className="font-semibold mt-4">
-                                                        {note.heavyEquipmentId ? `${note.heavyEquipmentId} Reporting on ${note.issue} Issues` : note.title || `${note.issue} critical issue at ${note.location}`}
+                                                        {note.title}
                                                         </h4>
                                                     <p className="text-white-dark mt-2">
-                                                    
+                                                        {note.description}
+                                                    </p>
+                                                    <p className="text-white-dark mt-2">
+                                                        <strong>Location:</strong> {note.location}
+                                                    </p>
+                                                    <p className="text-white-dark mt-2">
+                                                        <strong>Priority:</strong> {note.priority}
                                                     </p>
                                                 </div>
                                             </div>
@@ -525,373 +493,43 @@ const getUserRole = () => {
                                     </div>
                                     <div className="p-5">
                                     <form>
-                                            {/* Initial State */}
                                             <div className='mb-5'>
-                                                <label htmlFor='start'>Critical Summary (Reporting Operation)</label>
-                                                <select id='start' className='form-select' onChange={(e) => changeValue(e)}>
-                                                    <option value=''>Select Related</option>
-                                                    <option value="Truck">Truck Operation</option>
-                                                    <option value="Pit">Pit Operation</option>
-                                                    <option value="Admin">Administrative Operation</option>
-                                                    <option value="Other">Other operations</option>
-                                                </select>
-                                            </div>
-                                            {/* Heavy Equipment ID */}
-                                            <div className='flex justify-between mt-2'>
-                                                <div className="mb-5" style={{display: params.start === 'Truck' ? 'block' : 'none'}}>
-                                                    <label htmlFor="heavyEquipmentId">Heavy Equipment ID</label>
-                                                    <select id="heavyEquipmentId" className="form-select" value={params.heavyEquipmentId} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select HE ID</option>
-                                                        {heavyEquipments.map((heavyEquipment) => (
-                                                            <option key={heavyEquipment.id} value={heavyEquipment.id}>
-                                                                {heavyEquipment.heavyEquipmentName}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                {/* Operator Name */}
-                                                <div className="mb-5" style={{display: params.start === 'Truck' ? 'block' : 'none'}}>
-                                                    <label htmlFor="operator">Operator's Name (optional)</label>
-                                                    <select id="operator" className="form-select" value={params.operator} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select Operator's Name</option>
-                                                        {operators.map((operator) => (
-                                                            <option key={operator.id} value={operator.id}>
-                                                                {operator.operator}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+                                                <label htmlFor="title">Ticket Title</label>
+                                                <input id="title" type="text" placeholder="Enter Ticket Title" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
                                             </div>
 
-                                            
-                                            
-                                            {/* Concerns Location */}
-                                            <div className="mb-5" style={{display: params.start ==='Pit' || params.heavyEquipmentId || params. start === 'Admin' ? 'block' : 'none'}}>
-                                                    <label htmlFor="location">Location Happening</label>
-                                                    <select id="location" className="form-select" value={params.location} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select location</option>
-                                                        <option value="CUT2A">CUT2A</option>
-                                                        <option value="CUT2B">CUT2B</option>
-                                                        <option value="CUT2C">CUT2C</option>
-                                                        <option value="WASTE DUMP 4">WASTE DUMP 4</option>
-                                                        <option value="VIEW POINT">VIEW POINT</option>
-                                                        <option value="NEW TOWER">NEW TOWER</option>
-                                                        <option value="AJOPA">AJOPA</option>
-                                                        <option value="BLOCK 5">BLOCK 5</option>
-                                                        <option value="MINING OFFICE">MINING OFFICE</option>
-                                                        <option value="HME">HME (AMAX OFFICE)</option>
-                                                    </select>
-                                                </div>
-
-                                            {/* Other Operations */}
-                                            <div className="mb-5" style={{display: params.start === 'Other' ? 'block' : 'none'}}>
-                                                <label htmlFor="title">Title</label>
-                                                <input id="title" type="text" placeholder="Other Related" className="form-input" value={params.title} onChange={(e) => changeValue(e)} />
-                                            </div>
-
-                                            {/* Activity Type Flow */}
-                                            <div className="mb-5" style={{display: params.heavyEquipmentId || params.start === 'Pit' || params.start === 'Admin' ? 'block' : 'none'}}>
-                                                <label htmlFor="purpose">Activity Type</label>
-                                                <select id="purpose" className="form-select" value={params.purpose} onChange={(e) => changeValue(e)}>
-                                                    <option value="">Select Type</option>
-                                                    <option value="network">NETWORK</option>
-                                                    <option value="dispatch">DISPATCH</option>
-                                                    <option value="smart-cap">SMARTCAP</option>
-                                                    <option value="power">SOLAR/POWER</option>
-                                                    <option value="systems-admin">ADMINISTRATION</option>
-                                                </select>
-                                            </div>
-
-                                            {/* SMARTCAP FLOW */}
-                                            <div>
-                                                 {/* smartcap Type */}
-                                                <div className="mb-5" style={{ display: params.purpose === 'smart-cap' ? 'block' : 'none' }}>
-                                                    <label htmlFor="issueTypeSmart">What type of SmartCap</label>
-                                                    <select id="issueTypeSmart" className="form-select" value={params.issueTypeSmart} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select Type</option>
-                                                        <option value="issue">ISSUE</option>
-                                                        <option value="request">REQUEST</option>
-                                                        <option value="describe">OTHER</option>
-                                                    </select>
-                                                </div>
-
-                                                {/* Issue Type flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeSmart === 'issue' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Issue type</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="LifeDisplay">LIFE SCREEN</option>
-                                                            <option value="Life band">LIFE BAND</option>
-                                                            <option value="SmartCap Power">POWER</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Life Screen */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'LifeDisplay' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is on and off">ON/OFF</option>
-                                                            <option value="is not responsive">SCREEN NOT RESPONSIVE</option>
-                                                            <option value="needs re adjustment">RE ADJUST (eg: bolt loose, positioning)</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Life Band */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Life band' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is poorly fitted">POORLY FITTED</option>
-                                                            <option value="needs re-adjust">RE ADJUST</option>
-                                                            <option value='is removed'>REMOVE</option>
-                                                            <option value='cannot connect'>CANNOT CONNECT</option>
-                                                            <option value='cannot charge'>CANNOT CHARGE</option>
-                                                            <option value='connetion is unstable'>UNSTABLE CONNECTION</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Power */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'SmartCap Power' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is Off">OFF</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {/* Request flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeSmart === 'request' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Request type</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="Requests for LifeBand sensor spots">SENSOR DOT</option>
-                                                            <option value="Requests for headBand strap">STRAP</option>
-                                                            <option value="Requests for lifeBand">LIFE BAND</option>
-                                                            <option value="Requests for travel case">LIFEBAND TRAVEL CASE</option>
-                                                            <option value="Requests for removable sleeve">REMOVABLE SLEEVE</option>
-                                                            <option value="Requests for lifeDisplay">LIFE SCREEN</option>
-                                                            <option value="Requests for charger">CHARGER</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* DISPATCH FLOW */}
-                                            <div>
-                                                 {/* DISPATCH Type */}
-                                                <div className="mb-5" style={{ display: params.purpose === 'dispatch' ? 'block' : 'none' }}>
-                                                    <label htmlFor="issueTypeDisp">What type of incident operations</label>
-                                                    <select id="issueTypeDisp" className="form-select" value={params.issueTypeDisp} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select Type</option>
-                                                        <option value="issue">ISSUE</option>
-                                                        <option value="request">REQUEST</option>
-                                                        <option value="administration">ADMINISTRATION</option>
-                                                        <option value="describe">OTHER</option>
-                                                    </select>
-                                                </div>
-
-                                                {/* Issue Type flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'issue' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Issue operation</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="PTX Screen">PTX SCREEN</option>
-                                                            <option value="GPS">GPS</option>
-                                                            <option value="Antenna">ANTENNA</option>
-                                                            <option value="Mount">MOUNT</option>
-                                                            <option value="Communication">NETWORK</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* GPS */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'GPS' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select GPS Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is off">OFF</option>
-                                                            <option value="cable is torn">CABLE TORN</option>
-                                                            <option value="needs re adjustment">RE ADJUSTMENT</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* PTX Screen */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'PTX Screen' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Screen Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is removed">NO SCREEN</option>
-                                                            <option value="needs re-adjustment">RE ADJUST(eg: loose bolts, loose mount)</option>
-                                                            <option value='is performing very slow'>SYSTEM SLOW</option>
-                                                            <option value='is having touch issues'>SCREEN NOT RESPONSIVE</option>
-                                                            <option value='is on and off'>ON/OFF</option>
-                                                            <option value='has unstable comms'>UNSTABLE CONNECTION</option>
-                                                            <option value="is off">SCREEN OFF</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Power */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Mount' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Mount type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="needs re-adjustment">RE ADJUST(eg: loose bolts, loose mount)</option>
-                                                            <option value="is broken">BROKEN</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Comms */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Communication' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Network issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is Off">OFF</option>
-                                                            <option value="is unstable">UNSTABLE COMMS</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Antenna */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Antenna' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Antenna status</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Status</option>
-                                                            <option value="is broken">ATENNA BROKEN</option>
-                                                            <option value="needs re adjustment">RE ADJUST</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {/* Request flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'request' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Request Operation</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
-                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
-                                                            <option value="Requests for new screen">NEW SCREEN</option>
-                                                            <option value="Requests for dispatch mount">MOUNT</option>
-                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
-                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
-                                                            <option value="Requests for new GPS">GPS</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* NETWORK FLOW */}
-                                            <div>
-                                                 {/* NETWORK Type */}
-                                                <div className="mb-5" style={{ display: params.purpose === 'network' ? 'block' : 'none' }}>
-                                                    <label htmlFor="issueTypeNetwork">What type of incident operations</label>
-                                                    <select id="issueTypeNetwork" className="form-select" value={params.issueTypeDisp} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select Type</option>
-                                                        <option value="issue">ISSUE</option>
-                                                        <option value="request">REQUEST</option>
-                                                        <option value="administration">ADMINISTRATION</option>
-                                                        <option value="describe">OTHER</option>
-                                                    </select>
-                                                </div>
-
-                                                {/* Issue Type flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeNetwork === 'issue' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Issue operation</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="Radio">RADIO</option>
-                                                            <option value="Network">NETWORK</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Radio Screen */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Radio' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Radio Issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="communication is off">NO COMMS</option>
-                                                            <option value="communication is on and off">ON AND OFF</option>
-                                                            <option value='communication delays'>DELAYS</option>
-                                                            <option value='is not working'>NOT WORKING</option>
-                                                        </select>
-                                                    </div>
-                                                    {/* Comms */}
-                                                    <div className="mb-5" style={{ display: params.issue === 'Network' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issueDesc">Select Network issue type</label>
-                                                        <select id="issueDesc" className="form-select" value={params.issueDesc} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="is Off">OFF</option>
-                                                            <option value="is unstable">UNSTABLE COMMS</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {/* Request flow */}
-                                                <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'request' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Request Operation</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
-                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
-                                                            <option value="Requests for new screen">NEW SCREEN</option>
-                                                            <option value="Requests for dispatch mount">MOUNT</option>
-                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
-                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
-                                                            <option value="Requests for new GPS">GPS</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Request flow */}
-                                            <div className='flex justify-between mt-2'>
-                                                    <div className="mb-5" style={{ display: params.issueTypeDisp === 'administration' ? 'block' : 'none' }}>
-                                                        <label htmlFor="issue">Select Request Operation</label>
-                                                        <select id="issue" className="form-select" value={params.issue} onChange={(e) => changeValue(e)}>
-                                                            <option value="">Select Type</option>
-                                                            <option value="Requests for new bullet radio">NEW BULLET RADIO</option>
-                                                            <option value="Requests for new antenna">NEW ANTENNA</option>
-                                                            <option value="Requests for new screen">NEW SCREEN</option>
-                                                            <option value="Requests for dispatch mount">MOUNT</option>
-                                                            <option value="Requests for new dispatch installation">DISPATCH TRUCK INSTALLATION</option>
-                                                            <option value="Requests for new dispatch application installation">DISPATCH APPLICATION INSTALLATION</option>
-                                                            <option value="Requests for new GPS">GPS</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                            {/* priority */}
-                                            <div className="mb-5" style={{display: params.issueDesc || params.issue || params.issueTypeDisp === 'describe' || params.title ? 'block' : 'none'}}>
-                                                    <label htmlFor="priority">Priority State</label>
-                                                    <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
-                                                        <option value="">Select</option>
-                                                        <option value="low">Low</option>
-                                                        <option value="medium">Medium</option>
-                                                        <option value="high">High</option>
-                                                    </select>
-                                            </div>
-
-                                            {/* Other comments */}
-                                            <div className="mb-5" style={{display: params.title && params.priority ? 'block' : 'none'}}>
-                                                <label htmlFor="description">Describe Other related</label>
-                                                    <textarea
-                                                        id="description"
-                                                        rows={3}
-                                                        className="form-textarea resize-none min-h-[130px]"
-                                                        placeholder="Enter other descriptions"
-                                                        value={params.description}
-                                                        onChange={(e) => changeValue(e)}
-                                                    ></textarea>   
-                                            </div>
-                                                
-                                            {/* comments */}
-                                            <div className="mb-5" style={{display: params.priority && !params.title ? 'block' : 'none'}}>
-                                                <label htmlFor="description">Comment (optional)</label>
+                                            <div className="mb-5">
+                                                <label htmlFor="description">Description</label>
                                                 <textarea
                                                     id="description"
                                                     rows={3}
                                                     className="form-textarea resize-none min-h-[130px]"
-                                                    placeholder="Enter any coments"
+                                                    placeholder="Enter Description"
                                                     value={params.description}
                                                     onChange={(e) => changeValue(e)}
                                                 ></textarea>
                                             </div>
+
+                                            <div className="mb-5">
+                                                <label htmlFor="location">Location</label>
+                                                <input id="location" type="text" placeholder="Enter Location" className="form-input" value={params.location} onChange={(e) => changeValue(e)} />
+                                            </div>
+
+                                            <div className="mb-5">
+                                                <label htmlFor="tag">Tag (e.g., SYSTEMS-ENGINEER, DISPATCH)</label>
+                                                <input id="tag" type="text" placeholder="Enter Tag" className="form-input" value={params.tag} onChange={(e) => changeValue(e)} />
+                                            </div>
+
+                                            <div className="mb-5">
+                                                <label htmlFor="priority">Priority</label>
+                                                <select id="priority" className="form-select" value={params.priority} onChange={(e) => changeValue(e)}>
+                                                    <option value="">Select Priority</option>
+                                                    <option value="low">Low</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="high">High</option>
+                                                </select>
+                                            </div>
+
                                             <div className="flex justify-end items-center mt-8">
                                                 <button type="button" className="btn btn-outline-danger gap-2" onClick={() => setCreateTicket(false)}>
                                                     Cancel
@@ -933,78 +571,78 @@ const getUserRole = () => {
                                         leave="ease-in duration-200"
                                         leaveFrom="opacity-100 scale-100"
                                         leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsViewNoteModal(false)}
+                                        className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
                                     >
-                                        <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                                        <IconX />
+                                    </button>
+                                    <div className="flex items-center flex-wrap gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                                        <div className="ltr:mr-3 rtl:ml-3">{params.title}</div>
+                                        {params.tag && (
                                             <button
                                                 type="button"
-                                                onClick={() => setIsViewNoteModal(false)}
-                                                className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
+                                                className={`badge badge-outline-primary rounded-3xl capitalize ltr:mr-3 rtl:ml-3 ${
+                                                    params.tag === '-SYSTEMS-ENGINEER' ? 'shadow-primary' :
+                                                    params.tag === 'DISPATCH' ? 'shadow-warning' :
+                                                    ''
+                                                }`}
                                             >
-                                                <IconX />
+                                                {params.tag}
                                             </button>
-                                            <div className="flex items-center flex-wrap gap-2 text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                                <div className="ltr:mr-3 rtl:ml-3">{params.heavyEquipmentId ? `${params.heavyEquipmentId} Reporting on ${params.issue} Issues` : params.title || `${params.issue} critical issue at ${params.location}`}</div>
-                                                {params.tag && (
-                                                    <button
-                                                        type="button"
-                                                        className={`badge badge-outline-primary rounded-3xl capitalize ltr:mr-3 rtl:ml-3 ${
-                                                            (params.tag === '-SYSTEMS-ENGINEER' && 'shadow-primary',
-                                                            params.tag === 'DISPATCH' && 'shadow-warning')
-                                                        }`}
-                                                    >
-                                                        {params.tag}
-                                                    </button>
-                                                )}
-                                                {params.isComplete && (
-                                                    <button type="button" className="text-success">
-                                                        <IconMoodSmile className="fill-success align-center" />
-                                                        Completed
-                                                    </button>
-                                                )}
-                                                <div className="ltr:mr-3 rtl:ml-3">Assignee: {`${params.assignee1}${' '}${params.assignee2}`}</div>
-                                            </div>
-                                            <div className="p-5">
-                                                <div className="text-base">
-                                                {params.heavyEquipmentId ? `${params.operator}'s ${params.issue} ${params.issueDesc}. Reporting on ${params.heavyEquipmentId}. Location: ${params.location}`  : '' || `${!params.title ? `${params.operator} ${params.issue} ${params.issueDesc}. Location: ${params.location}`  : params.description }`}
-                                            
-                                                </div>
-                                                {loading ? (
-                                                <div className="flex justify-center items-center h-64">
-                                                    <div className="loader">Loading...</div>
-                                                </div>
-                                                ) : (
-                                                <div className="ltr:text-right rtl:text-left mt-8">
-                                                    {
-                                                        params.progress === 'new' ? (
-                                                            <button type="button" className="btn btn-outline-warning" onClick={() => startProgress(params)}>
-                                                                Start progress
-                                                            </button>
-                                                        ) : params.progress === 'in-progress' ? (
-                                                            <button type="button" className="btn btn-outline-success" onClick={() => completeProgress(params)}>
-                                                                Complete project
-                                                            </button>
-                                                        ) : params.isComplete === true ? (
-                                                            <button type="button" className="btn btn-outline-danger" onClick={() => setIsViewNoteModal(false)}>
-                                                                Close
-                                                            </button>
-                                                        ) : (
-                                                            <button type="button" className="btn btn-outline-danger" onClick={() => setIsViewNoteModal(false)}>
-                                                                Close
-                                                            </button>
-                                                        )
-                                                    }
-                                                </div>
-                                                )}
-                                            </div>
-                                        </Dialog.Panel>
-                                    </Transition.Child>
-                                </div>
-                            </div>
-                        </Dialog>
-                    </Transition>
-                </div>
+                                        )}
+                                        {params.isComplete && (
+                                            <button type="button" className="text-success">
+                                                <IconMoodSmile className="fill-success align-center" />
+                                                Completed
+                                            </button>
+                                        )}
+                                        <div className="ltr:mr-3 rtl:ml-3">Assignee: {`${params.assignee1} ${params.assignee2}`}</div>
+                                    </div>
+                                    <div className="p-5">
+                                        <div className="text-base">
+                                            <p><strong>Description:</strong> {params.description}</p>
+                                            <p><strong>Location:</strong> {params.location}</p>
+                                            <p><strong>Priority:</strong> {params.priority}</p>
+                                        </div>
+                                        {loading ? (
+                                        <div className="flex justify-center items-center h-64">
+                                            <div className="loader">Loading...</div>
+                                        </div>
+                                        ) : (
+                                        <div className="ltr:text-right rtl:text-left mt-8">
+                                            {canWorkOnIssues && params.progress === 'new' ? (
+                                                <button type="button" className="btn btn-outline-warning" onClick={() => startProgress(params)}>
+                                                    Start progress
+                                                </button>
+                                            ) : canResolveIssues && params.progress === 'in-progress' ? (
+                                                <button type="button" className="btn btn-outline-success" onClick={() => completeProgress(params)}>
+                                                    Complete project
+                                                </button>
+                                            ) : params.isComplete === true ? (
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setIsViewNoteModal(false)}>
+                                                    Close
+                                                </button>
+                                            ) : (
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setIsViewNoteModal(false)}>
+                                                    Close
+                                                </button>
+                                            )}
+                                        </div>
+                                        )}
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+                </Transition>
             </div>
-        </div>
+            </div>
+        </Fragment>
     );
 };
 

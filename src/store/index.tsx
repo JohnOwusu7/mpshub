@@ -25,12 +25,14 @@ import themeConfigSlice from './themeConfigSlice';
 import authReducer from './authSlice';
 import { alertSlice } from './features/alertSlice';
 import userReducer from './userSlice';
+import companyReducer from './companySlice';
 
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
     auth: authReducer,
     alerts: alertSlice.reducer,
     user: userReducer,
+    company: companyReducer,
 });
 
 const store = configureStore({

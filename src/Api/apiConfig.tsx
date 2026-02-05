@@ -1,8 +1,20 @@
+const env = (import.meta as any).env || {};
+const VITE_API_BASE_URL = env.VITE_API_BASE_URL || '/api';
+const VITE_SOCKET_URL = (() => {
+  if (env.VITE_SOCKET_URL) return env.VITE_SOCKET_URL;
+  try {
+    if (VITE_API_BASE_URL.startsWith('http')) {
+      return new URL(VITE_API_BASE_URL).origin;
+    }
+  } catch {}
+  return (typeof window !== 'undefined' && window.location?.origin) ? window.location.origin : '/';
+})();
+
 export const API_CONFIG = {
-  baseURL: 'https://mpsserver.onrender.com/api',
-  // baseURL: 'http://localhost:7854/api',
-  socketUrl: 'https://mpsserver.onrender.com',
-  // socketUrl: 'http://localhost:7854',
+  // baseURL: 'https://mpsserver.onrender.com/api',
+  baseURL: VITE_API_BASE_URL,
+  // socketUrl: 'https://mpsserver.onrender.com',
+  socketUrl: VITE_SOCKET_URL,
   equipment: {
     endpoints: {
       list: '/equipments/list',
@@ -28,41 +40,15 @@ export const API_CONFIG = {
       listAdmin: '/users/administrative',
       getUser: '/users/get-user',
       add: '/users/add',
-      edit: '/users/:userId',
+      edit: '/users/:userId/update',
       delete: '/users/:userId',
       active: 'users/:userId/block',
       inActive: 'users/:userId/unblock',
       changePassword: 'users/change-password',
+      forgotPassword: '/users/forgot-password',
       send: '/users/send',
       ready: '/users/ready',
-    },
-  },
-  heavyEquipments: {
-    endpoints: {
-      list: '/heavy-equipments/list',
-      listOne: '/heavy-equipments/:id',
-      add: '/heavy-equipments',
-      edit: '/heavy-equipments',
-      delete: '/heavy-equipments',
-    },
-  },
-  operators: {
-    endpoints: {
-      list: '/operators/list',
-      listOne: '/operators/:id',
-      add: '/operators',
-      bulk: '/operators/bulk',
-      edit: '/operators',
-      delete: '/operators',
-    },
-  },
-  installations: {
-    endpoints: {
-      list: '/installations/list',
-      listOne: '/installations/:id',
-      add: '/installations/add',
-      edit: '/installations/:id/equipmentStatus',
-      delete: '/installations/:id',
+      listAll: '/users/list-all', // New endpoint for SUPER-ADMIN to list all users
     },
   },
   ipAddress: {
@@ -86,7 +72,9 @@ export const API_CONFIG = {
       delete: '/issues/:id',
       deleteToTrash: '/issues/deleteToTrash',
       complete: '/issues/complete',
+      completeProgress: '/issues/complete-progress',
       reported: '/issues/reported',
+      assign: '/issues/assign',
       assigned: '/issues/assign',
       send: '/issues/send',
     },
@@ -128,6 +116,72 @@ export const API_CONFIG = {
       list: '/safety-interaction-records',
       delete: '/sirs/:id',
     }
-  }
+  },
+  companies: {
+    endpoints: {
+      register: '/register-company',
+      list: '/companies',
+      getById: '/companies/:companyId',
+      updateModules: '/companies/:companyId/modules', // New endpoint for updating subscribed modules
+      // Company Role Endpoints
+      createRole: '/companies/roles',
+      listRoles: '/companies/roles',
+      getRoleById: '/companies/roles/:roleId',
+      updateRole: '/companies/roles/:roleId',
+      deleteRole: '/companies/roles/:roleId',
+      // Role Template Endpoints
+      listRoleTemplates: '/role-templates/templates',
+      activateRoleTemplate: '/role-templates/activate',
+      syncRoleWithTemplate: '/role-templates/sync/:roleId',
+    },
+  },
+  departments: {
+    endpoints: {
+      create: '/departments',
+      list: '/departments',
+      getById: '/departments/:id',
+      update: '/departments/:id',
+      delete: '/departments/:id',
+    },
+  },
+  sections: {
+    endpoints: {
+      create: '/sections',
+      listByDepartment: '/sections/by-department/:departmentId',
+      getById: '/sections/:id',
+      update: '/sections/:id',
+      delete: '/sections/:id',
+    },
+  },
+  subsections: {
+    endpoints: {
+      create: '/subsections',
+      listBySection: '/subsections/by-section/:sectionId',
+      getById: '/subsections/:id',
+      update: '/subsections/:id',
+      delete: '/subsections/:id',
+    },
+  },
+  services: {
+    endpoints: {
+      create: '/services',
+      list: '/services',
+      listBySection: '/services/by-section/:sectionId',
+      getById: '/services/:id',
+      update: '/services/:id',
+      delete: '/services/:id',
+    },
+  },
+  paymentTransactions: {
+    endpoints: {
+      create: '/payment-transactions',
+      list: '/payment-transactions',
+      getById: '/payment-transactions/:paymentId',
+      confirm: '/payment-transactions/:paymentId/confirm',
+      update: '/payment-transactions/:paymentId',
+      delete: '/payment-transactions/:paymentId',
+      statistics: '/payment-transactions/statistics',
+    },
+  },
 };
 
