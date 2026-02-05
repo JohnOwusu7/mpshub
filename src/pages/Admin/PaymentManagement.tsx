@@ -199,6 +199,7 @@ const PaymentManagement: React.FC = () => {
             await createPaymentTransactionApi({
                 ...paymentData,
                 paymentMethod: paymentData.paymentMethod as PaymentTransaction['paymentMethod'],
+                subscriptionPeriod: paymentData.subscriptionPeriod as PaymentTransaction['subscriptionPeriod'],
             });
             showMessage({ message: 'Payment transaction created successfully.', success: true });
             setShowCreateModal(false);

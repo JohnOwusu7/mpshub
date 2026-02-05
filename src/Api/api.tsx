@@ -125,6 +125,9 @@ export interface User {
     departmentId?: string; // New field for department, optional
     sectionId?: string; // New field for section, optional
     subsectionId?: string; // New field for subsection, optional
+    department?: any; // Populated department object from API
+    section?: any; // Populated section object from API
+    subsection?: any; // Populated subsection object from API
     status: 'ACTIVE' | 'BLOCKED';
     tokens?: any[]; // Optional
     createdAt: string;

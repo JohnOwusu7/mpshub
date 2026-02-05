@@ -79,10 +79,10 @@ const IssueReportsUserList: React.FC = () => {
             let filteredResult = response.data.filter(issue => issue?.tag === userRole);
 
             if (userRole === 'DISPATCH') {
-                const dispatchReportedIssues = response.data.filter(issue => (issue?.reportedBy as any)?.role === 'DISPATCH' && issue?.reportedBy?._id === authenticatedUser?._id);
+                const dispatchReportedIssues = response.data.filter(issue => (issue?.reportedBy as any)?.role === 'DISPATCH' && (issue?.reportedBy as any)?._id === (authenticatedUser as any)?._id);
                 filteredResult = [...new Set([...filteredResult, ...dispatchReportedIssues])];
             } else if (userRole === 'BENEWISE') {
-                const benewiseReportedIssues = response.data.filter(issue => (issue?.reportedBy as any)?.role === 'BENEWISE' && issue?.reportedBy?._id === authenticatedUser?._id);
+                const benewiseReportedIssues = response.data.filter(issue => (issue?.reportedBy as any)?.role === 'BENEWISE' && (issue?.reportedBy as any)?._id === (authenticatedUser as any)?._id);
                 filteredResult = [...new Set([...filteredResult, ...benewiseReportedIssues])];
             }
 

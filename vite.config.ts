@@ -16,7 +16,11 @@ export default defineConfig({
         exclude: [
           'nanoid'
         ]
-      }
+    },
+    build: {
+        // Raise limit so large vendor chunks (e.g. react-apexcharts) don't warn; no change to output
+        chunkSizeWarningLimit: 600,
+    },
 });
 
 

@@ -111,7 +111,7 @@ const IssueAnalyticsDashboard: React.FC = () => {
             // Process issues created over time
             const issuesByDate: { [key: string]: number } = {};
             issues.forEach((issue: Issue) => {
-                const date = new Date(issue.issuedDate || issue.createdAt).toISOString().split('T')[0];
+                const date = new Date(issue.issuedDate ?? issue.createdAt ?? 0).toISOString().split('T')[0];
                 issuesByDate[date] = (issuesByDate[date] || 0) + 1;
             });
 
@@ -505,7 +505,7 @@ const IssueAnalyticsDashboard: React.FC = () => {
                                                 {issue.isComplete ? 'COMPLETED' : issue.status || 'PENDING'}
                                             </span>
                                         </td>
-                                        <td>{new Date(issue.issuedDate || issue.createdAt).toLocaleDateString()}</td>
+                                        <td>{new Date(issue.issuedDate ?? issue.createdAt ?? 0).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -575,7 +575,7 @@ const IssueAnalyticsDashboard: React.FC = () => {
                                                 ? `${issue.assignedTo.firstName || ''} ${issue.assignedTo.lastName || ''}`
                                                 : 'Unassigned'}
                                         </td>
-                                        <td>{new Date(issue.createdAt || issue.issuedDate).toLocaleDateString()}</td>
+                                        <td>{new Date(issue.createdAt ?? issue.issuedDate ?? 0).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
