@@ -1,10 +1,10 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from './Icon/IconX';
 import { API_CONFIG } from '../Api/apiConfig';
 import axiosInstance from '../Api/axiosInstance';
 import { getAllServicesApi } from '../Api/api';
-import type { IService } from '../Api/api';
+import type { IService, OnboardingStep } from '../Api/api';
 import Swal from 'sweetalert2';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../store';
@@ -27,10 +27,16 @@ interface CreateTicketModalProps {
 }
 
 const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps) => {
+    const formRef = useRef<HTMLFormElement>(null);
     const [params, setParams] = useState(defaultParams);
+    const [guidedAnswers, setGuidedAnswers] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
     const [services, setServices] = useState<IService[]>([]);
     const [servicesLoading, setServicesLoading] = useState(true);
+
+    const selectedService = services.find((s) => s._id === params.serviceId);
+    const hasGuidedForm =
+        !!selectedService?.onboardingTemplate?.steps?.length;
 
     const authenticatedUser = useSelector((state: IRootState) => state.user.user);
     const companyInfo = useSelector((state: IRootState) => state.company?.companyInfo);
@@ -40,7 +46,12 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
     useEffect(() => {
         if (!open) return;
         setParams({ ...defaultParams });
+        setGuidedAnswers({});
     }, [open]);
+
+    useEffect(() => {
+        if (!params.serviceId) setGuidedAnswers({});
+    }, [params.serviceId]);
 
     useEffect(() => {
         if (!companyId) {
@@ -54,20 +65,68 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
             .finally(() => setServicesLoading(false));
     }, [companyId]);
 
+    useEffect(() => {
+        if (!open) return;
+        const form = formRef.current;
+        const handler = (e: KeyboardEvent) => {
+            const el = e.target as HTMLInputElement | HTMLTextAreaElement;
+            if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return;
+            if (!form?.contains(el)) return;
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.stopPropagation();
+                e.preventDefault();
+                const char = e.key === ' ' ? ' ' : '\n';
+                const start = el.selectionStart ?? el.value.length;
+                const end = el.selectionEnd ?? el.value.length;
+                const newVal = el.value.slice(0, start) + char + el.value.slice(end);
+                el.value = newVal;
+                el.selectionStart = el.selectionEnd = start + 1;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+        document.addEventListener('keydown', handler, true);
+        return () => document.removeEventListener('keydown', handler, true);
+    }, [open]);
+
+    const buildGuidedTitleAndDescription = (): { title: string; descriptionText: string } => {
+        const steps = selectedService?.onboardingTemplate?.steps ?? [];
+        const parts = steps.map((s) => {
+            const answer = (guidedAnswers[s.key] || '').trim();
+            const otherText = (guidedAnswers[s.key + '_other'] || '').trim();
+            const fullAnswer = otherText ? `${answer || '—'}\n${otherText}` : (answer || '—');
+            return `${s.question}\n${fullAnswer}`;
+        });
+        const descriptionText = parts.join('\n\n');
+        const firstAnswer = steps.length ? (guidedAnswers[steps[0].key] || '').trim() : '';
+        const title = firstAnswer || (selectedService ? `Guided: ${selectedService.name}` : 'Guided ticket');
+        return { title, descriptionText };
+    };
+
     const handleSubmit = async () => {
-        const titleTrimmed = (params.title || '').trim();
-        if (!titleTrimmed) {
-            showMessage('Title is required.', 'error');
-            return;
-        }
         if (!params.serviceId) {
             showMessage('Please select a service so your ticket is routed to the right team.', 'error');
             return;
         }
 
+        let title: string;
+        let descriptionText: string | undefined;
+        if (hasGuidedForm) {
+            const built = buildGuidedTitleAndDescription();
+            title = built.title;
+            descriptionText = built.descriptionText;
+        } else {
+            const titleTrimmed = (params.title || '').trim();
+            if (!titleTrimmed) {
+                showMessage('Title is required.', 'error');
+                return;
+            }
+            title = titleTrimmed;
+            descriptionText = params.description;
+        }
+
         const payload = {
-            title: titleTrimmed,
-            descriptionText: params.description,
+            title,
+            descriptionText,
             priority: params.priority || undefined,
             location: params.location || undefined,
             serviceId: params.serviceId,
@@ -78,6 +137,7 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
             await axiosInstance.post(API_CONFIG.issues.endpoints.add, payload);
             showMessage('Ticket created successfully. It has been routed to the right team.');
             setParams({ ...defaultParams });
+            setGuidedAnswers({});
             onSuccess?.();
             onClose();
         } catch (error: any) {
@@ -95,6 +155,10 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
     const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { value, id } = e.target;
         setParams((prev) => ({ ...prev, [id]: value }));
+    };
+
+    const setGuidedAnswer = (key: string, value: string) => {
+        setGuidedAnswers((prev) => ({ ...prev, [key]: value }));
     };
 
     const showMessage = (msg = '', type: 'success' | 'error' = 'success') => {
@@ -153,6 +217,7 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                         Choose a service and the system will route your ticket to the right department and team.
                                     </p>
                                     <form
+                                        ref={formRef}
                                         onSubmit={(e) => {
                                             e.preventDefault();
                                             handleSubmit();
@@ -180,7 +245,69 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                             {!servicesLoading && services.length === 0 && (
                                                 <p className="text-xs text-warning mt-1">No services configured. Ask your administrator to add services in Service Management.</p>
                                             )}
+                                            {hasGuidedForm && (
+                                                <p className="text-xs text-primary mt-1">This service uses a guided form. Answer the questions below.</p>
+                                            )}
                                         </div>
+
+                                        {hasGuidedForm ? (
+                                            /* Guided form: onboarding template steps only */
+                                            <div className="space-y-4 mb-5">
+                                                {(selectedService?.onboardingTemplate?.steps ?? []).map((step: OnboardingStep) => (
+                                                    <div key={step.key} className="mb-5">
+                                                        <label htmlFor={`guided-${step.key}`}>{step.question}</label>
+                                                        {step.inputType === 'textarea' ? (
+                                                            <textarea
+                                                                id={`guided-${step.key}`}
+                                                                rows={3}
+                                                                className="form-textarea resize-none min-h-[80px] mt-1 block w-full"
+                                                                placeholder={step.question}
+                                                                value={guidedAnswers[step.key] ?? ''}
+                                                                onChange={(e) => setGuidedAnswer(step.key, e.target.value)}
+                                                            />
+                                                        ) : step.inputType === 'select' && step.options?.length ? (
+                                                            <>
+                                                            <select
+                                                                id={`guided-${step.key}`}
+                                                                className="form-select mt-1 block w-full"
+                                                                value={guidedAnswers[step.key] ?? ''}
+                                                                onChange={(e) => {
+                                                                    const v = e.target.value;
+                                                                    setGuidedAnswer(step.key, v);
+                                                                    if (!v.toLowerCase().includes('other')) setGuidedAnswer(step.key + '_other', '');
+                                                                }}
+                                                            >
+                                                                <option value="">Select...</option>
+                                                                {step.options.map((opt) => (
+                                                                    <option key={opt} value={opt}>{opt}</option>
+                                                                ))}
+                                                            </select>
+                                                            {(guidedAnswers[step.key] ?? '').toLowerCase().includes('other') && (
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-input mt-2 block w-full"
+                                                                    placeholder="Please specify (you can write a sentence)"
+                                                                    value={guidedAnswers[step.key + '_other'] ?? ''}
+                                                                    onChange={(e) => setGuidedAnswer(step.key + '_other', e.target.value)}
+                                                                />
+                                                            )}
+                                                            </>
+                                                        ) : (
+                                                            <input
+                                                                id={`guided-${step.key}`}
+                                                                type="text"
+                                                                className="form-input mt-1 block w-full"
+                                                                placeholder={step.question}
+                                                                value={guidedAnswers[step.key] ?? ''}
+                                                                onChange={(e) => setGuidedAnswer(step.key, e.target.value)}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            /* Default free-text form: Title and Description */
+                                            <>
                                         <div className="mb-5">
                                             <label htmlFor="title">Title <span className="text-danger">*</span></label>
                                             <input
@@ -204,17 +331,22 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                                 onChange={changeValue}
                                             />
                                         </div>
-                                        <div className="mb-5">
-                                            <label htmlFor="location">Location</label>
-                                            <input
-                                                id="location"
-                                                type="text"
-                                                placeholder="Enter Location"
-                                                className="form-input"
-                                                value={params.location}
-                                                onChange={changeValue}
-                                            />
-                                        </div>
+                                            </>
+                                        )}
+
+                                        {!hasGuidedForm && (
+                                            <div className="mb-5">
+                                                <label htmlFor="location">Location</label>
+                                                <input
+                                                    id="location"
+                                                    type="text"
+                                                    placeholder="Enter Location"
+                                                    className="form-input"
+                                                    value={params.location}
+                                                    onChange={changeValue}
+                                                />
+                                            </div>
+                                        )}
                                         <div className="mb-5">
                                             <label htmlFor="priority">Priority</label>
                                             <select id="priority" className="form-select" value={params.priority} onChange={changeValue}>
@@ -224,6 +356,7 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                                 <option value="high">High</option>
                                             </select>
                                         </div>
+
                                         <div className="flex justify-end items-center mt-8 gap-2">
                                             <button type="button" className="btn btn-outline-danger" onClick={onClose}>
                                                 Cancel

@@ -97,6 +97,17 @@ export interface ISubsection {
   updatedAt: string;
 }
 
+export interface OnboardingStep {
+  question: string;
+  key: string;
+  inputType?: 'text' | 'textarea' | 'select';
+  options?: string[];
+}
+
+export interface OnboardingTemplate {
+  steps: OnboardingStep[];
+}
+
 export interface IService {
   _id: string;
   name: string;
@@ -104,6 +115,7 @@ export interface IService {
   companyId: string;
   sectionId: string | { _id: string; name: string; departmentId?: any };
   isActive?: boolean;
+  onboardingTemplate?: OnboardingTemplate;
   createdAt: string;
   updatedAt: string;
 }
@@ -511,7 +523,7 @@ export const deleteSubsectionApi = async (subsectionId: string): Promise<ApiResp
 };
 
 // Service API Calls
-export const createServiceApi = async (serviceData: { name: string; sectionId: string; companyId?: string; description?: string; isActive?: boolean }): Promise<IService> => {
+export const createServiceApi = async (serviceData: { name: string; sectionId: string; companyId?: string; description?: string; isActive?: boolean; onboardingTemplate?: OnboardingTemplate }): Promise<IService> => {
   try {
     const response = await axiosInstance.post(API_CONFIG.services.endpoints.create, serviceData);
     return response.data;
