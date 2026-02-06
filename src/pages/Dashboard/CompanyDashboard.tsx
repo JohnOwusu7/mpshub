@@ -201,6 +201,7 @@ const CompanyDashboard: React.FC = () => {
     const canCreateIssue = userPermissions.includes('issue:create');
     const canViewUsers = userPermissions.includes('user:view');
     const canViewSubscription = true;
+    const canViewAnalytics = user?.roleName === 'ADMIN' || user?.roleName === 'MANAGER';
 
     const needAttention = stats.unassignedIssues + stats.highPriorityOpen;
     const subscriptionStatus =
@@ -345,7 +346,7 @@ const CompanyDashboard: React.FC = () => {
 
                 {/* Right: This week + Need attention */}
                 <div className="space-y-4">
-                    {issuesModuleSubscribed && (
+                    {issuesModuleSubscribed && canViewAnalytics && (
                         <>
                             <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">This week</h2>
                             <div className="panel p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
@@ -439,7 +440,7 @@ const CompanyDashboard: React.FC = () => {
                         </Link>
                     )}
 
-                    {issuesModuleSubscribed && canViewIssues && (
+                    {issuesModuleSubscribed && canViewIssues && canViewAnalytics && (
                         <Link
                             to="/dashboard/issues"
                             className="panel p-5 flex items-center gap-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-primary/30 hover:shadow-md transition-all group"

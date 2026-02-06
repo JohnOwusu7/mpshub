@@ -112,6 +112,11 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
       return <>{element}</>;
     }
 
+    // Allow if user's role name is in the list (e.g. route requires ADMIN or MANAGER only)
+    if (userRoleName && allowedPermissions.includes(userRoleName)) {
+      return <>{element}</>;
+    }
+
     const hasAllPermissions = allowedPermissions.every(permission => userPermissions.includes(permission));
 
     if (!hasAllPermissions) {

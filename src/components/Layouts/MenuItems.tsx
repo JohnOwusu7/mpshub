@@ -55,9 +55,9 @@ const allMenuItems: MenuItem[] = [
                 label: 'Analytics',
                 link: '/dashboard/issues',
                 icon: <IconMenuDashboard />,
-                permissions: ['issue:view', 'issue:assign'], // For Admin/Manager
+                permissions: ['ADMIN', 'MANAGER'], // Admin/Manager only – Lead Operator has Activity Hub (assign) but not analytics
                 moduleName: 'issueReporting',
-                requireAllPermissions: false, // Any of these permissions
+                requireAllPermissions: false,
             },
             {
                 label: 'My Dashboard',

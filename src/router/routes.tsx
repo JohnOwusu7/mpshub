@@ -163,7 +163,7 @@ const routes: Route[] = [
     },
     {
         path: '/dashboard/issues',
-        element: <PrivateRoute path="/dashboard/issues" element={<IssueAnalyticsDashboard />} allowedPermissions={['issue:view']} />,
+        element: <PrivateRoute path="/dashboard/issues" element={<IssueAnalyticsDashboard />} allowedPermissions={['ADMIN', 'MANAGER']} />,
         layout: 'default',
     },
     {
