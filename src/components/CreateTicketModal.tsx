@@ -8,6 +8,9 @@ import type { IService } from '../Api/api';
 import Swal from 'sweetalert2';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../store';
+import ModuleNotSubscribed from './ModuleNotSubscribed';
+
+const ISSUE_REPORTING_MODULE = 'issueReporting';
 
 const defaultParams = {
     title: '',
@@ -30,7 +33,9 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
     const [servicesLoading, setServicesLoading] = useState(true);
 
     const authenticatedUser = useSelector((state: IRootState) => state.user.user);
+    const companyInfo = useSelector((state: IRootState) => state.company?.companyInfo);
     const companyId = authenticatedUser?.companyId;
+    const issuesModuleSubscribed = (companyInfo?.subscribedModules ?? []).includes(ISSUE_REPORTING_MODULE);
 
     useEffect(() => {
         if (!open) return;
@@ -76,8 +81,12 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
             onSuccess?.();
             onClose();
         } catch (error: any) {
-            const msg = error.response?.data?.error || error.message || 'Failed to create ticket. Please try again.';
-            showMessage(msg, 'error');
+            if (error?.response?.data?.code === 'MODULE_NOT_SUBSCRIBED') {
+                showMessage('Your company is not subscribed to the Issues module. Contact your administrator.', 'error');
+            } else {
+                const msg = error.response?.data?.error || error.message || 'Failed to create ticket. Please try again.';
+                showMessage(msg, 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -136,6 +145,10 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                     Create a ticket
                                 </div>
                                 <div className="p-5">
+                                    {companyInfo && !issuesModuleSubscribed ? (
+                                        <ModuleNotSubscribed moduleName="Issues" compact />
+                                    ) : (
+                                        <>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                         Choose a service and the system will route your ticket to the right department and team.
                                     </p>
@@ -196,7 +209,7 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                             <input
                                                 id="location"
                                                 type="text"
-                                                placeholder="e.g. Pit 3, Workshop, or equipment area"
+                                                placeholder="Enter Location"
                                                 className="form-input"
                                                 value={params.location}
                                                 onChange={changeValue}
@@ -220,6 +233,8 @@ const CreateTicketModal = ({ open, onClose, onSuccess }: CreateTicketModalProps)
                                             </button>
                                         </div>
                                     </form>
+                                        </>
+                                    )}
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>

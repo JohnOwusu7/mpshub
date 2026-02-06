@@ -241,7 +241,7 @@ const routes: Route[] = [
     // Admin Settings
     {
         path: '/settings',
-        element: <PrivateRoute path='/settings' element={<Settings />} allowedPermissions={['user:manage', 'role:manage']} />,
+        element: <PrivateRoute path='/settings' element={<Settings />} allowedPermissions={['user:manage', 'role:manage', 'user:manage:self']} />,
     },
     {
         path: '/admin/roles',

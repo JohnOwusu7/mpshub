@@ -22,6 +22,7 @@ import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
 import IconTrendingUp from '../../components/Icon/IconTrendingUp';
 import showMessage from '../../components/Alerts/showMessage';
 import CreateTicketModal from '../../components/CreateTicketModal';
+import ModuleNotSubscribed from '../../components/ModuleNotSubscribed';
 
 const CountBadge: React.FC<{ count: number; variant?: 'info' | 'warning' }> = ({ count, variant = 'info' }) => {
     if (count <= 0) return null;
@@ -74,13 +75,17 @@ const CompanyDashboard: React.FC = () => {
         }
     }, [dispatch, user?.companyId]);
 
+    const issuesModuleSubscribed = companyInfo
+        ? (companyInfo.subscribedModules ?? []).includes('issueReporting')
+        : true;
+
     useEffect(() => {
         if (user?.companyId) {
-            fetchDashboardData();
+            fetchDashboardData(companyInfo);
         } else {
             setLoading(false);
         }
-    }, [user?.companyId]);
+    }, [user?.companyId, companyInfo]);
 
     useEffect(() => {
         const company = companyInfo;
@@ -98,13 +103,16 @@ const CompanyDashboard: React.FC = () => {
         }));
     }, [companyInfo]);
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = async (company?: { subscribedModules?: string[] } | null) => {
         if (!user?.companyId) return;
         setLoading(true);
+        const issuesSubscribed = company ? (company.subscribedModules ?? []).includes('issueReporting') : true;
         try {
             const [usersRes, issuesRes, departmentsData, servicesData] = await Promise.all([
                 axiosInstance.get(API_CONFIG.users.endpoints.list),
-                axiosInstance.get(API_CONFIG.issues.endpoints.list).catch(() => ({ data: [] })),
+                issuesSubscribed
+                    ? axiosInstance.get(API_CONFIG.issues.endpoints.list).catch(() => ({ data: [] }))
+                    : Promise.resolve({ data: [] }),
                 getAllDepartmentsApi(user.companyId),
                 getAllServicesApi(user.companyId).catch(() => []),
             ]);
@@ -176,7 +184,11 @@ const CompanyDashboard: React.FC = () => {
         }
     };
 
-    const companyName = companyInfo?.companyName || (user as any)?.companyName || 'Your Company';
+    const companyName =
+        companyInfo?.companyName ||
+        (user as any)?.companyName ||
+        (typeof localStorage !== 'undefined' ? localStorage.getItem('companyName') : null) ||
+        'Your Company';
     const greeting = (() => {
         const hour = new Date().getHours();
         if (hour < 12) return 'Good morning';
@@ -277,30 +289,38 @@ const CompanyDashboard: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="panel p-5 hover:shadow-lg transition-shadow border border-gray-200/50 dark:border-gray-700/50 rounded-xl">
-                            <div className="flex items-start justify-between">
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Issues</p>
-                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalIssues}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{stats.openIssues} open · {stats.completedIssues} done</p>
+                        {issuesModuleSubscribed ? (
+                            <>
+                                <div className="panel p-5 hover:shadow-lg transition-shadow border border-gray-200/50 dark:border-gray-700/50 rounded-xl">
+                                    <div className="flex items-start justify-between">
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Issues</p>
+                                            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalIssues}</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">{stats.openIssues} open · {stats.completedIssues} done</p>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-warning/10 shrink-0">
+                                            <IconNotes className="w-6 h-6 text-warning" />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-warning/10 shrink-0">
-                                    <IconNotes className="w-6 h-6 text-warning" />
+                                <div className="panel p-5 hover:shadow-lg transition-shadow border border-gray-200/50 dark:border-gray-700/50 rounded-xl">
+                                    <div className="flex items-start justify-between">
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Unassigned</p>
+                                            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.unassignedIssues}</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">open issues</p>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-danger/10 shrink-0">
+                                            <IconClock className="w-6 h-6 text-danger" />
+                                        </div>
+                                    </div>
                                 </div>
+                            </>
+                        ) : (
+                            <div className="col-span-2">
+                                <ModuleNotSubscribed moduleName="Issues" compact className="mt-0" />
                             </div>
-                        </div>
-                        <div className="panel p-5 hover:shadow-lg transition-shadow border border-gray-200/50 dark:border-gray-700/50 rounded-xl">
-                            <div className="flex items-start justify-between">
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Unassigned</p>
-                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.unassignedIssues}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">open issues</p>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-danger/10 shrink-0">
-                                    <IconClock className="w-6 h-6 text-danger" />
-                                </div>
-                            </div>
-                        </div>
+                        )}
                         <div className="panel p-5 hover:shadow-lg transition-shadow border border-gray-200/50 dark:border-gray-700/50 rounded-xl">
                             <div className="flex items-start justify-between">
                                 <div className="min-w-0">
@@ -325,28 +345,32 @@ const CompanyDashboard: React.FC = () => {
 
                 {/* Right: This week + Need attention */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">This week</h2>
-                    <div className="panel p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Created</span>
-                                <span className="text-xl font-bold text-primary">{stats.createdThisWeek}</span>
+                    {issuesModuleSubscribed && (
+                        <>
+                            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">This week</h2>
+                            <div className="panel p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-600 dark:text-gray-400">Created</span>
+                                        <span className="text-xl font-bold text-primary">{stats.createdThisWeek}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-600 dark:text-gray-400">Completed</span>
+                                        <span className="text-xl font-bold text-success">{stats.completedThisWeek}</span>
+                                    </div>
+                                </div>
+                                <Link
+                                    to="/dashboard/issues"
+                                    className="mt-4 flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                                >
+                                    View analytics
+                                    <IconArrowForward className="w-4 h-4" />
+                                </Link>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 dark:text-gray-400">Completed</span>
-                                <span className="text-xl font-bold text-success">{stats.completedThisWeek}</span>
-                            </div>
-                        </div>
-                        <Link
-                            to="/dashboard/issues"
-                            className="mt-4 flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                        >
-                            View analytics
-                            <IconArrowForward className="w-4 h-4" />
-                        </Link>
-                    </div>
+                        </>
+                    )}
 
-                    {needAttention > 0 && (
+                    {issuesModuleSubscribed && needAttention > 0 && (
                         <div className="panel p-5 rounded-xl border-2 border-warning/40 bg-warning/5 dark:bg-warning/10">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-warning/20">
@@ -381,7 +405,7 @@ const CompanyDashboard: React.FC = () => {
             <div>
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Quick actions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {canViewIssues && (
+                    {issuesModuleSubscribed && canViewIssues && (
                         <Link
                             to="/activity"
                             className="panel p-5 flex items-center gap-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-warning/40 hover:shadow-md transition-all group relative"
@@ -398,7 +422,7 @@ const CompanyDashboard: React.FC = () => {
                         </Link>
                     )}
 
-                    {canViewIssues && (
+                    {issuesModuleSubscribed && canViewIssues && (
                         <Link
                             to="/my-issues"
                             className="panel p-5 flex items-center gap-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-info/30 hover:shadow-md transition-all group relative"
@@ -415,7 +439,7 @@ const CompanyDashboard: React.FC = () => {
                         </Link>
                     )}
 
-                    {canViewIssues && (
+                    {issuesModuleSubscribed && canViewIssues && (
                         <Link
                             to="/dashboard/issues"
                             className="panel p-5 flex items-center gap-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-primary/30 hover:shadow-md transition-all group"
@@ -431,7 +455,7 @@ const CompanyDashboard: React.FC = () => {
                         </Link>
                     )}
 
-                    {canCreateIssue && (
+                    {issuesModuleSubscribed && canCreateIssue && (
                         <button
                             type="button"
                             onClick={() => setShowCreateTicketModal(true)}

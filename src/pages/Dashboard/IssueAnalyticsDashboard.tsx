@@ -15,6 +15,8 @@ import IconBuilding from '../../components/Icon/IconBuilding';
 import IconUsers from '../../components/Icon/IconUsers';
 import { Link } from 'react-router-dom';
 import showMessage from '../../components/Alerts/showMessage';
+import { fetchCompanyInfo } from '../../store/companySlice';
+import ModuleNotSubscribed from '../../components/ModuleNotSubscribed';
 
 interface Issue {
     _id: string;
@@ -36,9 +38,13 @@ interface Issue {
     isAssigned: boolean;
 }
 
+const ISSUE_REPORTING_MODULE = 'issueReporting';
+
 const IssueAnalyticsDashboard: React.FC = () => {
     const dispatch = useDispatch();
     const user = useSelector((state: IRootState) => state.user.user);
+    const companyInfo = useSelector((state: IRootState) => state.company?.companyInfo);
+    const [moduleNotSubscribed, setModuleNotSubscribed] = useState<boolean>(false);
     const [totalCount, setTotalCount] = useState(0);
     const [completedIssueCount, setCompletedIssueCount] = useState(0);
     const [notCompletedIssueCount, setNotCompletedIssueCount] = useState(0);
@@ -64,9 +70,24 @@ const IssueAnalyticsDashboard: React.FC = () => {
     }, [dispatch]);
 
     useEffect(() => {
+        if (user?.companyId && !companyInfo) {
+            dispatch(fetchCompanyInfo(user.companyId) as any);
+        }
+    }, [user?.companyId, companyInfo, dispatch]);
+
+    useEffect(() => {
+        const subscribed = companyInfo?.subscribedModules ?? [];
+        if (companyInfo && !subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(true);
+            setLoading(false);
+            return;
+        }
+        if (companyInfo && subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(false);
+        }
         fetchIssues();
         fetchCompanyStatistics();
-    }, [user]);
+    }, [user, companyInfo]);
 
     const fetchIssues = async () => {
         setLoading(true);
@@ -184,8 +205,13 @@ const IssueAnalyticsDashboard: React.FC = () => {
                 .slice(0, 10);
             setRecentActivity(recent);
         } catch (error: any) {
-            console.error('Error fetching issues:', error);
-            showMessage({ message: 'Failed to load analytics data.', success: false });
+            const code = error?.response?.data?.code;
+            if (code === 'MODULE_NOT_SUBSCRIBED') {
+                setModuleNotSubscribed(true);
+            } else {
+                console.error('Error fetching issues:', error);
+                showMessage({ message: 'Failed to load analytics data.', success: false });
+            }
         } finally {
             setLoading(false);
         }
@@ -222,6 +248,10 @@ const IssueAnalyticsDashboard: React.FC = () => {
             // Don't show error message for stats, just log it
         }
     };
+
+    if (moduleNotSubscribed) {
+        return <ModuleNotSubscribed moduleName="Issues" />;
+    }
 
     if (loading) {
         return (

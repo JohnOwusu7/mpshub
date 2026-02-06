@@ -21,9 +21,15 @@ import { API_CONFIG } from '../../Api/apiConfig';
 import axiosInstance from '../../Api/axiosInstance';
 import { getAllDepartmentsApi, getAllSectionsByDepartmentApi, getAllSubsectionsBySectionApi } from '../../Api/api';
 import CreateTicketModal from '../../components/CreateTicketModal';
+import { fetchCompanyInfo } from '../../store/companySlice';
+import ModuleNotSubscribed from '../../components/ModuleNotSubscribed';
+
+const ISSUE_REPORTING_MODULE = 'issueReporting';
 
 const ActivityHub = () => {
     const dispatch = useDispatch();
+    const user = useSelector((state: IRootState) => state.user.user);
+    const companyInfo = useSelector((state: IRootState) => state.company?.companyInfo);
     useEffect(() => {
         dispatch(setPageTitle('Activity Tracker'));
     });
@@ -61,6 +67,13 @@ const ActivityHub = () => {
     const [selectedSubsection, setSelectedSubsection] = useState<any>(null);
     const [selectedReassignSection, setSelectedReassignSection] = useState<any>(null);
     const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+    const [moduleNotSubscribed, setModuleNotSubscribed] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (user?.companyId && !companyInfo) {
+            dispatch(fetchCompanyInfo(user.companyId) as any);
+        }
+    }, [user?.companyId, companyInfo, dispatch]);
 
     const fetchIssues = async () => {
         try {
@@ -69,7 +82,11 @@ const ActivityHub = () => {
             const data = response.data || [];
             setAllTasks(Array.isArray(data) ? data : []);
         } catch (error: any) {
-            console.error('Error fetching issues:', error.message);
+            if (error?.response?.data?.code === 'MODULE_NOT_SUBSCRIBED') {
+                setModuleNotSubscribed(true);
+            } else {
+                console.error('Error fetching issues:', error.message);
+            }
             setAllTasks([]);
         } finally {
             setLoading(false);
@@ -77,8 +94,17 @@ const ActivityHub = () => {
     };
 
     useEffect(() => {
+        const subscribed = companyInfo?.subscribedModules ?? [];
+        if (companyInfo && !subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(true);
+            setLoading(false);
+            return;
+        }
+        if (companyInfo && subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(false);
+        }
         fetchIssues();
-    }, []);
+    }, [companyInfo]);
 
 
     const [filteredTasks, setFilteredTasks] = useState<any>(allTasks);
@@ -251,6 +277,10 @@ const ActivityHub = () => {
     };
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
+
+    if (moduleNotSubscribed) {
+        return <ModuleNotSubscribed moduleName="Issues" />;
+    }
 
     return (
         <div>

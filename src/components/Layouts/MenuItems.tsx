@@ -108,10 +108,10 @@ const allMenuItems: MenuItem[] = [
     },
     {
         label: 'Organization Setup',
-        link: '#', // Or a default landing page for organization setup if one exists
+        link: '#',
         icon: <IconBuilding />,
-        permissions: [], // Parent menu - no direct permission check, children will be filtered
-        moduleName: 'companyManagement', // Still related to company management
+        permissions: ['ADMIN'], // ADMIN only – Manager does not need this
+        moduleName: 'companyManagement',
         children: [
             {
                 label: 'Register Company',
@@ -161,22 +161,23 @@ const allMenuItems: MenuItem[] = [
         label: 'Roles Management',
         link: '/admin/roles',
         icon: <IconSettings />,
-        permissions: ['role:manage'],
-        moduleName: 'roleManagement', // Core for ADMINs
+        permissions: ['role:manage'], // ADMIN only – Manager does not need this
+        moduleName: 'roleManagement',
     },
     {
         label: 'Subscription Status',
         link: '/users/subscription-status',
         icon: <IconDollarSign />,
-        permissions: ['ADMIN', 'MANAGER'], // Company admins only – users should not see this
+        permissions: ['ADMIN'], // ADMIN only – Manager does not need this
         moduleName: 'subscriptionStatus',
     },
     {
         label: 'Settings',
         link: '/settings',
         icon: <IconSettings />,
-        permissions: ['user:manage:self', 'role:manage'], // Combined permissions for settings
-        moduleName: 'settings', // Core for ADMINs
+        permissions: ['user:manage:self', 'role:manage'], // ADMIN only – Manager (section head) does not need this
+        moduleName: 'settings',
+        requireAllPermissions: false,
     },
     {
         label: 'Report Forum',
@@ -298,7 +299,7 @@ const hasRequiredPermissions = (userPermissions: string[], requiredPermissions?:
     return requiredPermissions.some(permission => userPermissions.includes(permission));
 };
 
-const CORE_ADMIN_MODULES = ['userManagement', 'roleManagement', 'settings', 'companyManagement', 'mainDashboard', 'subscriptionStatus']; // Admin-only modules
+const CORE_ADMIN_MODULES = ['userManagement', 'roleManagement', 'settings', 'companyManagement', 'mainDashboard', 'subscriptionStatus', 'issueReporting']; // Admin/Manager modules (Issues always available when user has issue:* permissions)
 const CORE_USER_MODULES = ['mainDashboard']; // Modules visible to all users (subscriptionStatus is admin-only)
 
 const filterMenuItems = (
@@ -337,10 +338,13 @@ const filterMenuItems = (
                     return false;
                 }
                 item.children = filteredChildren;
-                if (!item.permissions || item.permissions.length === 0) {
-                    return item.children.length > 0;
+                // If parent has required permissions (e.g. ADMIN only), user must pass that to see the parent at all
+                if (item.permissions && item.permissions.length > 0) {
+                    if (!hasRequiredPermissions(userPermissions, item.permissions, roleForCheck, item.requireAllPermissions)) {
+                        return false; // e.g. Organisation Setup is ADMIN-only; Manager must not see it
+                    }
                 }
-                return hasRequiredPermissions(userPermissions, item.permissions, roleForCheck, item.requireAllPermissions) || item.children.length > 0;
+                return true;
             }
             return hasRequiredPermissions(userPermissions, item.permissions, roleForCheck, item.requireAllPermissions);
         }

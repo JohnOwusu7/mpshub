@@ -19,6 +19,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
   const userData = useSelector((state: IRootState) => state.user.user);
+  const canManageRoles = (userData?.permissions ?? []).includes('role:manage');
   const [roles, setRoles] = useState<CompanyRole[]>([]);
   const [roleTemplates, setRoleTemplates] = useState<RoleTemplate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -186,10 +187,14 @@ const RoleManagement: React.FC = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Role Management</h1>
-        <button type="button" className="btn btn-primary" onClick={() => openModal()}>
-          <IconPlus className="w-5 h-5 mr-2" />
-          Create New Role
-        </button>
+        {canManageRoles ? (
+          <button type="button" className="btn btn-primary" onClick={() => openModal()}>
+            <IconPlus className="w-5 h-5 mr-2" />
+            Create New Role
+          </button>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-gray-400">View only — you can see roles but cannot create or edit them.</p>
+        )}
       </div>
 
       <div className="panel">
@@ -200,7 +205,7 @@ const RoleManagement: React.FC = () => {
                 <th>Role Name</th>
                 <th>Description</th>
                 <th>Permissions</th>
-                <th className="!text-center">Actions</th>
+                {canManageRoles && <th className="!text-center">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -215,16 +220,18 @@ const RoleManagement: React.FC = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="!text-center">
-                    <div className="flex items-center justify-center gap-4">
-                      <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => openModal(role)}>
-                        <IconEdit className="w-4 h-4" />
-                      </button>
-                      <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteRole(role._id)}>
-                        <IconTrash className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+                  {canManageRoles && (
+                    <td className="!text-center">
+                      <div className="flex items-center justify-center gap-4">
+                        <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => openModal(role)}>
+                          <IconEdit className="w-4 h-4" />
+                        </button>
+                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteRole(role._id)}>
+                          <IconTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

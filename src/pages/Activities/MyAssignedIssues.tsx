@@ -10,6 +10,10 @@ import IconSquareCheck from '../../components/Icon/IconSquareCheck';
 import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
 import IconSearch from '../../components/Icon/IconSearch';
 import showMessage from '../../components/Alerts/showMessage';
+import { fetchCompanyInfo } from '../../store/companySlice';
+import ModuleNotSubscribed from '../../components/ModuleNotSubscribed';
+
+const ISSUE_REPORTING_MODULE = 'issueReporting';
 
 type IssueProgress = 'new' | 'in-progress' | 'complete' | string | null | undefined;
 
@@ -48,9 +52,11 @@ type FilterTab = 'all' | 'open' | 'in-progress' | 'completed';
 const MyAssignedIssues: React.FC = () => {
     const dispatch = useDispatch();
     const user = useSelector((state: IRootState) => state.user.user);
+    const companyInfo = useSelector((state: IRootState) => state.company?.companyInfo);
 
     const [issues, setIssues] = useState<Issue[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [moduleNotSubscribed, setModuleNotSubscribed] = useState<boolean>(false);
     const [selectedTab, setSelectedTab] = useState<FilterTab>('open');
     const [search, setSearch] = useState<string>('');
 
@@ -63,9 +69,24 @@ const MyAssignedIssues: React.FC = () => {
     }, [dispatch]);
 
     useEffect(() => {
+        if (user?.companyId && !companyInfo) {
+            dispatch(fetchCompanyInfo(user.companyId) as any);
+        }
+    }, [user?.companyId, companyInfo, dispatch]);
+
+    useEffect(() => {
         if (!user?._id) return;
+        const subscribed = companyInfo?.subscribedModules ?? [];
+        if (companyInfo && !subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(true);
+            setLoading(false);
+            return;
+        }
+        if (companyInfo && subscribed.includes(ISSUE_REPORTING_MODULE)) {
+            setModuleNotSubscribed(false);
+        }
         fetchAssignedIssues();
-    }, [user?._id]);
+    }, [user?._id, companyInfo]);
 
     const fetchAssignedIssues = async () => {
         setLoading(true);
@@ -97,8 +118,12 @@ const MyAssignedIssues: React.FC = () => {
 
             setIssues(myIssues);
         } catch (error: any) {
-            console.error('Error fetching assigned issues:', error);
-            showMessage({ message: 'Failed to load your assigned issues.', success: false });
+            if (error?.response?.data?.code === 'MODULE_NOT_SUBSCRIBED') {
+                setModuleNotSubscribed(true);
+            } else {
+                console.error('Error fetching assigned issues:', error);
+                showMessage({ message: 'Failed to load your assigned issues.', success: false });
+            }
         } finally {
             setLoading(false);
         }
@@ -221,6 +246,10 @@ const MyAssignedIssues: React.FC = () => {
             showMessage({ message: msg, success: false });
         }
     };
+
+    if (moduleNotSubscribed) {
+        return <ModuleNotSubscribed moduleName="Issues" />;
+    }
 
     if (loading) {
         return (
