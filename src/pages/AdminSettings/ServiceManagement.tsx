@@ -263,7 +263,7 @@ const ServiceManagement = () => {
           sectionId: params.sectionId,
           description: params.description || undefined,
           isActive: params.isActive,
-          onboardingTemplate,
+          onboardingTemplate: onboardingTemplate ?? undefined,
         });
         showMessage('Service has been updated successfully.');
       } else {
